@@ -1,0 +1,18 @@
+x <- data.full %>% 
+  filter(#[Not needed] Status != "Spam", # Remove spam
+    Q126...13 %in% c("Full license (current/valid)", "Full license (expired/revoked)"), # Removing responses that are not full license
+    !is.na(S_Ang_Total), # Removing responses that have incomplete State Anger
+    !is.na(T_Ang_Total), # Removing responses that have incomplete Trait Anger
+    keep_DDDI == "TRUE") # Select only observations that have completed DDDI 
+
+x1 <- data.full %>% 
+  filter(#[Not needed] Status != "Spam", # Remove spam
+    Q126...13 %in% c("Full license (current/valid)", "Full license (expired/revoked)"), # Removing responses that are not full license
+    !is.na(S_Ang_Total), # Removing responses that have incomplete State Anger
+    !is.na(T_Ang_Total)) # Removing responses that have incomplete Trait Anger
+    #keep_DDDI == "TRUE")  # Select only observations that have completed DDDI 
+
+y <- x1 %>% 
+  anti_join(x)
+
+y <- y[164:ncol(y)]

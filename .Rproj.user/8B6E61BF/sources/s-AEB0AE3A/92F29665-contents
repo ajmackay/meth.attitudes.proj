@@ -1,6 +1,15 @@
-# Hello bookdown 
+```{r processing.packages, echo = F}
+library(tidyverse)
+library(lubridate)
+```
 
-All chapters start with a first-level heading followed by your chapter title, like the line above. There should be only one first-level heading (`#`) per .Rmd file.
+```{r processing.data, echo = F}
+data.raw <- read_csv("data/data.1808.csv")
+```
+
+# Data Processing
+
+
 
 ## A section
 

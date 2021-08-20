@@ -1,0 +1,1033 @@
+# Install packages if not already installed
+package.list <- c("tidyverse", "lubridate")
+not.installed <- package.list[!(package.list %in% installed.packages()[,"Package"])]
+if(length(not.installed)) install.packages(not.installed)
+
+# Activate packages and read in data
+library(tidyverse)
+library(lubridate)
+data.raw <- read_csv("Data/data.1808.csv")
+
+# Cleaning up variables + converting to factors (and numeric where needed)
+data.full <- data.raw[c(-1, -2),] %>% # Remove first two rows (contains description of variables)
+  mutate(export_date = today(),
+         # Demographics
+         drivers_license = as_factor(Q126...13),
+         drugs_other_alcohol = as_factor(Q27),
+         age = as.numeric(Q19),
+         sex = as_factor(Q13),
+         ethnicity = fct_recode(as_factor(Q14),
+                                "Eastern European" = "Southern and Eastern European (e.g. Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece)",
+                                "Oceanian"= "Oceanian (Australian, Aboriginal, Torres Strait Islander)",
+                                "Undisclosed" = "Prefer not to say",
+                                "North-West European" = "North-West European (e.g.  UK, Ireland, France, Germany, Spain, Belgium, Portugal, Austria, Andorra, Czechia)",
+                                "Central Asian" = "Southern and Central Asian (e.g. Afghanistan, Bangladesh, Bhutan, India, Kyrgyzstan, Kazakhstan, Maldives, Nepal, Pakistan, Sri Lanka)",
+                                "Asian" = "North-East Asian (e.g. China, Japan, North Korea, South Korea, Mongolia)",
+                                "American" = "People of the Americas (e.g. indigenous peoples of the Americas are the pre-Columbian peoples of North, Central and South America)",
+                                "Middle-East" = "North African and Middle Eastern (e.g. Egypt, and Turkey)",
+                                "South-East Asian" = "South-East Asian (e.g. Cambodia, Indonesia, Laos, Malaysia, the Philippines, Singapore, Thailand and Vietnam)",
+                                "African" = "Sub-Saharan African (e.g. Botswana,Cameroon, Central African Republic, Congo, Ethiopia, Ghana, Guinea, Kenya, Liberia, Namibia, Nigeria)"
+         ),
+         marital_status = as_factor(Q15),
+         education = fct_recode(as_factor(Q20),
+                                "Did not finish high school" = "Attended high school but did not finish",
+                                "High School Diploma" = "High School Diploma",
+                                "Vocational/Technical degree or certificate" = "Vocational/Technical degree or certificate",
+                                "Did not finish University" = "Attended University but did not finish",
+                                "Bachelor Degree" = "Bachelor Degree",
+                                "Postgraduate Degree" = "Master’s Degree",
+                                "Postgraduate Degree" = "Postgraduate Degree"
+         ),
+         employment_status = as_factor(Q17),
+         area_live = as_factor(Q21),
+         license_status = as_factor(Q22),
+         # Alcohol Use
+         alcohol_ever = as_factor(Q28),
+         alcohol_past_12_least_12 = as_factor(Q29),
+         alcohol_frequency = as_factor(Q33...40),
+         alcohol_consumption = as_factor(Q31),
+         alcohol_six_or_more = as_factor(Q32),
+         # Drug Use
+         drug_use_cocaine = fct_recode(as_factor(Q63_1),
+                                       "Never" = "Neither/not used",
+                                       "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                       "Past 12 months" = "PAST 12 MONTHS",
+                                       "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_cannabis = fct_recode(as_factor(Q63_2),
+                                        "Never" = "Neither/not used",
+                                        "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                        "Past 12 months" = "PAST 12 MONTHS",
+                                        "Past 12 months" = "PAST 12 MONTHS,Neither/not used",
+                                        "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_club_drugs = fct_recode(as_factor(Q63_3),
+                                          "Never" = "Neither/not used",
+                                          "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                          "Past 12 months" = "PAST 12 MONTHS",
+                                          "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_hallucinogens = fct_recode(as_factor(Q63_4),
+                                             "Never" = "Neither/not used",
+                                             "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                             "Before 12 months" = "BEFORE 12 MONTHS AGO,Neither/not used",
+                                             "Past 12 months" = "PAST 12 MONTHS",
+                                             "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_inhalants = fct_recode(as_factor(Q63_5),
+                                         "Never" = "Neither/not used",
+                                         "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                         "Past 12 months" = "PAST 12 MONTHS",
+                                         "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_heroin = fct_recode(as_factor(Q63_6),
+                                      "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                      "Never" = "Neither/not used",
+                                      "Past 12 months" = "PAST 12 MONTHS"
+         ),
+         drug_use_sedatives = fct_recode(as_factor(Q63_7),
+                                         "Never" = "Neither/not used",
+                                         "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                         "Past 12 months" = "PAST 12 MONTHS",
+                                         "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_new_psychoactive = fct_recode(as_factor(Q63_8),
+                                                "Never" = "Neither/not used",
+                                                "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                                "Before 12 months" = "BEFORE 12 MONTHS AGO,Neither/not used",
+                                                "Past 12 months" = "PAST 12 MONTHS",
+                                                "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         prescription_drugs = as_factor(Q64),
+         prescription_drug_use = as_factor(Q144), # Will need to consolidate levels
+         pres_use_pain_killer_pres = as_factor(Q125_1), # Off-label prescription drug use, prescription pain killer
+         pres_use_pain_killer_otc = as_factor(Q125_2), # Off-label prescription drug use, over the counter
+         pres_use_sleeping_pill = as_factor(Q125_3),
+         pres_use_methadone = as_factor(Q125_4),
+         pres_use_ritalin = as_factor(Q125_5),
+         # MA use
+         meth_ingest = as_factor(Q47),
+         meth_most_common = as_factor(Q48),
+         meth_use_at_peak = as_factor(Q49),
+         meth_last_12_months = as_factor(Q50),
+         meth_before_last_year = as_factor(Q51),
+         meth_recent_use = as_factor(Q52),
+         meth_use_age = fct_recode(as_factor(Q53),
+                                   "25" = "25 years old."),
+         meth_use_ways = Q54, # Think about how to organise factors
+         ## SDS Scale (Re-scored to not use zero as R is weird with zeros)
+         meth_out_of_control = as.numeric(fct_recode(as_factor(Q55),
+                                                     "1" = "Never or almost never",
+                                                     "2" = "Sometimes",
+                                                     "3" = "Often",
+                                                     "4" = "Always")
+         ),
+         meth_anxious_about_missing = as.numeric(fct_recode(as_factor(Q56),
+                                                            "1" = "Never or almost never",
+                                                            "2" = "Sometimes",
+                                                            "3" = "Often",
+                                                            "4" = "Always")
+         ),
+         meth_worry_about_use = as.numeric(fct_recode(as_factor(Q57),
+                                                      "1" = "Not at all",
+                                                      "2" = "A little",
+                                                      "3" = "Often",
+                                                      "4" = "Always or nearly always")
+         ),
+         meth_wish_stop = as.numeric(fct_recode(as_factor(Q58),
+                                                "1" = "Never or almost never",
+                                                "2" = "Sometimes",
+                                                "3" = "Often",
+                                                "4" = "Always")
+         ),
+         meth_difficulty_stopping = as.numeric(fct_recode(as_factor(Q60),
+                                                          "1" = "Not difficult at all",
+                                                          "2" = "Quite difficult",
+                                                          "3" = "Very difficult",
+                                                          "4" = "Impossible")
+         ),
+         meth_SDS = ((meth_out_of_control - 1) + (meth_anxious_about_missing - 1) + (meth_worry_about_use - 1) + 
+                  (meth_wish_stop - 1) + (meth_difficulty_stopping - 1)),
+         meth_user = ifelse(meth_SDS > 4, "MUD", "Recreational"),
+         meth_want_to_change = as_factor(Q61),
+         meth_could_change = as_factor(Q62),
+         # K6 Distress scale - need to calculate total
+         k6_nervous = as_factor(Q33...58),
+         k6_hopeless = as_factor(Q34),
+         k6_restless = as_factor(Q35),
+         k6_depressed = as_factor(Q44),
+         k6_effort = as_factor(Q36),
+         k6_worthless = as_factor(Q37),
+         k6_physical_cause = as_factor(Q43),
+         # Add psychiatric diagnoses (consolidate levels)
+         psychiatric_diagnoses = fct_recode(as_factor(Q46), # I think it might be best to have separate columns for each diagnosis.
+                                            "Major Depressive Disorder" = "Major Depressive Disorder (MDD)",
+                                            "Bipolar Disorder" = "Bipolar I Disorder",
+                                            "Bipolar Disorder" = "Bipolar II Disorder",
+                                            "Eating Disorder" = "Anorexia Nervosa",
+                                            "Eating Disorder" = "Binge-eating disorder",
+                                            "Eating Disorder" = "Bulimia Nervosa",
+                                            "Personality Disorder" = "Borderline Personality Disorder (BPD)",
+                                            "PTSD" = "Post Traumatic Stress Disorder (PTSD)",
+                                            "Attention Deficit Disorder" = "Attention Deficit Disorder (ADD)",
+                                            "Attention Deficit Disorder" = "Attention Deficit Hyperactivity Disorder (ADHD)"
+         ),
+         # Instances Driving Under Influence of Alcohol (DUI)
+         DUI_suspended = as_factor(Q95),
+         DUI_hurt = as_factor(Q96),
+         # Attitudes toward Drink Driving
+         DUI_attitude_friends = as.numeric(fct_recode(as_factor(Q97), # Reverse coded
+                                                      "1" = "Strongly disagree",
+                                                      "2" = "Disagree",
+                                                      "3" = "Somewhat disagree",
+                                                      "4" = "Neither agree nor disagree",
+                                                      "5" = "Somewhat agree",
+                                                      "6" = "Agree",
+                                                      "7" = "Strongly Agree")
+         ),
+         DUI_attitude_drunk = as.numeric(fct_recode(as_factor(Q98), # Reverse coded
+                                                    "1" = "Strongly disagree",
+                                                    "2" = "Disagree",
+                                                    "3" = "Somewhat disagree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat agree",
+                                                    "6" = "Agree",
+                                                    "7" = "Strongly Agree")
+         ),
+         DUI_attitude_jail = as.numeric(fct_recode(as_factor(Q99),
+                                                   "1" = "Strongly Agree",
+                                                   "2" = "Agree",
+                                                   "3" = "Somewhat agree",
+                                                   "4" = "Neither agree nor disagree",
+                                                   "5" = "Somewhat disagree",
+                                                   "6" = "Disagree",
+                                                   "7" = "Strongly disagree")
+         ),
+         DUI_attitude_strict = as.numeric(fct_recode(as_factor(Q100),
+                                                     "1" = "Strongly Agree",
+                                                     "2" = "Agree",
+                                                     "3" = "Somewhat agree",
+                                                     "4" = "Neither agree nor disagree",
+                                                     "5" = "Somewhat disagree",
+                                                     "6" = "Disagree",
+                                                     "7" = "Strongly disagree")
+         ),
+         DUI_attitude_tough = as.numeric(fct_recode(as_factor(Q101),
+                                                    "1" = "Strongly Agree",
+                                                    "2" = "Agree",
+                                                    "3" = "Somewhat agree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat disagree",
+                                                    "6" = "Disagree",
+                                                    "7" = "Strongly disagree")
+         ),
+         DUI_attitude_caught = as.numeric(fct_recode(as_factor(Q102), # Reverse coded
+                                                      "1" = "Strongly disagree",
+                                                      "2" = "Disagree",
+                                                      "3" = "Somewhat disagree",
+                                                      "4" = "Neither agree nor disagree",
+                                                      "5" = "Somewhat agree",
+                                                      "6" = "Agree",
+                                                      "7" = "Strongly Agree")
+         ),
+         DUI_attitude_while = as.numeric(fct_recode(as_factor(Q103), # Reverse coded
+                                                     "1" = "Strongly disagree",
+                                                     "2" = "Disagree",
+                                                     "3" = "Somewhat disagree",
+                                                     "4" = "Neither agree nor disagree",
+                                                     "5" = "Somewhat agree",
+                                                     "6" = "Agree",
+                                                     "7" = "Strongly Agree")
+         ),
+         DUI_attitude_dumb = as.numeric(fct_recode(as_factor(Q104),
+                                                    "1" = "Strongly Agree",
+                                                    "2" = "Agree",
+                                                    "3" = "Somewhat agree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat disagree",
+                                                    "6" = "Disagree",
+                                                    "7" = "Strongly disagree")
+         ),
+         DUI_attitude_overrated = as.numeric(fct_recode(as_factor(Q105), # Reverse coded
+                                                         "1" = "Strongly disagree",
+                                                         "2" = "Disagree",
+                                                         "3" = "Somewhat disagree",
+                                                         "4" = "Neither agree nor disagree",
+                                                         "5" = "Somewhat agree",
+                                                         "6" = "Agree",
+                                                         "7" = "Strongly Agree")
+         ),
+         DUI_attitude_license = as.numeric(fct_recode(as_factor(Q106),
+                                                       "1" = "Strongly Agree",
+                                                       "2" = "Agree",
+                                                       "3" = "Somewhat agree",
+                                                       "4" = "Neither agree nor disagree",
+                                                       "5" = "Somewhat disagree",
+                                                       "6" = "Disagree",
+                                                       "7" = "Strongly disagree")
+         ),
+         # Attitudes towards strategies for avoiding Drink Driving: Discrete
+         DUI_strategy_leave = as.numeric(fct_recode(as_factor(Q107),
+                                                     "1" = "Definitely yes",
+                                                     "2" = "Probably yes",
+                                                     "3" = "Might or might not",
+                                                     "4" = "Probably not",
+                                                     "5" = "Definitely not")
+         ),
+         DUI_strategy_light = as.numeric(fct_recode(as_factor(Q108),
+                                                    "1" = "Extremely likely",
+                                                    "2" = "Moderately likely",
+                                                    "2" = "Slightly likely",
+                                                    "3" = "Neither likely nor unlikely",
+                                                    "4" = "Slightly unlikely",
+                                                    "4" = "Moderately unlikely",
+                                                    "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_plan_driver = as.numeric(fct_recode(as_factor(Q109),
+                                                           "1" = "Extremely likely",
+                                                           "2" = "Moderately likely",
+                                                           "2" = "Slightly likely",
+                                                           "3" = "Neither likely nor unlikely",
+                                                           "4" = "Slightly unlikely",
+                                                           "4" = "Moderately unlikely",
+                                                           "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_plan_use = as.numeric(fct_recode(as_factor(Q110),
+                                                        "1" = "Extremely likely",
+                                                        "2" = "Moderately likely",
+                                                        "2" = "Slightly likely",
+                                                        "3" = "Neither likely nor unlikely",
+                                                        "4" = "Slightly unlikely",
+                                                        "4" = "Moderately unlikely",
+                                                        "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_taxi = as.numeric(fct_recode(as_factor(Q111),
+                                                    "1" = "Extremely likely",
+                                                    "2" = "Moderately likely",
+                                                    "2" = "Slightly likely",
+                                                    "3" = "Neither likely nor unlikely",
+                                                    "4" = "Slightly unlikely",
+                                                    "4" = "Moderately unlikely",
+                                                    "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_track = as.numeric(fct_recode(as_factor(Q112),
+                                                     "1" = "Extremely likely",
+                                                     "2" = "Moderately likely",
+                                                     "2" = "Slightly likely",
+                                                     "3" = "Neither likely nor unlikely",
+                                                     "4" = "Slightly unlikely",
+                                                     "4" = "Moderately unlikely",
+                                                     "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_overnight = as.numeric(fct_recode(as_factor(Q113),
+                                                         "1" = "Extremely likely",
+                                                         "2" = "Moderately likely",
+                                                         "2" = "Slightly likely",
+                                                         "3" = "Neither likely nor unlikely",
+                                                         "4" = "Slightly unlikely",
+                                                         "4" = "Moderately unlikely",
+                                                         "5" = "Extremely unlikely")
+         ),
+         # Attitudes towards strategies for avoiding Drink Driving: Dichotomous
+         DUI_strategy_leave_dich = as.numeric(fct_recode(as_factor(Q107),
+                                                    "agree" = "Definitely yes",
+                                                    "agree" = "Probably yes",
+                                                    "disagree" = "Might or might not",
+                                                    "disagree" = "Probably not",
+                                                    "disagree" = "Definitely not")
+         ),
+         DUI_strategy_light_dich = as.numeric(fct_recode(as_factor(Q108),
+                                                    "agree" = "Extremely likely",
+                                                    "agree" = "Moderately likely",
+                                                    "agree" = "Slightly likely",
+                                                    "disagree" = "Neither likely nor unlikely",
+                                                    "disagree" = "Slightly unlikely",
+                                                    "disagree" = "Moderately unlikely",
+                                                    "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_plan_driver_dich = as.numeric(fct_recode(as_factor(Q109),
+                                                               "agree" = "Extremely likely",
+                                                               "agree" = "Moderately likely",
+                                                               "agree" = "Slightly likely",
+                                                               "disagree" = "Neither likely nor unlikely",
+                                                               "disagree" = "Slightly unlikely",
+                                                               "disagree" = "Moderately unlikely",
+                                                               "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_plan_use_dich = as.numeric(fct_recode(as_factor(Q110),
+                                                            "agree" = "Extremely likely",
+                                                            "agree" = "Moderately likely",
+                                                            "agree" = "Slightly likely",
+                                                            "disagree" = "Neither likely nor unlikely",
+                                                            "disagree" = "Slightly unlikely",
+                                                            "disagree" = "Moderately unlikely",
+                                                            "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_taxi_dich = as.numeric(fct_recode(as_factor(Q111),
+                                                        "agree" = "Extremely likely",
+                                                        "agree" = "Moderately likely",
+                                                        "agree" = "Slightly likely",
+                                                        "disagree" = "Neither likely nor unlikely",
+                                                        "disagree" = "Slightly unlikely",
+                                                        "disagree" = "Moderately unlikely",
+                                                        "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_track_dich = as.numeric(fct_recode(as_factor(Q112),
+                                                    "agree" = "Extremely likely",
+                                                    "agree" = "Moderately likely",
+                                                    "agree" = "Slightly likely",
+                                                    "disagree" = "Neither likely nor unlikely",
+                                                    "disagree" = "Slightly unlikely",
+                                                    "disagree" = "Moderately unlikely",
+                                                    "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_overnight_dich = as.numeric(fct_recode(as_factor(Q113),
+                                                             "agree" = "Extremely likely",
+                                                             "agree" = "Moderately likely",
+                                                             "agree" = "Slightly likely",
+                                                             "disagree" = "Neither likely nor unlikely",
+                                                             "disagree" = "Slightly unlikely",
+                                                             "disagree" = "Moderately unlikely",
+                                                             "disagree" = "Extremely unlikely")
+         ),
+         # Instances Driving Under Influence of Drugs (DUID)
+         DUID_incidence = as_factor(Q114),
+         DUID_recent = as_factor(Q118),
+         DUID_recent_drugs = fct_recode(as_factor(Q119), # Should Consolidate levels in a better way
+                                        "Amphetamine only" = "Amphetamine",
+                                        "Cocaine only" = "Cocaine",
+                                        "Marijuana only" = "Marijuana/Cannabis",
+                                        "Club drugs only" = "Club drugs (e.g ketamine, GHB)",
+                                        "Hallucinogens only" = "Hallucinogens/psychedelics (e.g acid, LSD, DMT)",
+                                        "Sedatives only" = "Sedatives/tranquilisers (e.g. Xanax, Valium)"
+         ),
+         DUID_lifetime = as_factor(Q120),
+         DUID_lifetime_drugs = Q121, # Consolidate levels
+         DUID_ongoing = as_factor(ifelse(DUID_recent == "Yes" & DUID_lifetime == "Yes", "Yes", "No")),
+         DUID_suspended = as_factor(Q122),
+         DUID_suspended_drugs = Q124, # Consolidate levels
+         DUID_hurt = as_factor(Q123),
+         DUID_hurt_drugs = as_factor(Q125),
+         # Attitudes toward Drug Driving
+         DUID_attitude_friends = as.numeric(fct_recode(as_factor(Q126...75), # Reverse coded
+                                                       "1" = "Strongly disagree",
+                                                       "2" = "Disagree",
+                                                       "3" = "Somewhat disagree",
+                                                       "4" = "Neither agree nor disagree",
+                                                       "5" = "Somewhat agree",
+                                                       "6" = "Agree",
+                                                       "7" = "Strongly agree")
+         ),
+         DUID_attitude_high = as.numeric(fct_recode(as_factor(Q128), # Reverse coded
+                                                    "1" = "Strongly disagree",
+                                                    "2" = "Disagree",
+                                                    "3" = "Somewhat disagree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat agree",
+                                                    "6" = "Agree",
+                                                    "7" = "Strongly agree")
+         ),
+         DUID_attitude_jail = as.numeric(fct_recode(as_factor(Q129),
+                                                    "1" = "Strongly agree",
+                                                    "2" = "Agree",
+                                                    "3" = "Somewhat agree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat disagree",
+                                                    "6" = "Disagree",
+                                                    "7" = "Strongly disagree")
+         ),
+         DUID_attitude_strict = as.numeric(fct_recode(as_factor(Q130),
+                                                      "1" = "Strongly agree",
+                                                      "2" = "Agree",
+                                                      "3" = "Somewhat agree",
+                                                      "4" = "Neither agree nor disagree",
+                                                      "5" = "Somewhat disagree",
+                                                      "6" = "Disagree",
+                                                      "7" = "Strongly disagree")
+         ),
+         DUID_attitude_tough = as.numeric(fct_recode(as_factor(Q131),
+                                                     "1" = "Strongly agree",
+                                                     "2" = "Agree",
+                                                     "3" = "Somewhat agree",
+                                                     "4" = "Neither agree nor disagree",
+                                                     "5" = "Somewhat disagree",
+                                                     "6" = "Disagree",
+                                                     "7" = "Strongly disagree")
+         ),
+         DUID_attitude_caught = as.numeric(fct_recode(as_factor(Q132), # Reverse coded
+                                                      "1" = "Strongly disagree",
+                                                      "2" = "Disagree",
+                                                      "3" = "Somewhat disagree",
+                                                      "4" = "Neither agree nor disagree",
+                                                      "5" = "Somewhat agree",
+                                                      "6" = "Agree",
+                                                      "7" = "Strongly agree")
+         ),
+         DUID_attitude_while = as.numeric(fct_recode(as_factor(Q133), # Reverse coded
+                                                     "1" = "Strongly disagree",
+                                                     "2" = "Disagree",
+                                                     "3" = "Somewhat disagree",
+                                                     "4" = "Neither agree nor disagree",
+                                                     "5" = "Somewhat agree",
+                                                     "6" = "Agree",
+                                                     "7" = "Strongly agree")
+         ),
+         DUID_attitude_dumb = as.numeric(fct_recode(as_factor(Q134),
+                                                    "1" = "Strongly agree",
+                                                    "2" = "Agree",
+                                                    "3" = "Somewhat agree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat disagree",
+                                                    "6" = "Disagree",
+                                                    "7" = "Strongly disagree")
+         ),
+         DUID_attitude_overrated = as.numeric(fct_recode(as_factor(Q135), # Reverse coded
+                                                         "1" = "Strongly disagree",
+                                                         "2" = "Disagree",
+                                                         "3" = "Somewhat disagree",
+                                                         "4" = "Neither agree nor disagree",
+                                                         "5" = "Somewhat agree",
+                                                         "6" = "Agree",
+                                                         "7" = "Strongly agree")
+         ),
+         DUID_attitude_license = as.numeric(fct_recode(as_factor(Q136),
+                                                       "1" = "Strongly agree",
+                                                       "2" = "Agree",
+                                                       "3" = "Somewhat agree",
+                                                       "4" = "Neither agree nor disagree",
+                                                       "5" = "Somewhat disagree",
+                                                       "6" = "Disagree",
+                                                       "7" = "Strongly disagree")
+         ),
+         # Attitudes towards strategies for avoiding Drug Driving: Discrete
+         DUID_strategy_leave = as.numeric(fct_recode(as_factor(Q137),
+                                                     "1" = "Definitely yes",
+                                                     "2" = "Probably yes",
+                                                     "3" = "Might or might not",
+                                                     "4" = "Probably not",
+                                                     "5" = "Definitely not")
+         ),
+         DUID_strategy_less = as.numeric(fct_recode(as_factor(Q138),
+                                                    "1" = "Extremely likely",
+                                                    "2" = "Moderately likely",
+                                                    "2" = "Slightly likely",
+                                                    "3" = "Neither likely nor unlikely",
+                                                    "4" = "Slightly unlikely",
+                                                    "4" = "Moderately unlikely",
+                                                    "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_plan_driver = as.numeric(fct_recode(as_factor(Q139),
+                                                           "1" = "Extremely likely",
+                                                           "2" = "Moderately likely",
+                                                           "2" = "Slightly likely",
+                                                           "3" = "Neither likely nor unlikely",
+                                                           "4" = "Slightly unlikely",
+                                                           "4" = "Moderately unlikely",
+                                                           "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_plan_use = as.numeric(fct_recode(as_factor(Q140),
+                                                        "1" = "Extremely likely",
+                                                        "2" = "Moderately likely",
+                                                        "2" = "Slightly likely",
+                                                        "3" = "Neither likely nor unlikely",
+                                                        "4" = "Slightly unlikely",
+                                                        "4" = "Moderately unlikely",
+                                                        "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_taxi = as.numeric(fct_recode(as_factor(Q141),
+                                                    "1" = "Extremely likely",
+                                                    "2" = "Moderately likely",
+                                                    "2" = "Slightly likely",
+                                                    "3" = "Neither likely nor unlikely",
+                                                    "4" = "Slightly unlikely",
+                                                    "4" = "Moderately unlikely",
+                                                    "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_track = as.numeric(fct_recode(as_factor(Q142),
+                                                     "1" = "Extremely likely",
+                                                     "2" = "Moderately likely",
+                                                     "2" = "Slightly likely",
+                                                     "3" = "Neither likely nor unlikely",
+                                                     "4" = "Slightly unlikely",
+                                                     "4" = "Moderately unlikely",
+                                                     "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_overnight = as.numeric(fct_recode(as_factor(Q143),
+                                                         "1" = "Extremely likely",
+                                                         "2" = "Moderately likely",
+                                                         "2" = "Slightly likely",
+                                                         "3" = "Neither likely nor unlikely",
+                                                         "4" = "Slightly unlikely",
+                                                         "4" = "Moderately unlikely",
+                                                         "5" = "Extremely unlikely")
+         ),
+         # Attitudes towards strategies for avoiding Drug Driving: Dichotomous
+         DUID_strategy_leave_dich = as.numeric(fct_recode(as_factor(Q137),
+                                                     "agree" = "Definitely yes",
+                                                     "agree" = "Probably yes",
+                                                     "disagree" = "Might or might not",
+                                                     "disagree" = "Probably not",
+                                                     "disagree" = "Definitely not")
+         ),
+         DUID_strategy_less = as.numeric(fct_recode(as_factor(Q138),
+                                                    "agree" = "Extremely likely",
+                                                    "agree" = "Moderately likely",
+                                                    "agree" = "Slightly likely",
+                                                    "disagree" = "Neither likely nor unlikely",
+                                                    "disagree" = "Slightly unlikely",
+                                                    "disagree" = "Moderately unlikely",
+                                                    "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_plan_driver = as.numeric(fct_recode(as_factor(Q139),
+                                                           "agree" = "Extremely likely",
+                                                           "agree" = "Moderately likely",
+                                                           "agree" = "Slightly likely",
+                                                           "disagree" = "Neither likely nor unlikely",
+                                                           "disagree" = "Slightly unlikely",
+                                                           "disagree" = "Moderately unlikely",
+                                                           "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_plan_use = as.numeric(fct_recode(as_factor(Q140),
+                                                        "agree" = "Extremely likely",
+                                                        "agree" = "Moderately likely",
+                                                        "agree" = "Slightly likely",
+                                                        "disagree" = "Neither likely nor unlikely",
+                                                        "disagree" = "Slightly unlikely",
+                                                        "disagree" = "Moderately unlikely",
+                                                        "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_taxi = as.numeric(fct_recode(as_factor(Q141),
+                                                    "agree" = "Extremely likely",
+                                                    "agree" = "Moderately likely",
+                                                    "agree" = "Slightly likely",
+                                                    "disagree" = "Neither likely nor unlikely",
+                                                    "disagree" = "Slightly unlikely",
+                                                    "disagree" = "Moderately unlikely",
+                                                    "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_track = as.numeric(fct_recode(as_factor(Q142),
+                                                     "agree" = "Extremely likely",
+                                                     "agree" = "Moderately likely",
+                                                     "agree" = "Slightly likely",
+                                                     "disagree" = "Neither likely nor unlikely",
+                                                     "disagree" = "Slightly unlikely",
+                                                     "disagree" = "Moderately unlikely",
+                                                     "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_overnight = as.numeric(fct_recode(as_factor(Q143),
+                                                         "agree" = "Extremely likely",
+                                                         "agree" = "Moderately likely",
+                                                         "agree" = "Slightly likely",
+                                                         "disagree" = "Neither likely nor unlikely",
+                                                         "disagree" = "Slightly unlikely",
+                                                         "disagree" = "Moderately unlikely",
+                                                         "disagree" = "Extremely unlikely")
+         ),
+         # Dula Dangerous Driving Index (DDDI)
+         DDDI_NE_1 = as.numeric(fct_recode(as_factor(Q65),
+                                "1" = "Never",
+                                "2" = "Rarely",
+                                "3" = "Sometimes",
+                                "4" = "Often",
+                                "5" = "Always")
+         ),
+         DDDI_NE_2 = as.numeric(fct_recode(as_factor(Q66),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_3 = as.numeric(fct_recode(as_factor(Q67),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_1 = as.numeric(fct_recode(as_factor(Q68),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_2 = as.numeric(fct_recode(as_factor(Q69),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_3 = as.numeric(fct_recode(as_factor(Q70),
+                                          "1" = "Never",
+                                          "2" = "Rarely",
+                                          "3" = "Sometimes",
+                                          "4" = "Often",
+                                          "5" = "Always")
+         ),
+         DDDI_AD_4 = as.numeric(fct_recode(as_factor(Q73),
+                                          "1" = "Never",
+                                          "2" = "Rarely",
+                                          "3" = "Sometimes",
+                                          "4" = "Often",
+                                          "5" = "Always")
+         ),
+         DDDI_RD_1 = as.numeric(fct_recode(as_factor(Q74),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_5 = as.numeric(fct_recode(as_factor(Q75),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_2 = as.numeric(fct_recode(as_factor(Q76),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_6 = as.numeric(fct_recode(as_factor(Q77),
+                                         "1" = "Never",
+                                         "2" = "Rarely",
+                                         "3" = "Sometimes",
+                                         "4" = "Often",
+                                         "5" = "Always")
+         ),
+         DDDI_NE_4 = as.numeric(fct_recode(as_factor(Q79),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_3 = as.numeric(fct_recode(as_factor(Q80),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_4 = as.numeric(fct_recode(as_factor(Q81),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_7 = as.numeric(fct_recode(as_factor(Q82),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_5 = as.numeric(fct_recode(as_factor(Q83),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_6 = as.numeric(fct_recode(as_factor(Q84),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_7 = as.numeric(fct_recode(as_factor(Q85),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_5 = as.numeric(fct_recode(as_factor(Q86),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_6 = as.numeric(fct_recode(as_factor(Q87),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_8 = as.numeric(fct_recode(as_factor(Q88),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_7 = as.numeric(fct_recode(as_factor(Q89),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_8 = as.numeric(fct_recode(as_factor(Q90),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_9 = as.numeric(fct_recode(as_factor(Q91),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_9 = as.numeric(fct_recode(as_factor(Q92),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_10 = as.numeric(fct_recode(as_factor(Q93),
+                                            "1" = "Never",
+                                            "2" = "Rarely",
+                                            "3" = "Sometimes",
+                                            "4" = "Often",
+                                            "5" = "Always")
+         ),
+         DDDI_RD_11 = as.numeric(fct_recode(as_factor(Q94),
+                                            "1" = "Never",
+                                            "2" = "Rarely",
+                                            "3" = "Sometimes",
+                                            "4" = "Often",
+                                            "5" = "Always")
+         ),
+         ## DDDI summing up scores
+         DDDI_NE_Total = (DDDI_NE_1 + DDDI_NE_2 + DDDI_NE_3 + DDDI_NE_4 + DDDI_NE_5 + DDDI_NE_6 + DDDI_NE_7 + DDDI_NE_8 + DDDI_NE_9), # Negative Emotions
+         DDDI_AD_Total = (DDDI_AD_1 + DDDI_AD_2 + DDDI_AD_3 + DDDI_AD_4 + DDDI_AD_5 + DDDI_AD_6 + DDDI_AD_7), # Agressive Driving
+         DDDI_RD_Total = (DDDI_RD_1 + DDDI_RD_2 + DDDI_RD_3 + DDDI_RD_4 + DDDI_RD_5 + DDDI_RD_6 + DDDI_RD_7 + DDDI_RD_8 + DDDI_RD_9 + DDDI_RD_10 + DDDI_RD_11), # Risky Driving
+         DDDI_Total = (DDDI_NE_Total + DDDI_AD_Total + DDDI_RD_Total),
+         keep_DDDI = !is.na(DDDI_Total), # Logical to indicate whether DDDI has been completed
+         # STAXI - 2
+         ## State Anger
+         S_Ang_F_1 = as.numeric(fct_recode(as_factor(Q146_1),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_2 = as.numeric(fct_recode(as_factor(Q146_2),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_3 = as.numeric(fct_recode(as_factor(Q146_3),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_V_1 = as.numeric(fct_recode(as_factor(Q146_4),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_1 = as.numeric(fct_recode(as_factor(Q146_5),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_4 = as.numeric(fct_recode(as_factor(Q146_6),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_2 = as.numeric(fct_recode(as_factor(Q146_7),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_3 = as.numeric(fct_recode(as_factor(Q146_8),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_V_2 = as.numeric(fct_recode(as_factor(Q146_9),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_5 = as.numeric(fct_recode(as_factor(Q146_10),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_4 = as.numeric(fct_recode(as_factor(Q146_11),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_V_3 = as.numeric(fct_recode(as_factor(Q146_12),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_V_4 = as.numeric(fct_recode(as_factor(Q146_13),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_5 = as.numeric(fct_recode(as_factor(Q146_14),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_Total = (S_Ang_F_1 + S_Ang_F_2 + S_Ang_F_3 + S_Ang_F_4 + S_Ang_F_5),
+         S_Ang_P_Total = (S_Ang_P_1 + S_Ang_P_2 + S_Ang_P_3 + S_Ang_P_4 + S_Ang_P_5),
+         S_Ang_V_Total = (S_Ang_V_1 + S_Ang_V_2 + S_Ang_V_3 + S_Ang_V_4), 
+         S_Ang_Total = (S_Ang_F_1 + S_Ang_F_2 + S_Ang_F_3 + S_Ang_F_4 + S_Ang_F_5 + 
+                          S_Ang_P_1 + S_Ang_P_2 + S_Ang_P_3 + S_Ang_P_4 + S_Ang_P_5 +
+                          S_Ang_V_1 + S_Ang_V_2 + S_Ang_V_3 + S_Ang_V_4),
+         ## Trait Anger
+         T_Ang_T_1 = as.numeric(fct_recode(as_factor(Q147_1),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_T_2 = as.numeric(fct_recode(as_factor(Q147_2),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Sometimes,Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_T_3 = as.numeric(fct_recode(as_factor(Q147_3),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Sometimes,Often",
+                                           "3" = "Almost never,Often",
+                                           "4" = "Almost always",
+                                           "4" = "Sometimes,Often,Almost always")
+         ),
+         T_Ang_R_1 = as.numeric(fct_recode(as_factor(Q147_4),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Sometimes,Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_R_2 = as.numeric(fct_recode(as_factor(Q147_5),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Almost never,Sometimes,Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_T_4 = as.numeric(fct_recode(as_factor(Q147_6),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "4" = "Almost always",
+                                           "4" = "Often,Almost always")
+         ),
+         T_Ang_1 = as.numeric(fct_recode(as_factor(Q147_7),
+                                         "1" = "Almost never",
+                                         "2" = "Sometimes",
+                                         "2" = "Almost never,Sometimes",
+                                         "3" = "Often",
+                                         "3" = "Sometimes,Often",
+                                         "4" = "Almost always",
+                                         "4" = "Sometimes,Often,Almost always")
+         ),
+         T_Ang_R_3 = as.numeric(fct_recode(as_factor(Q147_8),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Almost never,Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_2 = as.numeric(fct_recode(as_factor(Q147_9),
+                                         "1" = "Almost never",
+                                         "2" = "Sometimes",
+                                         "2" = "Almost never,Sometimes",
+                                         "3" = "Often",
+                                         "4" = "Almost always",
+                                         "4" = "Often,Almost always")
+         ),
+         T_Ang_R_4 = as.numeric(fct_recode(as_factor(Q147_10),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Sometimes,Often",
+                                           "3" = "Almost never,Sometimes,Often",
+                                           "3" = "Almost never,Often",
+                                           "4" = "Almost always",
+                                           "4" = "Often,Almost always")
+         ),
+         T_Ang_T_Total = (T_Ang_T_1 + T_Ang_T_2 + T_Ang_T_3 + T_Ang_T_4),
+         T_Ang_R_Total = (T_Ang_R_1 + T_Ang_R_2 + T_Ang_R_3 + T_Ang_R_4),
+         T_Ang_Total = (T_Ang_T_1 + T_Ang_T_2 + T_Ang_T_3 + T_Ang_T_4 +
+                          T_Ang_R_1 + T_Ang_R_2 + T_Ang_R_3 + T_Ang_R_4 +
+                          T_Ang_1 + T_Ang_2)
+    );
+
+# Creating screened data set
+screened.full <- data.full %>% 
+  filter(Q25 == "Yes", # Remove non-consenting responses
+         Status != "Spam", # Remove spam
+         #Removed for the time being - Finished %in% c("True", "TRUE"), # Selecting only responses that have completed the survey
+         !is.na(S_Ang_Total), # Removing responses that have incomplete State Anger
+         !is.na(T_Ang_Total), # Removing responses that have incomplete Trait Anger
+         Q126...13 %in% c("Full license (current/valid)", "Full license (expired/revoked)")) %>% # Removing responses that are not full license
+         mutate(id = row_number()) # Assign a number to each participant
+
+screened <- screened.full[164:ncol(screened.full)] %>% # Select only variables that have been re-coded
+  select(id, everything()); # Moving participant id to front of data frame
+
+# Creating cleaned data set
+cleaned <- screened %>%
+  filter(keep_DDDI == "TRUE"); # Select only observations that have completed DDDI
+
+#Saving as R objects
+save(data.full, file = "Data/Data.frame/data.full.Rda")
+save(screened.full, file = "Data/Data.frame/screened.full.Rda")
+save(screened, file = "Data/Data.frame/screened.Rda")
+save(cleaned, file = "Data/Data.frame/cleaned.Rda")
+
+# Writing data to csv
+write_excel_csv(data.full, "Data/Cleaning/data.full.csv"); # Export full data
+write_excel_csv(screened, "Data/Cleaning/data.screened.csv"); # Export cleaner data
+write_excel_csv(cleaned, "Data/Cleaning/data.cleaned.csv"); # Export cleaned data
