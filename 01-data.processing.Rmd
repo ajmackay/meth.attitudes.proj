@@ -1,8 +1,9 @@
-# Data Processing {.tabset}
+# Data Processing
 ```{r processing.packages, include=FALSE}
 library(tidyverse)
 library(lubridate)
 library(bookdown)
+library(knitr)
 ```
 
 ```{r processing.data, include = F}
@@ -1051,6 +1052,25 @@ save(screened, file = "data/objects/screened.Rda")
 #save(cleaned, file = "Data/Data.frame/cleaned.Rda")
 ```
 
-## Summary of Screened Data
-Table and shit
+## Summary of Data Screened
+The table below outlines how many observations did not meet any combination of the criteria laid out above.  "TRUE" means that there was a response recorded for that item.
+```{r processing.summary, echo= F, message=FALSE}
+bad <- anti_join(data.full, screened) %>% 
+  select(Q126...13, S_Ang_Total, T_Ang_Total, DDDI_Total)
+bad <- bad %>%
+  mutate(License = fct_recode(as_factor(Q126...13),
+                              "Full License" = "Full license (current/valid)",
+                              "Full License" = "Full license (expired/revoked)",
+                              "Probationary License" = "Probationary license (P-plate)",
+                              "Learners License" = "Learners license (L-plate)"),
+         S_Ang_Total = ifelse(!is.na(S_Ang_Total), T, NA),
+         T_Ang_Total = ifelse(!is.na(T_Ang_Total), T, NA),
+         DDDI_Total = ifelse(!is.na(DDDI_Total), T, NA)) %>% 
+  group_by(License, S_Ang_Total, T_Ang_Total, DDDI_Total) %>% 
+  summarise(
+    n = n()
+)
+
+kable(bad, caption = "Table 1. Number of Observations Removed by group")
+```
 

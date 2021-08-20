@@ -1,5 +1,6 @@
 h1:data-processing Data Processing
 h2:cleaning-data Cleaning Data
 h2:screening-data Screening Data
-h2:summary-of-screened-data Summary of Screened Data
+h2:summary-of-data-screened Summary of Data Screened
+tab:processing Table 1. Number of Observations Removed by group
 
