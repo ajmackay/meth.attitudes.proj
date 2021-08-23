@@ -10,11 +10,14 @@ h3:area-of-residence Area of Residence
 h2:bivariate-distribution-of-key-variables Bivariate distribution of key variables
 h3:dula-dangerous-driving-index-dddi Dula Dangerous Driving Index (DDDI)
 h4:about About
-h5:subscales Subscales:
+h4:subscales Subscales:
 h4:total-score Total Score
 h4:aggressive-driving Aggressive Driving
 h4:negative-emotional-driving Negative Emotional Driving
 h4:risky-driving Risky Driving
+h4:aggressive-driving-items Aggressive Driving Items
+h4:negative-emotional-driving-items Negative Emotional Driving Items
+h4:risky-driving-items Risky Driving Items
 h3:staxi-2 STAXI-2
 h4:about-1 About
 h5:state-anger State Anger

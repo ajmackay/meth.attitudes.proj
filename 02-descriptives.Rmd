@@ -222,7 +222,7 @@ grid.arrange(bar.res, bar.res.ma, nrow = 2, top = "Area of Residence Distributio
 
 ## Bivariate distribution of key variables 
 ### Dula Dangerous Driving Index (DDDI) {.tabset}
-#### About
+#### About {-}
 The DDDI includes 28$^*$ items (divided into 3 categorical subscales) with each item assessing a persons tendency to engage in certain driving practices or beliefs held around specific driving behaviours.  Each item is scored on a 5-point Likert scale from 1 (Never) to 5 (Always).
 
 <br>
@@ -231,7 +231,7 @@ The total score can be used as a composite measure for one's tendency and/or wil
 
 <br>
 
-##### Subscales:
+#### Subscales: {-}
 
 **Aggressive Driving:**
 Assessed with 7 items which reflect behaviours that are intentionally meant to annoy, irritate or punish other drivers.  E.g. *I flash my headlights when I am annoyed by another driver.*
@@ -291,7 +291,7 @@ dens.di.ma <- screened %>%
 # Box and scatter
 box.di.ma <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_Total, fill = meth_ingest)) +
-  geom_boxplot(outlier.alpha = 0) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
   geom_jitter(width = 0.08, alpha = 0.5) +
   theme_light() +
   labs(x = "MA Use", y = "DDDI Total") +
@@ -337,8 +337,8 @@ dens.ag.ma <- screened %>%
 # Box and scatter
 box.ag.ma <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_AD_Total, fill = meth_ingest)) +
-  geom_boxplot(outlier.alpha = 0) +
-  geom_jitter(width = 0.08, alpha = 0.5) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
   theme_light() +
   labs(x = "MA Use", y = "DDDI Aggression") +
   #ggtitle("Box plot of DDDI Aggression by MA Use") +
@@ -383,8 +383,8 @@ dens.ned.ma <- screened %>%
 # Box and scatter
 box.ned.ma <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_NE_Total, fill = meth_ingest)) +
-  geom_boxplot(outlier.alpha = 0) +
-  geom_jitter(width = 0.08, alpha = 0.5) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
   theme_light() +
   labs(x = "MA Use", y = "DDDI NED") +
   #ggtitle("Box plot of DDDI NED by MA Use") +
@@ -431,7 +431,7 @@ dens.rd.ma <- screened %>%
 box.rd.ma <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_RD_Total, fill = meth_ingest)) +
   geom_boxplot(outlier.alpha = 0) +
-  geom_jitter(width = 0.08, alpha = 0.5) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
   theme_light() +
   labs(x = "MA Use", y = "DDDI Risky Driving") +
   #ggtitle("Box plot of DDDI Risky Driving by MA Use") +
@@ -443,6 +443,270 @@ grid.arrange(hist.rd, hist.rd.ma, dens.rd.ma, box.rd.ma, nrow = 2, top = "Distri
 ```
 
 ***
+
+#### Aggressive Driving Items
+```{r di.ad.ind, echo = F}
+box.ad.1 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_1, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q68")
+
+box.ad.2 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_2, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q69")
+
+box.ad.3 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_3, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q70")
+
+box.ad.4 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_4, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q73")
+
+box.ad.5 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_5, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q75")
+
+box.ad.6 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_6, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q77")
+
+box.ad.7 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_7, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q82")
+
+grid.arrange(box.ad.1, box.ad.2, box.ad.3, box.ad.4) 
+grid.arrange(box.ad.5, box.ad.6, box.ad.7, ncol = 2)
+
+```
+
+
+#### Negative Emotional Driving Items
+```{r di.ned.ind, echo = F}
+box.ne.1 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_1, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q65")
+
+box.ne.2 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_2, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q66")
+
+box.ne.3 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_3, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q67")
+
+box.ne.4 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_4, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q79")
+
+box.ne.5 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_5, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q83")
+
+box.ne.6 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_6, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q84")
+
+box.ne.7 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_7, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q85")
+
+box.ne.8 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_8, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q88")
+
+box.ne.9 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_9, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q92")
+
+grid.arrange(box.ne.1, box.ne.2, box.ne.3, box.ne.4, box.ne.5, ncol = 2)
+grid.arrange(box.ne.6, box.ne.7, box.ne.8, box.ne.9, ncol = 2)
+
+```
+
+#### Risky Driving Items
+```{r di.rd.ind, echo = F}
+box.rd.1 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_1, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q74")
+
+box.rd.2 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_2, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q76")
+
+box.rd.3 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_3, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q80")
+
+box.rd.4 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_4, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q81")
+
+box.rd.5 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_5, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q86")
+
+box.rd.6 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_6, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q87")
+
+box.rd.7 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_7, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q89")
+
+box.rd.8 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_8, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q90")
+
+box.rd.9 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_9, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q92")
+
+box.rd.10 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_10, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q93")
+
+box.rd.11 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_11, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q94")
+
+grid.arrange(box.rd.1, box.rd.2, box.rd.3, box.rd.4, box.rd.5, box.rd.6)
+grid.arrange(box.rd.7, box.rd.8, box.rd.9, box.rd.10, box.rd.11)
+```
 
 ### STAXI-2 {.tabset}
 #### About
