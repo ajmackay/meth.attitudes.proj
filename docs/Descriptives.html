@@ -401,16 +401,17 @@ div.csl-indent {
 <h2><span class="header-section-number">2.2</span> Distribution of Demographics</h2>
 <div id="ma-use" class="section level3" number="2.2.1">
 <h3><span class="header-section-number">2.2.1</span> MA Use</h3>
-<p>This is a test</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="Descriptives.html#cb3-1" aria-hidden="true" tabindex="-1"></a>plot.count <span class="ot">&lt;-</span> screened <span class="sc">%&gt;%</span></span>
-<span id="cb3-2"><a href="Descriptives.html#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(meth_user, meth_user, <span class="cf">function</span>(x) <span class="sc">-</span><span class="fu">length</span>(x)))) <span class="sc">+</span></span>
-<span id="cb3-3"><a href="Descriptives.html#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> .grey, <span class="at">col =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
-<span id="cb3-4"><a href="Descriptives.html#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">&quot;count&quot;</span>, <span class="fu">aes</span>(<span class="at">label =</span> ..count..), <span class="at">vjust =</span> <span class="sc">-</span>.<span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb3-5"><a href="Descriptives.html#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Type of User&quot;</span>, <span class="at">y =</span> <span class="st">&quot;n&quot;</span>) <span class="sc">+</span></span>
-<span id="cb3-6"><a href="Descriptives.html#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Count of MA and non-MA users&quot;</span>) <span class="sc">+</span></span>
-<span id="cb3-7"><a href="Descriptives.html#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>()</span>
-<span id="cb3-8"><a href="Descriptives.html#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="Descriptives.html#cb3-9" aria-hidden="true" tabindex="-1"></a>plot.count</span></code></pre></div>
+<p>This is a test.</p>
+<p>Another test</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="Descriptives.html#cb1-1" aria-hidden="true" tabindex="-1"></a>plot.count <span class="ot">&lt;-</span> screened <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="Descriptives.html#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(meth_user, meth_user, <span class="cf">function</span>(x) <span class="sc">-</span><span class="fu">length</span>(x)))) <span class="sc">+</span></span>
+<span id="cb1-3"><a href="Descriptives.html#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> .grey, <span class="at">col =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1-4"><a href="Descriptives.html#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">stat =</span> <span class="st">&quot;count&quot;</span>, <span class="fu">aes</span>(<span class="at">label =</span> ..count..), <span class="at">vjust =</span> <span class="sc">-</span>.<span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb1-5"><a href="Descriptives.html#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Type of User&quot;</span>, <span class="at">y =</span> <span class="st">&quot;n&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1-6"><a href="Descriptives.html#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">&quot;Count of MA and non-MA users&quot;</span>) <span class="sc">+</span></span>
+<span id="cb1-7"><a href="Descriptives.html#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>()</span>
+<span id="cb1-8"><a href="Descriptives.html#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="Descriptives.html#cb1-9" aria-hidden="true" tabindex="-1"></a>plot.count</span></code></pre></div>
 <p><img src="_main_files/figure-html/distr.ma-1.png" width="672" /></p>
 <hr />
 </div>
