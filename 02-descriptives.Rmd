@@ -61,7 +61,7 @@ table1(~age + sex + meth_ingest + meth_user + license_status + education + ethni
 
 ### MA Use
 
-```{r distr.ma, echo = F}
+```{r distr.ma}
 plot.count <- screened %>%
   ggplot(aes(x = reorder(meth_user, meth_user, function(x) -length(x)))) +
   geom_bar(fill = .grey, col = "black") +
