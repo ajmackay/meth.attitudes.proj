@@ -60,7 +60,7 @@ table1(~age + sex + meth_ingest + meth_user + license_status + education + ethni
 ## Distribution of Demographics {.tabset}
 
 ### MA Use
-
+This is a test
 ```{r distr.ma}
 plot.count <- screened %>%
   ggplot(aes(x = reorder(meth_user, meth_user, function(x) -length(x)))) +
