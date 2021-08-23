@@ -24,7 +24,7 @@ The following code performs the following duties:
   - State Trait Anger Expression Index (STAXI-2)
 
 
-```{r processing.clean, message=FALSE, warning=FALSE, cache=F}
+```{r processing.clean, message=FALSE, warning=FALSE, cache=T}
 data.full <- data.raw[c(-1, -2),] %>% # Remove first two rows (contains description of variables)
   mutate(export_date = today(),
          # Demographics
