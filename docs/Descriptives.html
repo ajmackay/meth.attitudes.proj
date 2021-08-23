@@ -32,7 +32,7 @@
   
   
 <link rel="prev" href="data-processing.html"/>
-<link rel="next" href="parts.html"/>
+<link rel="next" href="analyses.html"/>
 <script src="libs/header-attrs-2.10/header-attrs.js"></script>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -56,6 +56,70 @@
 <link href="libs/table1-1.0/table1_defaults.css" rel="stylesheet" />
 
 
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
 
 <style type="text/css">
 /* Used with Pandoc 2.11+ new --citeproc when CSL is used */
@@ -118,29 +182,20 @@ div.csl-indent {
 <li class="chapter" data-level="2.2.5" data-path="Descriptives.html"><a href="Descriptives.html#ethnicity"><i class="fa fa-check"></i><b>2.2.5</b> Ethnicity</a></li>
 <li class="chapter" data-level="2.2.6" data-path="Descriptives.html"><a href="Descriptives.html#area-of-residence"><i class="fa fa-check"></i><b>2.2.6</b> Area of Residence</a></li>
 </ul></li>
-<li class="chapter" data-level="2.3" data-path="Descriptives.html"><a href="Descriptives.html#bivariate-distribution-of-key-variables"><i class="fa fa-check"></i><b>2.3</b> Bivariate distribution of key variables</a>
+<li class="chapter" data-level="2.3" data-path="Descriptives.html"><a href="Descriptives.html#distribution-of-key-variables-by-ma-use"><i class="fa fa-check"></i><b>2.3</b> Distribution of key variables by MA Use</a>
 <ul>
 <li class="chapter" data-level="2.3.1" data-path="Descriptives.html"><a href="Descriptives.html#dula-dangerous-driving-index-dddi"><i class="fa fa-check"></i><b>2.3.1</b> Dula Dangerous Driving Index (DDDI)</a></li>
 <li class="chapter" data-level="2.3.2" data-path="Descriptives.html"><a href="Descriptives.html#staxi-2"><i class="fa fa-check"></i><b>2.3.2</b> STAXI-2</a></li>
+<li class="chapter" data-level="2.3.3" data-path="Descriptives.html"><a href="Descriptives.html#k6-distress-scale"><i class="fa fa-check"></i><b>2.3.3</b> K6 Distress Scale</a></li>
+<li class="chapter" data-level="2.3.4" data-path="Descriptives.html"><a href="Descriptives.html#severity-dependence-scale-sds"><i class="fa fa-check"></i><b>2.3.4</b> Severity Dependence Scale (SDS)</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="3" data-path="parts.html"><a href="parts.html"><i class="fa fa-check"></i><b>3</b> Parts</a></li>
-<li class="chapter" data-level="4" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html"><i class="fa fa-check"></i><b>4</b> Footnotes and citations</a>
+<li class="chapter" data-level="3" data-path="analyses.html"><a href="analyses.html"><i class="fa fa-check"></i><b>3</b> Analyses</a></li>
+<li class="chapter" data-level="4" data-path="discussion.html"><a href="discussion.html"><i class="fa fa-check"></i><b>4</b> Discussion</a></li>
+<li class="chapter" data-level="5" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html"><i class="fa fa-check"></i><b>5</b> Footnotes and citations</a>
 <ul>
-<li class="chapter" data-level="4.1" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html#footnotes"><i class="fa fa-check"></i><b>4.1</b> Footnotes</a></li>
-<li class="chapter" data-level="4.2" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html#citations"><i class="fa fa-check"></i><b>4.2</b> Citations</a></li>
-</ul></li>
-<li class="chapter" data-level="5" data-path="blocks.html"><a href="blocks.html"><i class="fa fa-check"></i><b>5</b> Blocks</a>
-<ul>
-<li class="chapter" data-level="5.1" data-path="blocks.html"><a href="blocks.html#equations"><i class="fa fa-check"></i><b>5.1</b> Equations</a></li>
-<li class="chapter" data-level="5.2" data-path="blocks.html"><a href="blocks.html#theorems-and-proofs"><i class="fa fa-check"></i><b>5.2</b> Theorems and proofs</a></li>
-<li class="chapter" data-level="5.3" data-path="blocks.html"><a href="blocks.html#callout-blocks"><i class="fa fa-check"></i><b>5.3</b> Callout blocks</a></li>
-</ul></li>
-<li class="chapter" data-level="6" data-path="sharing-your-book.html"><a href="sharing-your-book.html"><i class="fa fa-check"></i><b>6</b> Sharing your book</a>
-<ul>
-<li class="chapter" data-level="6.1" data-path="sharing-your-book.html"><a href="sharing-your-book.html#publishing"><i class="fa fa-check"></i><b>6.1</b> Publishing</a></li>
-<li class="chapter" data-level="6.2" data-path="sharing-your-book.html"><a href="sharing-your-book.html#pages"><i class="fa fa-check"></i><b>6.2</b> 404 pages</a></li>
-<li class="chapter" data-level="6.3" data-path="sharing-your-book.html"><a href="sharing-your-book.html#metadata-for-sharing"><i class="fa fa-check"></i><b>6.3</b> Metadata for sharing</a></li>
+<li class="chapter" data-level="5.1" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html#footnotes"><i class="fa fa-check"></i><b>5.1</b> Footnotes</a></li>
+<li class="chapter" data-level="5.2" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html#citations"><i class="fa fa-check"></i><b>5.2</b> Citations</a></li>
 </ul></li>
 <li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
 <li class="divider"></li>
@@ -366,9 +421,9 @@ div.csl-indent {
 <hr />
 </div>
 </div>
-<div id="bivariate-distribution-of-key-variables" class="section level2" number="2.3">
-<h2><span class="header-section-number">2.3</span> Bivariate distribution of key variables</h2>
-<div id="dula-dangerous-driving-index-dddi" class="section level3 tabset" number="2.3.1">
+<div id="distribution-of-key-variables-by-ma-use" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Distribution of key variables by MA Use</h2>
+<div id="dula-dangerous-driving-index-dddi" class="section level3" number="2.3.1">
 <h3><span class="header-section-number">2.3.1</span> Dula Dangerous Driving Index (DDDI)</h3>
 <div id="about-1" class="section level4 unnumbered">
 <h4>About</h4>
@@ -376,8 +431,9 @@ div.csl-indent {
 <p><br></p>
 <p>The total score can be used as a composite measure for one’s tendency and/or willingness to engage in dangerous driving. Scores can range from 27 to 135.</p>
 <p><br></p>
-<div id="subscales" class="section level5 unnumbered">
-<h5>Subscales:</h5>
+</div>
+<div id="subscales" class="section level4 unnumbered">
+<h4>Subscales:</h4>
 <p><strong>Aggressive Driving:</strong>
 Assessed with 7 items which reflect behaviours that are intentionally meant to annoy, irritate or punish other drivers. E.g. <em>I flash my headlights when I am annoyed by another driver.</em></p>
 <p>Scores range from 7 to 35.</p>
@@ -394,52 +450,52 @@ Assessed with 11 items which gauge ones willingness to engage in unsafe driving 
 <p><span class="math inline">\(^*\)</span>The present study used 27 items with one item from the “Risky Driving” subscale - <em>I will weave in and out of slower traffic</em> - omitted from the questionnaire.</p>
 <hr />
 </div>
-</div>
-<div id="total-score" class="section level4" number="2.3.1.1">
-<h4><span class="header-section-number">2.3.1.1</span> Total Score</h4>
+<div id="total-score" class="section level4 unnumbered">
+<h4>Total Score</h4>
 <p><img src="_main_files/figure-html/di.total-1.png" width="672" /></p>
 <hr />
 </div>
-<div id="aggressive-driving" class="section level4" number="2.3.1.2">
-<h4><span class="header-section-number">2.3.1.2</span> Aggressive Driving</h4>
+<div id="aggressive-driving" class="section level4 unnumbered">
+<h4>Aggressive Driving</h4>
 <p><img src="_main_files/figure-html/di.AG-1.png" width="672" /></p>
 <hr />
 </div>
-<div id="negative-emotional-driving" class="section level4" number="2.3.1.3">
-<h4><span class="header-section-number">2.3.1.3</span> Negative Emotional Driving</h4>
+<div id="negative-emotional-driving" class="section level4 unnumbered">
+<h4>Negative Emotional Driving</h4>
 <p><img src="_main_files/figure-html/di.NE-1.png" width="672" /></p>
 <hr />
 </div>
-<div id="risky-driving" class="section level4" number="2.3.1.4">
-<h4><span class="header-section-number">2.3.1.4</span> Risky Driving</h4>
+<div id="risky-driving" class="section level4 unnumbered">
+<h4>Risky Driving</h4>
 <p><img src="_main_files/figure-html/di.RD-1.png" width="672" /></p>
 <hr />
 </div>
-<div id="aggressive-driving-items" class="section level4" number="2.3.1.5">
-<h4><span class="header-section-number">2.3.1.5</span> Aggressive Driving Items</h4>
+<div id="aggressive-driving-items" class="section level4 unnumbered">
+<h4>Aggressive Driving Items</h4>
 <p><img src="_main_files/figure-html/di.ad.ind-1.png" width="672" /><img src="_main_files/figure-html/di.ad.ind-2.png" width="672" /></p>
 </div>
-<div id="negative-emotional-driving-items" class="section level4" number="2.3.1.6">
-<h4><span class="header-section-number">2.3.1.6</span> Negative Emotional Driving Items</h4>
+<div id="negative-emotional-driving-items" class="section level4 unnumbered">
+<h4>Negative Emotional Driving Items</h4>
 <p><img src="_main_files/figure-html/di.ned.ind-1.png" width="672" /><img src="_main_files/figure-html/di.ned.ind-2.png" width="672" /></p>
 </div>
-<div id="risky-driving-items" class="section level4" number="2.3.1.7">
-<h4><span class="header-section-number">2.3.1.7</span> Risky Driving Items</h4>
+<div id="risky-driving-items" class="section level4 unnumbered">
+<h4>Risky Driving Items</h4>
 <p><img src="_main_files/figure-html/di.rd.ind-1.png" width="672" /><img src="_main_files/figure-html/di.rd.ind-2.png" width="672" /></p>
+<hr />
 </div>
 </div>
-<div id="staxi-2" class="section level3 tabset" number="2.3.2">
+<div id="staxi-2" class="section level3" number="2.3.2">
 <h3><span class="header-section-number">2.3.2</span> STAXI-2</h3>
-<div id="about-2" class="section level4" number="2.3.2.1">
-<h4><span class="header-section-number">2.3.2.1</span> About</h4>
+<div id="about-2" class="section level4 unnumbered">
+<h4>About</h4>
 <p>The State-Trait Anger Expression Inventory (STAXI-2) is designed to understand the attitudes, emotional states and behaviours that are typical to a person in regard to their feelings, control and expression of anger. It distinguishes anger between being a passing/present state as a personality trait.</p>
 <p><em>Description of scoring</em></p>
-<div id="state-anger" class="section level5" number="2.3.2.1.1">
-<h5><span class="header-section-number">2.3.2.1.1</span> State Anger</h5>
+<div id="state-anger" class="section level5 unnumbered">
+<h5>State Anger</h5>
 <p>Assesses the intensity of the individual’s angry feelings at time of testing.</p>
 </div>
-<div id="subscales-1" class="section level5" number="2.3.2.1.2">
-<h5><span class="header-section-number">2.3.2.1.2</span> Subscales:</h5>
+<div id="subscales-1" class="section level5 unnumbered">
+<h5>Subscales:</h5>
 <p><strong>Feeling Angry (S-Ang/F):</strong>
 TBC</p>
 <p><br></p>
@@ -451,17 +507,146 @@ TBC</p>
 <hr />
 </div>
 </div>
-<div id="state-anger-total" class="section level4" number="2.3.2.2">
-<h4><span class="header-section-number">2.3.2.2</span> State Anger Total</h4>
+<div id="state-anger-total" class="section level4 unnumbered">
+<h4>State Anger Total</h4>
 <p><img src="_main_files/figure-html/staxi.state-1.png" width="672" /></p>
 <hr />
 </div>
-<div id="trait-anger-total" class="section level4" number="2.3.2.3">
-<h4><span class="header-section-number">2.3.2.3</span> Trait Anger Total</h4>
+<div id="trait-anger-total" class="section level4 unnumbered">
+<h4>Trait Anger Total</h4>
 <p><img src="_main_files/figure-html/staxi.trait-1.png" width="672" /></p>
 <hr />
-
 </div>
+</div>
+<div id="k6-distress-scale" class="section level3" number="2.3.3">
+<h3><span class="header-section-number">2.3.3</span> K6 Distress Scale</h3>
+<p>The K6 Distress scale is a 6-item assessment that measures overall distress from depressive and anxiety related symptoms.</p>
+<p>It measures distress for the period 4 weeks prior to administration of the test.</p>
+<p>Each Item is rated on a 5-point<span class="math inline">\(^*\)</span> likert scale ranging from 1 (none of the time) to 5 (all of the time).</p>
+<p>Total score is obtained by simply adding up the item scores together.</p>
+<p><span class="math inline">\(^*\)</span>The present study used a 4-point scale for the item <em>During the past 30 days, about how often did you feel depressed?</em> with the level “A little of the time” omitted from the survey.</p>
+<div id="numeric-summary" class="section level4 unnumbered">
+<h4>Numeric summary</h4>
+<div class="Rtable1"><table class="Rtable1"><caption>Overall K6 Distress Scores</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=245)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>K6 Distress Score</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>12.6 (4.57)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>12.0 [6.00, 28.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>3 (1.2%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="Rtable1"><table class="Rtable1"><caption>K6 Distress Scores for MA Users</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=58)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>K6 Distress Score</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>17.4 (4.94)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>17.0 [9.00, 28.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>1 (1.7%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="Rtable1"><table class="Rtable1"><caption>K6 Distress Scores for non-MA Users</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=187)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>K6 Distress Score</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>11.2 (3.30)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>11.0 [6.00, 24.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>2 (1.1%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="k6-distribution" class="section level4 unnumbered">
+<h4>K6 Distribution</h4>
+<p><img src="_main_files/figure-html/dist.k6-1.png" width="672" /></p>
+</div>
+</div>
+<div id="severity-dependence-scale-sds" class="section level3" number="2.3.4">
+<h3><span class="header-section-number">2.3.4</span> Severity Dependence Scale (SDS)</h3>
+<p>The SDS is a 5 item questionnaire that provides a score indicating the severity of dependence on a given substance.
+Each item is scored from 0 to 3, with a higher score indicating greater dependence.</p>
+<p>Those whose total score is above 4 are considered to be dependent users.</p>
+<div class="Rtable1"><table class="Rtable1">
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=58)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>SDS</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>7.43 (2.51)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Median [Min, Max]</td>
+<td class='lastrow'>8.00 [0, 11.0]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><img src="_main_files/figure-html/sds-1.png" width="672" /></p>
+
 </div>
 </div>
 </div>
@@ -471,7 +656,7 @@ TBC</p>
         </div>
       </div>
 <a href="data-processing.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="parts.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="analyses.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

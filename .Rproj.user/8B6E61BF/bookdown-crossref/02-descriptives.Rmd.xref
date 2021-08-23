@@ -7,7 +7,7 @@ h3:age Age
 h3:education Education
 h3:ethnicity Ethnicity
 h3:area-of-residence Area of Residence
-h2:bivariate-distribution-of-key-variables Bivariate distribution of key variables
+h2:distribution-of-key-variables-by-ma-use Distribution of key variables by MA Use
 h3:dula-dangerous-driving-index-dddi Dula Dangerous Driving Index (DDDI)
 h4:about About
 h4:subscales Subscales:
@@ -24,4 +24,8 @@ h5:state-anger State Anger
 h5:subscales-1 Subscales:
 h4:state-anger-total State Anger Total
 h4:trait-anger-total Trait Anger Total
+h3:k6-distress-scale K6 Distress Scale
+h4:numeric-summary Numeric summary
+h4:k6-distribution K6 Distribution
+h3:severity-dependence-scale-sds Severity Dependence Scale (SDS)
 

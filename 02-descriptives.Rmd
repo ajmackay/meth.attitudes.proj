@@ -220,8 +220,8 @@ grid.arrange(bar.res, bar.res.ma, nrow = 2, top = "Area of Residence Distributio
 
 ***
 
-## Bivariate distribution of key variables 
-### Dula Dangerous Driving Index (DDDI) {.tabset}
+## Distribution of key variables by MA Use
+### Dula Dangerous Driving Index (DDDI)
 #### About {-}
 The DDDI includes 28$^*$ items (divided into 3 categorical subscales) with each item assessing a persons tendency to engage in certain driving practices or beliefs held around specific driving behaviours.  Each item is scored on a 5-point Likert scale from 1 (Never) to 5 (Always).
 
@@ -259,7 +259,7 @@ $^*$The present study used 27 items with one item from the "Risky Driving" subsc
 
 ***
 
-#### Total Score
+#### Total Score {-}
 ```{r di.total, echo = F}
 # Summary Table
 
@@ -304,7 +304,7 @@ grid.arrange(hist.di, hist.di.ma, dens.di.ma, box.di.ma, nrow = 2, ncol = 2, top
 
 ***
 
-#### Aggressive Driving
+#### Aggressive Driving {-}
 ```{r di.AG, echo = F}
 # Histogram
 hist.ag <- screened %>% 
@@ -350,7 +350,7 @@ grid.arrange(hist.ag, hist.ag.ma, dens.ag.ma, box.ag.ma, nrow = 2, top = "Distri
 
 ***
 
-#### Negative Emotional Driving
+#### Negative Emotional Driving {-}
 ```{r di.NE, echo = F}
 # Histogram
 hist.ned <- screened %>% 
@@ -397,7 +397,7 @@ grid.arrange(hist.ned, hist.ned.ma, dens.ned.ma, box.ned.ma, nrow = 2, top = "Di
 
 ***
 
-#### Risky Driving
+#### Risky Driving {-}
 ```{r di.RD, echo = F}
 # Histogram
 hist.rd <- screened %>% 
@@ -444,7 +444,7 @@ grid.arrange(hist.rd, hist.rd.ma, dens.rd.ma, box.rd.ma, nrow = 2, top = "Distri
 
 ***
 
-#### Aggressive Driving Items
+#### Aggressive Driving Items {-}
 ```{r di.ad.ind, echo = F}
 box.ad.1 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_AD_1, fill = meth_ingest)) +
@@ -515,7 +515,7 @@ grid.arrange(box.ad.5, box.ad.6, box.ad.7, ncol = 2)
 ```
 
 
-#### Negative Emotional Driving Items
+#### Negative Emotional Driving Items {-}
 ```{r di.ned.ind, echo = F}
 box.ne.1 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_NE_1, fill = meth_ingest)) +
@@ -603,7 +603,7 @@ grid.arrange(box.ne.6, box.ne.7, box.ne.8, box.ne.9, ncol = 2)
 
 ```
 
-#### Risky Driving Items
+#### Risky Driving Items {-}
 ```{r di.rd.ind, echo = F}
 box.rd.1 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_RD_1, fill = meth_ingest)) +
@@ -708,16 +708,18 @@ grid.arrange(box.rd.1, box.rd.2, box.rd.3, box.rd.4, box.rd.5, box.rd.6)
 grid.arrange(box.rd.7, box.rd.8, box.rd.9, box.rd.10, box.rd.11)
 ```
 
-### STAXI-2 {.tabset}
-#### About
+***
+
+### STAXI-2
+#### About {-}
 The State-Trait Anger Expression Inventory (STAXI-2) is designed to understand the attitudes, emotional states and behaviours that are typical to a person in regard to their feelings, control and expression of anger.  It distinguishes anger between being a passing/present state as a personality trait.
 
 *Description of scoring*
 
-##### State Anger
+##### State Anger {-}
 Assesses the intensity of the individual's angry feelings at time of testing.
 
-##### Subscales:
+##### Subscales: {-}
 **Feeling Angry (S-Ang/F):**
 TBC
 
@@ -733,7 +735,7 @@ TBC
 
 ***
 
-#### State Anger Total
+#### State Anger Total {-}
 ```{r staxi.state, echo = F}
 # Histogram
 hist.sstaxi <- screened %>% 
@@ -779,7 +781,7 @@ grid.arrange(hist.sstaxi, hist.sstaxi.ma, dens.sstaxi.ma, box.sstaxi.ma, ncol = 
 
 ***
 
-#### Trait Anger Total
+#### Trait Anger Total {-}
 ```{r staxi.trait, echo = F}
 # Histogram
 hist.tstaxi <- screened %>% 
@@ -813,7 +815,7 @@ dens.tstaxi.ma <- screened %>%
 box.tstaxi.ma <- screened %>% 
   ggplot(aes(x = meth_ingest, y = T_Ang_Total, fill = meth_ingest)) +
   geom_boxplot(outlier.alpha = 0) +
-  geom_jitter(width = 0.08, alpha = 0.5) +
+  geom_jitter(width = 0.1, height = 0, alpha = 0.5) +
   theme_light() +
   labs(x = "MA Use", y = "Trait Anger") +
   #ggtitle("Box plot of Trait Anger by MA Use") +
@@ -825,3 +827,109 @@ grid.arrange(hist.tstaxi, hist.tstaxi.ma, dens.tstaxi.ma, box.tstaxi.ma, ncol = 
 ```
 
 ***
+
+### K6 Distress Scale
+The K6 Distress scale is a 6-item assessment that measures overall distress from depressive and anxiety related symptoms.
+
+It measures distress for the period 4 weeks prior to administration of the test.  
+
+Each Item is rated on a 5-point$^*$ likert scale ranging from 1 (none of the time) to 5 (all of the time).
+
+Total score is obtained by simply adding up the item scores together.
+
+
+$^*$The present study used a 4-point scale for the item *During the past 30 days, about how often did you feel depressed?* with the level "A little of the time" omitted from the survey.
+
+#### Numeric summary {-}
+```{r num.summ.k6, echo=F}
+label(screened$k6_total) <- "K6 Distress Score"
+
+table1(~k6_total, data = screened, caption = "Overall K6 Distress Scores")
+
+table1(~k6_total, data = screened %>% filter(meth_ingest == "Yes"), caption = "K6 Distress Scores for MA Users")
+
+table1(~k6_total, data = screened %>% filter(meth_ingest != "Yes"), caption = "K6 Distress Scores for non-MA Users")
+```
+
+
+#### K6 Distribution {-}
+```{r dist.k6, echo = F, warning=F}
+# Hist
+hist.k6 <- screened %>% ggplot(aes(x = k6_total)) +
+  geom_histogram(binwidth = 1, col = "black", fill = .grey) +
+  labs(x = "K6 Distress Score", y = "") +
+  theme_light();
+
+# Hist by MA
+hist.k6.ma <- screened %>% 
+  ggplot(aes(x = k6_total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  labs(x = "K6 Distress Score", y = "", fill = "MA Use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Dens by MA
+dens.k6.ma <- screened %>% 
+  ggplot(aes(x = k6_total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "K6 Distress Score", y = "Density", fill = "MA Use") +
+  theme_light()
+
+# Boxplot by MA
+box.k6.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = k6_total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.1, height = 0, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "K6 Distress Score") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(hist.k6, hist.k6.ma, dens.k6.ma, box.k6.ma, top = "Distribution of K6 Distress Scores")
+```
+
+### Severity Dependence Scale (SDS)
+The SDS is a 5 item questionnaire that provides a score indicating the severity of dependence on a given substance.
+Each item is scored from 0 to 3, with a higher score indicating greater dependence.
+
+Those whose total score is above 4 are considered to be dependent users.
+
+```{r sds, echo=F}
+ma <- screened %>% filter(meth_ingest == "Yes")
+label(ma$meth_SDS) <- "SDS"
+table1(~meth_SDS, data = ma)
+
+ma %>% 
+  ggplot(aes(x = meth_SDS)) +
+  geom_histogram(binwidth = 1, col = "black", fill = .grey) +
+  theme_light() +
+  labs(x = "Severity Dependence Score", y = "") +
+  ggtitle("Distribution of SDS Scores")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
