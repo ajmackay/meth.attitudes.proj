@@ -163,8 +163,6 @@ div.csl-indent {
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>About</a>
 <ul>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html#packages-used"><i class="fa fa-check"></i>Packages Used</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#usage-ignore"><i class="fa fa-check"></i>Usage (ignore)</a></li>
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html#render-book-ignore"><i class="fa fa-check"></i>Render book (ignore)</a></li>
 </ul></li>
 <li class="chapter" data-level="1" data-path="data-processing.html"><a href="data-processing.html"><i class="fa fa-check"></i><b>1</b> Data Processing</a>
 <ul>
@@ -246,23 +244,6 @@ div.csl-indent {
 <li>tidyverse</li>
 <li>lubridate</li>
 </ul>
-</div>
-<div id="usage-ignore" class="section level2 unnumbered">
-<h2>Usage (ignore)</h2>
-<p>Each <strong>bookdown</strong> chapter is an .Rmd file, and each .Rmd file can contain one (and only one) chapter. A chapter <em>must</em> start with a first-level heading: <code># A good chapter</code>, and can contain one (and only one) first-level heading.</p>
-<p>Use second-level and higher headings within chapters like: <code>## A short section</code> or <code>### An even shorter section</code>.</p>
-<p>The <code>index.Rmd</code> file is required, and is also your first book chapter. It will be the homepage when you render the book.</p>
-</div>
-<div id="render-book-ignore" class="section level2 unnumbered">
-<h2>Render book (ignore)</h2>
-<p>You can render the HTML version of this example book without changing anything:</p>
-<ol style="list-style-type: decimal">
-<li><p>Find the <strong>Build</strong> pane in the RStudio IDE, and</p></li>
-<li><p>Click on <strong>Build Book</strong>, then select your output format, or select “All formats” if you’d like to use multiple formats from the same book source files.</p></li>
-</ol>
-<p>Or build the book from the R console:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="index.html#cb1-1" aria-hidden="true" tabindex="-1"></a>bookdown<span class="sc">::</span><span class="fu">render_book</span>()</span></code></pre></div>
-<p>To render this example to PDF as a <code>bookdown::pdf_book</code>, you’ll need to install XeLaTeX. You are recommended to install TinyTeX (which includes XeLaTeX): <a href="https://yihui.org/tinytex/" class="uri">https://yihui.org/tinytex/</a>.</p>
 
 </div>
 </div>
