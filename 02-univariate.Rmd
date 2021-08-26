@@ -1,4 +1,4 @@
-# Descriptives {#Descriptives}
+# Univariate Descriptives {#Uni.Descriptives}
 ```{r desc.setup, include=FALSE}
 library(bookdown)
 library(tidyverse)
@@ -33,6 +33,7 @@ screened$education <- factor(screened$education, levels = c("Did not finish high
                                                           "Bachelor Degree",
                                                           "Postgraduate Degree"))
 ```
+This section includes Univariate Descriptives (stratified by Methamphetamine Use) for the key variables in the study.
 
 ***
 

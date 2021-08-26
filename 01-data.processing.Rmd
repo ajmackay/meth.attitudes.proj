@@ -131,7 +131,7 @@ data.full <- data.raw[c(-1, -2),] %>% # Remove first two rows (contains descript
          meth_use_age = fct_recode(as_factor(Q53),
                                    "25" = "25 years old."),
          meth_use_ways = Q54, # Think about how to organise factors
-         ## SDS Scale (Re-scored to not use zero as R is weird with zeros)
+         # SDS Scale (Re-scored to not use zero as R is weird with zeros)
          meth_out_of_control = as.numeric(fct_recode(as_factor(Q55),
                                                      "1" = "Never or almost never",
                                                      "2" = "Sometimes",
@@ -324,6 +324,8 @@ data.full <- data.raw[c(-1, -2),] %>% # Remove first two rows (contains descript
                                                        "6" = "Disagree",
                                                        "7" = "Strongly disagree")
          ),
+         DUI_attitude_Total = DUI_attitude_friends + DUI_attitude_drunk + DUI_attitude_jail + DUI_attitude_strict + DUI_attitude_tough + DUI_attitude_caught + DUI_attitude_while + DUI_attitude_dumb + DUI_attitude_overrated + DUI_attitude_license,
+         DUI_attitude_Mean = DUI_attitude_Total/10,
          # Attitudes towards strategies for avoiding Drink Driving: Discrete
          DUI_strategy_leave = as.numeric(fct_recode(as_factor(Q107),
                                                      "1" = "Definitely yes",

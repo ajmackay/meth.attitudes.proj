@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>2 Univariate Descriptives | Methamphetamine Use, Driving Behaviour, Aggression and Attitudes</title>
+  <meta name="description" content="The following book is designed to document the process of data processing, exploration and analyses for the Methamphetamine, driving behaviour, aggression and attitudes study." />
+  <meta name="generator" content="bookdown 0.23 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="2 Univariate Descriptives | Methamphetamine Use, Driving Behaviour, Aggression and Attitudes" />
+  <meta property="og:type" content="book" />
+  <meta property="og:url" content="https://ajmackay.github.io/meth.attitudes.proj/" />
+  
+  <meta property="og:description" content="The following book is designed to document the process of data processing, exploration and analyses for the Methamphetamine, driving behaviour, aggression and attitudes study." />
+  <meta name="github-repo" content="rstudio/bookdown-demo" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="2 Univariate Descriptives | Methamphetamine Use, Driving Behaviour, Aggression and Attitudes" />
+  
+  <meta name="twitter:description" content="The following book is designed to document the process of data processing, exploration and analyses for the Methamphetamine, driving behaviour, aggression and attitudes study." />
+  
+
+<meta name="author" content="Aaron Mackay" />
+
+
+<meta name="date" content="2021-08-27" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="data-processing.html"/>
+<link rel="next" href="bivariate-descriptives.html"/>
+<script src="libs/header-attrs-2.10/header-attrs.js"></script>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.0.1/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.0.1/anchor-sections.js"></script>
+<link href="libs/table1-1.0/table1_defaults.css" rel="stylesheet" />
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">MA use, Driving Behaviour, Aggression</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>About</a>
+<ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#packages-used"><i class="fa fa-check"></i>Packages Used</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="data-processing.html"><a href="data-processing.html"><i class="fa fa-check"></i><b>1</b> Data Processing</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="data-processing.html"><a href="data-processing.html#cleaning-data"><i class="fa fa-check"></i><b>1.1</b> Cleaning Data</a></li>
+<li class="chapter" data-level="1.2" data-path="data-processing.html"><a href="data-processing.html#screening-data"><i class="fa fa-check"></i><b>1.2</b> Screening Data</a></li>
+<li class="chapter" data-level="1.3" data-path="data-processing.html"><a href="data-processing.html#summary-of-data-screened"><i class="fa fa-check"></i><b>1.3</b> Summary of Data Screened</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="Uni.html"><a href="Uni.html"><i class="fa fa-check"></i><b>2</b> Univariate Descriptives</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="Uni.html"><a href="Uni.html#demographic-summary-table"><i class="fa fa-check"></i><b>2.1</b> Demographic Summary Table</a></li>
+<li class="chapter" data-level="2.2" data-path="Uni.html"><a href="Uni.html#distribution-of-demographics"><i class="fa fa-check"></i><b>2.2</b> Distribution of Demographics</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="Uni.html"><a href="Uni.html#ma-use"><i class="fa fa-check"></i><b>2.2.1</b> MA Use</a></li>
+<li class="chapter" data-level="2.2.2" data-path="Uni.html"><a href="Uni.html#sex"><i class="fa fa-check"></i><b>2.2.2</b> Sex</a></li>
+<li class="chapter" data-level="2.2.3" data-path="Uni.html"><a href="Uni.html#age"><i class="fa fa-check"></i><b>2.2.3</b> Age</a></li>
+<li class="chapter" data-level="2.2.4" data-path="Uni.html"><a href="Uni.html#education"><i class="fa fa-check"></i><b>2.2.4</b> Education</a></li>
+<li class="chapter" data-level="2.2.5" data-path="Uni.html"><a href="Uni.html#ethnicity"><i class="fa fa-check"></i><b>2.2.5</b> Ethnicity</a></li>
+<li class="chapter" data-level="2.2.6" data-path="Uni.html"><a href="Uni.html#area-of-residence"><i class="fa fa-check"></i><b>2.2.6</b> Area of Residence</a></li>
+</ul></li>
+<li class="chapter" data-level="2.3" data-path="Uni.html"><a href="Uni.html#distribution-of-key-variables-by-ma-use"><i class="fa fa-check"></i><b>2.3</b> Distribution of key variables by MA Use</a>
+<ul>
+<li class="chapter" data-level="2.3.1" data-path="Uni.html"><a href="Uni.html#dula-dangerous-driving-index-dddi"><i class="fa fa-check"></i><b>2.3.1</b> Dula Dangerous Driving Index (DDDI)</a></li>
+<li class="chapter" data-level="2.3.2" data-path="Uni.html"><a href="Uni.html#staxi-2"><i class="fa fa-check"></i><b>2.3.2</b> STAXI-2</a></li>
+<li class="chapter" data-level="2.3.3" data-path="Uni.html"><a href="Uni.html#k6-distress-scale"><i class="fa fa-check"></i><b>2.3.3</b> K6 Distress Scale</a></li>
+<li class="chapter" data-level="2.3.4" data-path="Uni.html"><a href="Uni.html#severity-dependence-scale-sds"><i class="fa fa-check"></i><b>2.3.4</b> Severity Dependence Scale (SDS)</a></li>
+<li class="chapter" data-level="2.3.5" data-path="Uni.html"><a href="Uni.html#attitudes"><i class="fa fa-check"></i><b>2.3.5</b> Attitudes</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="bivariate-descriptives.html"><a href="bivariate-descriptives.html"><i class="fa fa-check"></i><b>3</b> Bivariate Descriptives</a></li>
+<li class="chapter" data-level="4" data-path="analyses.html"><a href="analyses.html"><i class="fa fa-check"></i><b>4</b> Analyses</a></li>
+<li class="chapter" data-level="5" data-path="discussion.html"><a href="discussion.html"><i class="fa fa-check"></i><b>5</b> Discussion</a></li>
+<li class="chapter" data-level="6" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html"><i class="fa fa-check"></i><b>6</b> Footnotes and citations</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html#footnotes"><i class="fa fa-check"></i><b>6.1</b> Footnotes</a></li>
+<li class="chapter" data-level="6.2" data-path="footnotes-and-citations.html"><a href="footnotes-and-citations.html#citations"><i class="fa fa-check"></i><b>6.2</b> Citations</a></li>
+</ul></li>
+<li class="chapter" data-level="" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i>References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Methamphetamine Use, Driving Behaviour, Aggression and Attitudes</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="Uni.Descriptives" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Univariate Descriptives</h1>
+<p>This section includes Univariate Descriptives (stratified by Methamphetamine Use) for the key variables in the study.</p>
+<hr />
+<div id="demographic-summary-table" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> Demographic Summary Table</h2>
+<div class="Rtable1"><table class="Rtable1">
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=245)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>Age</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>30.6 (6.71)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Median [Min, Max]</td>
+<td class='lastrow'>29.0 [18.0, 50.0]</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'>Sex</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Female</td>
+<td>98 (40.0%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Male</td>
+<td class='lastrow'>147 (60.0%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'>MA Ingest</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Yes</td>
+<td>58 (23.7%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>No</td>
+<td class='lastrow'>187 (76.3%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'>MA User Type</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Recreational</td>
+<td>6 (2.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>MUD</td>
+<td>52 (21.2%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Non-User</td>
+<td class='lastrow'>187 (76.3%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'>License Status</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Valid/current</td>
+<td>245 (100%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Former/lapsed</td>
+<td class='lastrow'>0 (0%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'>Education</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Did not finish high school</td>
+<td>7 (2.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>High School Diploma</td>
+<td>30 (12.2%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Vocational/Technical degree or certificate</td>
+<td>44 (18.0%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Did not finish University</td>
+<td>67 (27.3%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Bachelor Degree</td>
+<td>77 (31.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Postgraduate Degree</td>
+<td class='lastrow'>20 (8.2%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'>Ethnicity</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>North-West European</td>
+<td>101 (41.2%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>American</td>
+<td>74 (30.2%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Oceanian</td>
+<td>40 (16.3%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Eastern European</td>
+<td>10 (4.1%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Undisclosed</td>
+<td>7 (2.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>South-East Asian</td>
+<td>7 (2.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Central Asian</td>
+<td>2 (0.8%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Middle-East</td>
+<td>2 (0.8%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Asian</td>
+<td>1 (0.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>African</td>
+<td class='lastrow'>1 (0.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'>Area of Residence</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Rural</td>
+<td>10 (4.1%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Suburban</td>
+<td>99 (40.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Urban/Inner-city</td>
+<td class='lastrow'>136 (55.5%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr />
+</div>
+<div id="distribution-of-demographics" class="section level2 tabset" number="2.2">
+<h2><span class="header-section-number">2.2</span> Distribution of Demographics</h2>
+<div id="ma-use" class="section level3" number="2.2.1">
+<h3><span class="header-section-number">2.2.1</span> MA Use</h3>
+<p><img src="_main_files/figure-html/distr.ma-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="sex" class="section level3" number="2.2.2">
+<h3><span class="header-section-number">2.2.2</span> Sex</h3>
+<p><img src="_main_files/figure-html/distr.sex-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="age" class="section level3" number="2.2.3">
+<h3><span class="header-section-number">2.2.3</span> Age</h3>
+<p><img src="_main_files/figure-html/distr.age-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="education" class="section level3" number="2.2.4">
+<h3><span class="header-section-number">2.2.4</span> Education</h3>
+<p><img src="_main_files/figure-html/distr.edu-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="ethnicity" class="section level3" number="2.2.5">
+<h3><span class="header-section-number">2.2.5</span> Ethnicity</h3>
+<p><img src="_main_files/figure-html/distr.eth-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="area-of-residence" class="section level3" number="2.2.6">
+<h3><span class="header-section-number">2.2.6</span> Area of Residence</h3>
+<p><img src="_main_files/figure-html/distr.live-1.png" width="672" /></p>
+<hr />
+</div>
+</div>
+<div id="distribution-of-key-variables-by-ma-use" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> Distribution of key variables by MA Use</h2>
+<div id="dula-dangerous-driving-index-dddi" class="section level3" number="2.3.1">
+<h3><span class="header-section-number">2.3.1</span> Dula Dangerous Driving Index (DDDI)</h3>
+<div id="about-1" class="section level4 unnumbered">
+<h4>About</h4>
+<p>The DDDI includes 28<span class="math inline">\(^*\)</span> items (divided into 3 categorical subscales) with each item assessing a persons tendency to engage in certain driving practices or beliefs held around specific driving behaviours. Each item is scored on a 5-point Likert scale from 1 (Never) to 5 (Always).</p>
+<p><br></p>
+<p>The total score can be used as a composite measure for one’s tendency and/or willingness to engage in dangerous driving. Scores can range from 27 to 135.</p>
+<p><br></p>
+</div>
+<div id="subscales" class="section level4 unnumbered">
+<h4>Subscales:</h4>
+<p><strong>Aggressive Driving:</strong>
+Assessed with 7 items which reflect behaviours that are intentionally meant to annoy, irritate or punish other drivers. E.g. <em>I flash my headlights when I am annoyed by another driver.</em></p>
+<p>Scores range from 7 to 35.</p>
+<p><br></p>
+<p><strong>Negative Emotional Driving:</strong>
+Assessed with 9 items which gauge irritability and anger while driving and the tendency to become annoyed with other drivers. E.g. <em>I lose my temper while driving.</em></p>
+<p>Scores range from 9 to 45.</p>
+<p><br></p>
+<p><strong>Risky Driving:</strong>
+Assessed with 11 items which gauge ones willingness to engage in unsafe driving behaviours. E.g. <em>I will “drag race” other drivers at stop lights to get out front.</em></p>
+<p>Scores range from 11 to 55.</p>
+<p><br>
+<br></p>
+<p><span class="math inline">\(^*\)</span>The present study used 27 items with one item from the “Risky Driving” subscale - <em>I will weave in and out of slower traffic</em> - omitted from the questionnaire.</p>
+<hr />
+</div>
+<div id="total-score" class="section level4 unnumbered">
+<h4>Total Score</h4>
+<p><img src="_main_files/figure-html/di.total-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="aggressive-driving" class="section level4 unnumbered">
+<h4>Aggressive Driving</h4>
+<p><img src="_main_files/figure-html/di.AG-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="negative-emotional-driving" class="section level4 unnumbered">
+<h4>Negative Emotional Driving</h4>
+<p><img src="_main_files/figure-html/di.NE-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="risky-driving" class="section level4 unnumbered">
+<h4>Risky Driving</h4>
+<p><img src="_main_files/figure-html/di.RD-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="aggressive-driving-items" class="section level4 unnumbered">
+<h4>Aggressive Driving Items</h4>
+<p><img src="_main_files/figure-html/di.ad.ind-1.png" width="672" /><img src="_main_files/figure-html/di.ad.ind-2.png" width="672" /></p>
+</div>
+<div id="negative-emotional-driving-items" class="section level4 unnumbered">
+<h4>Negative Emotional Driving Items</h4>
+<p><img src="_main_files/figure-html/di.ned.ind-1.png" width="672" /><img src="_main_files/figure-html/di.ned.ind-2.png" width="672" /></p>
+</div>
+<div id="risky-driving-items" class="section level4 unnumbered">
+<h4>Risky Driving Items</h4>
+<p><img src="_main_files/figure-html/di.rd.ind-1.png" width="672" /><img src="_main_files/figure-html/di.rd.ind-2.png" width="672" /></p>
+<hr />
+</div>
+</div>
+<div id="staxi-2" class="section level3" number="2.3.2">
+<h3><span class="header-section-number">2.3.2</span> STAXI-2</h3>
+<div id="about-2" class="section level4 unnumbered">
+<h4>About</h4>
+<p>The State-Trait Anger Expression Inventory (STAXI-2) is designed to understand the attitudes, emotional states and behaviours that are typical to a person in regard to their feelings, control and expression of anger. It distinguishes anger between being a passing/present state as a personality trait.</p>
+<p>The full STAXI-2 contains 57 items grouped into 12 subscales which lie under three factors (State Anger, Trait Anger and Anger Control and Expression).</p>
+<p>For the purposes of this study, only the subscacles relating to State and Trait Anger were used.</p>
+<div id="scoring" class="section level5 unnumbered">
+<h5>Scoring</h5>
+<p>Each Item on the STAXI-2 is rated on a 4-point Likert scale from 1 (Not al all/Almost Never) to 4 (Very much so/Almost Always).
+Total score for State or Trait Anger is obtained by adding up the items from each subscale. Total scores for the subscales are obtained by adding up the scores of each item for the corresponding subscale.</p>
+</div>
+</div>
+<div id="state-anger" class="section level4 unnumbered">
+<h4>State Anger</h4>
+<p>Assesses the intensity of the individual’s angry feelings at time of testing.</p>
+<div id="subscales-1" class="section level5 unnumbered">
+<h5>Subscales:</h5>
+<p><strong>Feeling Angry (S-Ang/F):</strong>
+Measures the intensity of the angry feelings the person may be experiencing.</p>
+<p><br></p>
+<p><strong>Feel like verbally expressing anger (S-Ang/V):</strong>
+Measures the intensity of the current feelings related to the verbal expression of anger.</p>
+<p><br></p>
+<p><strong>Feel like physically expressing anger (A-Ang/P):</strong>
+Measures the intensity of the current feelings related to the physical expression of anger.</p>
+<p><br></p>
+</div>
+</div>
+<div id="trait-anger" class="section level4 unnumbered">
+<h4>Trait Anger</h4>
+<p>Measures the general tendency of a person to get angry.</p>
+<div id="subscales-2" class="section level5 unnumbered">
+<h5>Subscales:</h5>
+<p><strong>Angry Temperament (T-Ang/T):</strong>
+Measures the disposition to experience anger without specific provocation.</p>
+<p><br></p>
+<p><strong>Angry Reaction (T-Ang/T):</strong>
+Measures the frequency with which angry feelings are experienced in situations that involve frustration and/or negative evaluations.<br />
+<br></p>
+<hr />
+</div>
+</div>
+<div id="state-anger-total" class="section level4 unnumbered">
+<h4>State Anger Total</h4>
+<p><img src="_main_files/figure-html/staxi.state-1.png" width="672" /></p>
+</div>
+<div id="state-anger-subscales" class="section level4 unnumbered">
+<h4>State anger Subscales</h4>
+<p><img src="_main_files/figure-html/staxi.state.subs-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="trait-anger-total" class="section level4 unnumbered">
+<h4>Trait Anger Total</h4>
+<p><img src="_main_files/figure-html/staxi.trait-1.png" width="672" /></p>
+</div>
+<div id="trait-anger-subscales" class="section level4 unnumbered">
+<h4>Trait Anger Subscales</h4>
+<p><img src="_main_files/figure-html/staxi.trait.subs-1.png" width="672" /></p>
+<hr />
+</div>
+</div>
+<div id="k6-distress-scale" class="section level3" number="2.3.3">
+<h3><span class="header-section-number">2.3.3</span> K6 Distress Scale</h3>
+<p>The K6 Distress scale is a 6-item assessment that measures overall distress from depressive and anxiety related symptoms.</p>
+<p>It measures distress for the period 4 weeks prior to administration of the test.</p>
+<p>Each Item is rated on a 5-point<span class="math inline">\(^*\)</span> likert scale ranging from 1 (none of the time) to 5 (all of the time).</p>
+<p>Total score is obtained by simply adding up the item scores together.</p>
+<p><span class="math inline">\(^*\)</span>The present study used a 4-point scale for the item <em>During the past 30 days, about how often did you feel depressed?</em> with the level “A little of the time” omitted from the survey.</p>
+<div id="numeric-summary" class="section level4 unnumbered">
+<h4>Numeric summary</h4>
+<div class="Rtable1"><table class="Rtable1"><caption>Overall K6 Distress Scores</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=245)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>K6 Distress Score</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>12.6 (4.57)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>12.0 [6.00, 28.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>3 (1.2%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="Rtable1"><table class="Rtable1"><caption>K6 Distress Scores for MA Users</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=58)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>K6 Distress Score</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>17.4 (4.94)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>17.0 [9.00, 28.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>1 (1.7%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="Rtable1"><table class="Rtable1"><caption>K6 Distress Scores for non-MA Users</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=187)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>K6 Distress Score</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>11.2 (3.30)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>11.0 [6.00, 24.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>2 (1.1%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="k6-distribution" class="section level4 unnumbered">
+<h4>K6 Distribution</h4>
+<p><img src="_main_files/figure-html/dist.k6-1.png" width="672" /></p>
+</div>
+</div>
+<div id="severity-dependence-scale-sds" class="section level3" number="2.3.4">
+<h3><span class="header-section-number">2.3.4</span> Severity Dependence Scale (SDS)</h3>
+<p>The SDS is a 5 item questionnaire that provides a score indicating the severity of dependence on a given substance.
+Each item is scored from 0 to 3, with a higher score indicating greater dependence.</p>
+<p>Those whose total score is above 4 are considered to be dependent users.</p>
+<div class="Rtable1"><table class="Rtable1">
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=58)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>SDS</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>7.43 (2.51)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Median [Min, Max]</td>
+<td class='lastrow'>8.00 [0, 11.0]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><img src="_main_files/figure-html/sds-1.png" width="672" /></p>
+<hr />
+</div>
+<div id="attitudes" class="section level3" number="2.3.5">
+<h3><span class="header-section-number">2.3.5</span> Attitudes</h3>
+<p>Two questionnaires designed to assess participants attitudes toward drink and drug driving were administered.<br />
+Each questionnaire included 10 items rated on a 7-point Likert scale indicating to what extend the participant agreed or disagreed with the statement (e.g. <em>My community needs stricter laws against drink driving</em>). After taking into account items that were reverse scored (e.g. <em>It’s OK to drive after drinking as long as you’re not too drunk</em>), total scores were calculated with higher scores indicating a more favourable attitude toward drink or drug driving.</p>
+<div id="attitudes-toward-drink-driving-dui" class="section level4 unnumbered">
+<h4>Attitudes toward Drink Driving (DUI)</h4>
+<div class="Rtable1"><table class="Rtable1"><caption>DUI Attitude</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=245)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>DUI Attitude Total</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>29.8 (7.14)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Median [Min, Max]</td>
+<td class='lastrow'>28.0 [10.0, 52.0]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="Rtable1"><table class="Rtable1"><caption>DUI Attitude MA Users</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=58)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>DUI Attitude Total</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>36.9 (7.55)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Median [Min, Max]</td>
+<td class='lastrow'>37.5 [24.0, 51.0]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="Rtable1"><table class="Rtable1"><caption>DUI Attitude non-drug Users</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=187)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>DUI Attitude Total</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>27.5 (5.32)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Median [Min, Max]</td>
+<td class='lastrow'>27.0 [10.0, 52.0]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><img src="_main_files/figure-html/attitudes.DUI-1.png" width="672" /></p>
+</div>
+<div id="attitudes-toward-drug-driving" class="section level4 unnumbered">
+<h4>Attitudes toward Drug Driving</h4>
+<div class="Rtable1"><table class="Rtable1"><caption>DUID Attitude</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=245)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>DUID Attitude Total</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>31.2 (8.29)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>31.0 [10.0, 54.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>14 (5.7%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="Rtable1"><table class="Rtable1"><caption>DUID Attitude MA Users</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=58)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>DUID Attitude Total</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>39.1 (7.78)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>40.0 [24.0, 54.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>1 (1.7%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="Rtable1"><table class="Rtable1"><caption>DUID Attitude non-drug Users</caption>
+
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=187)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'>DUID Attitude Total</td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>28.6 (6.66)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>29.5 [10.0, 50.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>13 (7.0%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><img src="_main_files/figure-html/attitudes.DUID-1.png" width="672" /></p>
+
+</div>
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="data-processing.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bivariate-descriptives.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"whatsapp": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/USERNAME/REPO/edit/BRANCH/02-univariate.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["_main.pdf", "_main.epub"],
+"search": {
+"engine": "lunr",
+"options": null
+},
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

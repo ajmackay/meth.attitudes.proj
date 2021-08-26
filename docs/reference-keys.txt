@@ -2,7 +2,7 @@ data-processing
 cleaning-data
 screening-data
 summary-of-data-screened
-Descriptives
+Uni.Descriptives
 demographic-summary-table
 distribution-of-demographics
 ma-use
@@ -16,9 +16,10 @@ dula-dangerous-driving-index-dddi
 staxi-2
 k6-distress-scale
 severity-dependence-scale-sds
+attitudes
+bivariate-descriptives
 analyses
 discussion
 footnotes-and-citations
 footnotes
 citations
-attitudes
