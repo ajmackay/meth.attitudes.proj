@@ -714,24 +714,46 @@ grid.arrange(box.rd.7, box.rd.8, box.rd.9, box.rd.10, box.rd.11)
 #### About {-}
 The State-Trait Anger Expression Inventory (STAXI-2) is designed to understand the attitudes, emotional states and behaviours that are typical to a person in regard to their feelings, control and expression of anger.  It distinguishes anger between being a passing/present state as a personality trait.
 
-*Description of scoring*
+The full STAXI-2 contains 57 items grouped into 12 subscales which lie under three factors (State Anger, Trait Anger and Anger Control and Expression).  
 
-##### State Anger {-}
+For the purposes of this study, only the subscacles relating to State and Trait Anger were used.  
+
+##### Scoring {-}
+Each Item on the STAXI-2 is rated on a 4-point Likert scale from 1 (Not al all/Almost Never) to 4 (Very much so/Almost Always).
+Total score for State or Trait Anger is obtained by adding up the items from each subscale.  Total scores for the subscales are obtained by adding up the scores of each item for the corresponding subscale.  
+
+#### State Anger {-}
 Assesses the intensity of the individual's angry feelings at time of testing.
 
 ##### Subscales: {-}
 **Feeling Angry (S-Ang/F):**
-TBC
+Measures the intensity of the angry feelings the person may be experiencing.
 
 <br>
 
 **Feel like verbally expressing anger (S-Ang/V):**
-TBC
+Measures the intensity of the current feelings related to the verbal expression of anger.
 
 <br>
 
 **Feel like physically expressing anger (A-Ang/P):**
-TBC
+Measures the intensity of the current feelings related to the physical expression of anger.
+
+<br>
+
+#### Trait Anger {-}
+Measures the general tendency of a person to get angry.  
+
+##### Subscales: {-}
+**Angry Temperament (T-Ang/T):**
+Measures the disposition to experience anger without specific provocation. 
+
+<br>
+
+**Angry Reaction (T-Ang/T):**
+Measures the frequency with which angry feelings are experienced in situations that involve frustration and/or negative evaluations.  
+<br>
+
 
 ***
 
@@ -779,6 +801,72 @@ box.sstaxi.ma <- screened %>%
 grid.arrange(hist.sstaxi, hist.sstaxi.ma, dens.sstaxi.ma, box.sstaxi.ma, ncol = 2, top = "Distribution of State STAXI Scores (Total)")
 ```
 
+#### State anger Subscales {-}
+```{r staxi.state.subs, echo=F}
+# Feeling box
+box.sstaxi.F <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = S_Ang_F_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Feeling") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+#Verbal box
+box.sstaxi.V <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = S_Ang_V_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "") +
+  ggtitle("Verbal") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Physical box
+box.sstaxi.P <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = S_Ang_P_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "") +
+  ggtitle("Physical") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Feeling Dens
+dens.sstaxi.F <- screened %>% 
+  ggplot(aes(x = S_Ang_F_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Feeling", y = "Density", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+# Verbal Dens
+dens.sstaxi.V <- screened %>% 
+  ggplot(aes(x = S_Ang_V_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Verbal", y = "", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+# Physical Dens
+dens.sstaxi.P <- screened %>% 
+  ggplot(aes(x = S_Ang_P_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Physical", y = "", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+grid.arrange(box.sstaxi.F, box.sstaxi.V, box.sstaxi.P, 
+             dens.sstaxi.F, dens.sstaxi.V, dens.sstaxi.P, nrow = 2, ncol = 3)
+```
+
 ***
 
 #### Trait Anger Total {-}
@@ -823,6 +911,53 @@ box.tstaxi.ma <- screened %>%
   scale_fill_manual(values = c(.ma, .nma))
 
 grid.arrange(hist.tstaxi, hist.tstaxi.ma, dens.tstaxi.ma, box.tstaxi.ma, ncol = 2, top = "Distribution of Trait Staxi Scores (Total)")
+
+```
+
+#### Trait Anger Subscales {-}
+```{r staxi.trait.subs, echo = F}
+# Temperament box
+box.tstaxi.T <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = T_Ang_T_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Angry Temperament") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Reaction box
+box.tstaxi.R <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = T_Ang_R_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "") +
+  ggtitle("Angry Reaction") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Temperament dens
+dens.tstaxi.T <- screened %>% 
+  ggplot(aes(x = T_Ang_T_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Temperament", y = "Density", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+# Reaction dens
+dens.tstaxi.R <- screened %>% 
+  ggplot(aes(x = T_Ang_R_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Reaction", y = "", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+grid.arrange(box.tstaxi.T, box.tstaxi.R, 
+             dens.tstaxi.T, dens.tstaxi.R, nrow = 2, ncol = 2)
 
 ```
 
@@ -910,7 +1045,66 @@ ma %>%
   ggtitle("Distribution of SDS Scores")
 ```
 
+***
 
+### Attitudes
+Two questionnaires designed to assess participants attitudes toward drink and drug driving were administered.  
+Each questionnaire included 10 items rated on a 7-point Likert scale indicating to what extend the participant agreed or disagreed with the statement (e.g. *My community needs stricter laws against drink driving*).  After taking into account items that were reverse scored (e.g. *It's OK to drive after drinking as long as you're not too drunk*), total scores were calculated with higher scores indicating a more favourable attitude toward drink or drug driving.
+
+#### Attitudes toward Drink Driving (DUI) {-}
+```{r attitudes.DUI, echo = F}
+label(screened$DUI_attitude_Total) <- "DUI Attitude Total"
+table1(~DUI_attitude_Total, data = screened, caption = "DUI Attitude")
+table1(~DUI_attitude_Total, data = screened %>% filter(meth_ingest == "Yes"), caption = "DUI Attitude MA Users")
+table1(~DUI_attitude_Total, data = screened %>% filter(meth_ingest == "No"), caption = "DUI Attitude non-drug Users")
+
+dens.dui.att <- screened %>% 
+  ggplot(aes(x = DUI_attitude_Total, fill = meth_ingest)) +
+  geom_density(alpha = 0.5, col = "black") +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "DUI Attitude Score", y = "Density", fill = "MA User")
+
+box.dui.att <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DUI_attitude_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(height = 0, width = 0.1, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "DUI Attitude Score", fill = "MA User") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(dens.dui.att, box.dui.att, nrow = 2)
+
+```
+
+
+#### Attitudes toward Drug Driving {-}
+
+
+
+```{r attitudes.DUID, echo = F, warning=F}
+label(screened$DUID_attitude_Total) <- "DUID Attitude Total"
+table1(~DUID_attitude_Total, data = screened, caption = "DUID Attitude")
+table1(~DUID_attitude_Total, data = screened %>% filter(meth_ingest == "Yes"), caption = "DUID Attitude MA Users")
+table1(~DUID_attitude_Total, data = screened %>% filter(meth_ingest == "No"), caption = "DUID Attitude non-drug Users")
+
+dens.duid.att <- screened %>% 
+  ggplot(aes(x = DUID_attitude_Total, fill = meth_ingest)) +
+  geom_density(alpha = 0.5, col = "black") +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "DUID Attitude Score", y = "Density", fill = "MA User")
+
+box.duid.att <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DUID_attitude_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(height = 0, width = 0.1, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "DUID Attitude Score", fill = "MA User") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(dens.duid.att, box.duid.att, nrow = 2)
+```
 
 
 

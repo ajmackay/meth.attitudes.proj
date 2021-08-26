@@ -21,3 +21,4 @@ discussion
 footnotes-and-citations
 footnotes
 citations
+attitudes
