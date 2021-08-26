@@ -557,6 +557,8 @@ data.full <- data.raw[c(-1, -2),] %>% # Remove first two rows (contains descript
                                                        "6" = "Disagree",
                                                        "7" = "Strongly disagree")
          ),
+         DUID_attitude_Total = DUID_attitude_caught + DUID_attitude_dumb + DUID_attitude_friends + DUID_attitude_high + DUID_attitude_jail + DUID_attitude_license + DUID_attitude_overrated + DUID_attitude_strict + DUID_attitude_tough + DUID_attitude_while,
+         DUID_attitude_Mean = DUID_attitude_Total/10,
          # Attitudes towards strategies for avoiding Drug Driving: Discrete
          DUID_strategy_leave = as.numeric(fct_recode(as_factor(Q137),
                                                      "1" = "Definitely yes",
