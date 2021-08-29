@@ -23,3 +23,11 @@ discussion
 footnotes-and-citations
 footnotes
 citations
+Bivar.Descriptives
+staxi-2-1
+state-anger-1
+trait-anger-1
+k6-distress-scale-1
+attitudes-1
+dui
+correlation-matrix
