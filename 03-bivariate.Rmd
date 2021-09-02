@@ -1,1 +1,235 @@
-# Bivariate Descriptives
+# Bivariate Descriptives {#Bivar.Descriptives}
+```{r library, include = FALSE}
+library(bookdown)
+library(tidyverse)
+library(gridExtra)
+library(rlang) # For ggplot functions
+library(knitr)
+library(kableExtra)
+```
+
+```{r data.load, include = F}
+load("data/objects/data.full.Rda")
+load("data/objects/screened.full.Rda")
+load("data/objects/screened.Rda")
+
+```
+
+```{r data.prep, include = F}
+# Preparing colours for graphs
+.grey <- "#A6A6A6"
+.ma <- "#DC2D27"
+.nma <- "#39B9FF"
+.lav <- "#D9BBDC"
+.lgreen <- "#BEDCB3"
+
+# Changing NA from meth_ingest and meth_user to "No"
+screened$meth_ingest[is.na(screened$meth_ingest)] <- "No"
+screened$meth_user[is.na(screened$meth_user)] <- "Non-User"
+screened$meth_user <- as.factor(screened$meth_user)
+
+# Rearranging levels for education 
+screened$education <- factor(screened$education, levels = c("Did not finish high school",
+                                                          "High School Diploma",
+                                                          "Vocational/Technical degree or certificate",
+                                                          "Did not finish University",
+                                                          "Bachelor Degree",
+                                                          "Postgraduate Degree"))
+```
+
+This section will explore bivariate relationships between each key predictor variable (STAXI-2, K6 Distress, SDS, Attitudes) and will examine in more detail their relationship with the outcome variable (DDDI).  There will be particular attention paid on the relationship between the predictors and the outcome variable and we will seek to graphically identify whether there may be an y interactions present between the predictor variables and MA use on the DDDI.  
+
+## STAXI-2
+### State Anger
+```{r staxi.state, echo = F, message=F, warning=F}
+plot.bivar <- function(df, xcol, ycol, colour) {
+  ggplot(data = df, aes(x = {{xcol}}, y = {{ycol}}, col = {{colour}})) +
+    geom_smooth(method = "lm", alpha = 0.1, fullrange = T) +
+    geom_point(size = 2, alpha = 0.5) +
+    theme_light() +
+    scale_color_manual(values = c(.ma, .nma))
+}
+
+point.sstaxi <- plot.bivar(screened, S_Ang_Total, DDDI_Total, meth_ingest) +
+  labs(x = "State Total", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by State Anger")
+
+point.sstaxi.F <- plot.bivar(screened, S_Ang_F_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Feeling", y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+point.sstaxi.V <- plot.bivar(screened, S_Ang_V_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Verbal", y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+point.sstaxi.P <- plot.bivar(screened, S_Ang_P_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Physical", y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+lay <- rbind(c(1, 1, 1),
+             c(1, 1, 1),
+             c(1, 1, 1),
+             c(2, 3, 4),
+             c(2, 3, 4))
+
+grid.arrange(point.sstaxi, point.sstaxi.F, point.sstaxi.V, point.sstaxi.P, layout_matrix = lay)
+```
+
+### Trait Anger
+```{r staxi.trait, echo = F, message = F, warning = F}
+point.tstaxi <- plot.bivar(screened, T_Ang_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Trait ", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by Trait Anger")
+
+point.tstaxi.R <- plot.bivar(screened, T_Ang_R_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Reaction",y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+point.tstaxi.T <- plot.bivar(screened, T_Ang_T_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Temperament", y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+lay <- rbind(c(1, 1, 1),
+             c(1, 1, 1),
+             c(2, NA, 3),
+             c(2, NA, 3))
+
+grid.arrange(point.tstaxi, point.tstaxi.R, point.tstaxi.T, layout_matrix = lay)
+```
+
+## K6 Distress Scale
+```{r k6, echo=F, message = F, warning = F}
+plot.bivar(screened, k6_total, DDDI_Total, meth_ingest) +
+  labs(x = "K6 Distress Score", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by K6 Distress Score")
+```
+
+## Attitudes
+### DUI
+```{r DUI, echo = F, message = F, warning = F}
+plot.bivar(screened, DUI_attitude_Total, DDDI_Total, meth_ingest) +
+  labs(x = "DUI Attitude Total", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by DUI Attitude")
+```
+
+```{r DUID, echo = F, message = F, warning = F}
+plot.bivar(screened, DUID_attitude_Total, DDDI_Total, meth_ingest) +
+  labs(x = "DUID Attitude Total", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by DUID Attitude")
+```
+
+## Correlation Matrix
+```{r cor.matrix.function, include=F}
+#' correlation_matrix from https://www.r-bloggers.com/2020/07/create-a-publication-ready-correlation-matrix-with-significance-levels-in-r/
+#' Creates a publication-ready / formatted correlation matrix, using `Hmisc::rcorr` in the backend.
+#'
+#' @param df dataframe; containing numeric and/or logical columns to calculate correlations for
+#' @param type character; specifies the type of correlations to compute; gets passed to `Hmisc::rcorr`; options are `"pearson"` or `"spearman"`; defaults to `"pearson"`
+#' @param digits integer/double; number of decimals to show in the correlation matrix; gets passed to `formatC`; defaults to `3`
+#' @param decimal.mark character; which decimal.mark to use; gets passed to `formatC`; defaults to `.`
+#' @param use character; which part of the correlation matrix to display; options are `"all"`, `"upper"`, `"lower"`; defaults to `"all"`
+#' @param show_significance boolean; whether to add `*` to represent the significance levels for the correlations; defaults to `TRUE`
+#' @param replace_diagonal boolean; whether to replace the correlations on the diagonal; defaults to `FALSE`
+#' @param replacement character; what to replace the diagonal and/or upper/lower triangles with; defaults to `""` (empty string)
+#'
+#' @return a correlation matrix
+#' @export
+#'
+#' @examples
+#' `correlation_matrix(iris)`
+#' `correlation_matrix(mtcars)`
+correlation_matrix <- function(df, 
+                               type = "pearson",
+                               digits = 3, 
+                               decimal.mark = ".",
+                               use = "all", 
+                               show_significance = TRUE, 
+                               replace_diagonal = FALSE, 
+                               replacement = ""){
+  
+  # check arguments
+  stopifnot({
+    is.numeric(digits)
+    digits >= 0
+    use %in% c("all", "upper", "lower")
+    is.logical(replace_diagonal)
+    is.logical(show_significance)
+    is.character(replacement)
+  })
+  # we need the Hmisc package for this
+  require(Hmisc)
+  
+  # retain only numeric and boolean columns
+  isNumericOrBoolean = vapply(df, function(x) is.numeric(x) | is.logical(x), logical(1))
+  if (sum(!isNumericOrBoolean) > 0) {
+    cat('Dropping non-numeric/-boolean column(s):', paste(names(isNumericOrBoolean)[!isNumericOrBoolean], collapse = ', '), '\n\n')
+  }
+  df = df[isNumericOrBoolean]
+  
+  # transform input data frame to matrix
+  x <- as.matrix(df)
+  
+  # run correlation analysis using Hmisc package
+  correlation_matrix <- Hmisc::rcorr(x, type = )
+  R <- correlation_matrix$r # Matrix of correlation coeficients
+  p <- correlation_matrix$P # Matrix of p-value 
+  
+  # transform correlations to specific character format
+  Rformatted = formatC(R, format = 'f', digits = digits, decimal.mark = decimal.mark)
+  
+  # if there are any negative numbers, we want to put a space before the positives to align all
+  if (sum(R < 0) > 0) {
+    Rformatted = ifelse(R > 0, paste0(' ', Rformatted), Rformatted)
+  }
+  
+  # add significance levels if desired
+  if (show_significance) {
+    # define notions for significance levels; spacing is important.
+    stars <- ifelse(is.na(p), "   ", ifelse(p < .001, "***", ifelse(p < .01, "** ", ifelse(p < .05, "*  ", "   "))))
+    Rformatted = paste0(Rformatted, stars)
+  }
+  # build a new matrix that includes the formatted correlations and their significance stars
+  Rnew <- matrix(Rformatted, ncol = ncol(x))
+  rownames(Rnew) <- colnames(x)
+  colnames(Rnew) <- paste(colnames(x), "", sep =" ")
+  
+  # replace undesired values
+  if (use == 'upper') {
+    Rnew[lower.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (use == 'lower') {
+    Rnew[upper.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (replace_diagonal) {
+    diag(Rnew) <- replacement
+  }
+  
+  return(Rnew)
+}
+```
+
+```{r cor.matrix, echo=F, message = F}
+key.vars <- screened %>%
+  select(DDDI_Total, DDDI_AD_Total, DDDI_RD_Total, DDDI_NE_Total, 
+         k6_total, 
+         S_Ang_Total, S_Ang_F_Total, S_Ang_V_Total, S_Ang_P_Total,
+         T_Ang_Total, T_Ang_R_Total, T_Ang_T_Total,
+         DUI_attitude_Total,
+         DUID_attitude_Total)
+
+key.vars.total <- screened %>%
+  select(DDDI_Total, 
+         k6_total, 
+         S_Ang_Total,
+         T_Ang_Total,
+         DUI_attitude_Total,
+         DUID_attitude_Total)
+
+corr.vars <- correlation_matrix(key.vars.total, digits = 2, use = "lower")
+
+kable(corr.vars) %>% 
+  kable_styling("striped") %>% 
+  scroll_box(width = "100%")
+```
+
+```{r cor.scatter, echo = F, message = F}
+
+```

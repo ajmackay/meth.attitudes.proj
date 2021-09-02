@@ -31,3 +31,7 @@ k6-distress-scale-1
 attitudes-1
 dui
 correlation-matrix
+drug-use
+alcohol
+drugs-ma-users-only
+methamphetamine--

@@ -7,11 +7,13 @@ library(gridExtra)
 library(kableExtra)
 library(table1)
 library(gridExtra)
+```
 
+```{r data.prep, include = F}
 # Preparing colours for graphs
 .grey <- "#A6A6A6"
 .ma <- "#DC2D27"
-.nma <- "#80B9C9"
+.nma <- "#39B9FF"
 .lav <- "#D9BBDC"
 .lgreen <- "#BEDCB3"
 
@@ -52,28 +54,15 @@ label(x$ethnicity) <- "Ethnicity"
 label(x$area_live) <- "Area of Residence"
 
 
-table1(~age + sex + meth_ingest + meth_user + license_status + education + ethnicity + area_live, data = x)
+kable(table1(~age + sex + meth_ingest + meth_user + license_status + education + ethnicity + area_live, data = x)) %>% 
+  kable_styling("striped") %>% 
+  scroll_box(height = "500px")
 
 ```
 
 ***
 
-## Distribution of Demographics {.tabset}
-
-### MA Use
-```{r distr.ma, echo = F}
-plot.count <- screened %>%
-  ggplot(aes(x = reorder(meth_user, meth_user, function(x) -length(x)))) +
-  geom_bar(fill = .grey, col = "black") +
-  geom_text(stat = "count", aes(label = ..count..), vjust = -.3) +
-  labs(x = "Type of User", y = "n") +
-  ggtitle("Count of MA and non-MA users") +
-  theme_light()
-
-plot.count
-```
-
-***
+## Distribution of Demographics 
 
 ### Sex
 ```{r distr.sex, echo = F}
@@ -219,6 +208,80 @@ grid.arrange(bar.res, bar.res.ma, nrow = 2, top = "Area of Residence Distributio
 
 ```
 
+***
+## Drug Use
+### Alcohol
+*NTS: Would be good to show proportions within MA group instead of count.
+```{r, echo=FALSE}
+# Rearranging levels
+levels(screened$alcohol_frequency) <- c("Four or more times a week", "Two to three times per week", "Two to four times a month","Monthly or less", "Never")
+
+screened %>% 
+  ggplot(aes(x = alcohol_frequency, fill = meth_ingest)) +
+  geom_bar() +
+  coord_flip() +
+  facet_wrap(~meth_ingest) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  theme_light() +
+  labs(x = "Alcohol Frequency", y = "Count", fill = "MA Use")
+```
+
+### Drugs (MA Users only)
+
+#### Methamphetamine (-)
+
+```{r ma.prep, include = FALSE}
+screened <- screened %>% 
+  mutate(meth_use_extreme = fct_recode(as_factor(meth_use_ways),
+                                    "Injection" = "Injection under the skin?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "Injection under the skin?,By mouth, drinking or in a pill?",
+                                    "Injection" = "Injection under the skin?,Smoking, freebasing?",
+                                    "Injection" = "Injection under the skin?,Smoking, freebasing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?,By mouth, drinking or in a pill?",
+                                    "Injection" = "Injection under the skin?,Smoking, freebasing?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?,Smoking, freebasing?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "Injection under the skin?",
+                                    "Injection" = "IV, through the veins?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?,Smoking, freebasing?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?,Snorting, sniffing, breathing?",
+                                    "Smoking" = "Smoking, freebasing?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Smoking" = "Smoking, freebasing?,Snorting, sniffing, breathing?",
+                                    "Smoking" = "Smoking, freebasing?,By mouth, drinking or in a pill?",
+                                    "Smoking" = "Smoking, freebasing?",
+                                    "Snorting" = "Snorting, sniffing, breathing?",
+                                    "Oral" = "By mouth, drinking or in a pill?"))
+         
+```
+
+
+```{r ma.summ, echo = FALSE}
+ma.df <- screened %>% filter(meth_ingest == "Yes")
+
+label(ma.df$meth_use_at_peak) <- "At the time when you were using MA the most, how often did you use it?"
+label(ma.df$meth_last_12_months) <- "In the last 12 months, did you use MA in any form?"
+label(ma.df$meth_use_age) <- "How old were you when you first began using MA?"
+label(ma.df$meth_recent_use) <- "When was the most recent time you used MA?"
+label(ma.df$meth_use_extreme) <- "Most extreme form of use"
+
+kable(table1(~meth_use_age + meth_use_at_peak + meth_last_12_months + meth_recent_use + meth_use_extreme , data = ma.df)) %>% 
+  kable_styling("striped") %>% 
+  scroll_box(height = "500px")
+```
+
+```{r distr.ma, echo = F}
+plot.count <- screened %>%
+  ggplot(aes(x = reorder(meth_user, meth_user, function(x) -length(x)))) +
+  geom_bar(fill = .grey, col = "black") +
+  geom_text(stat = "count", aes(label = ..count..), vjust = -.3) +
+  labs(x = "Type of User", y = "n") +
+  ggtitle("Count of MA and non-MA users") +
+  theme_light()
+
+plot.count
+```
 ***
 
 ## Distribution of key variables by MA Use

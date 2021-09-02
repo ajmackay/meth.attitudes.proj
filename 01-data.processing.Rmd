@@ -128,8 +128,11 @@ data.full <- data.raw[c(-1, -2),] %>% # Remove first two rows (contains descript
          meth_last_12_months = as_factor(Q50),
          meth_before_last_year = as_factor(Q51),
          meth_recent_use = as_factor(Q52),
-         meth_use_age = fct_recode(as_factor(Q53),
-                                   "25" = "25 years old."),
+         meth_use_age = as.numeric(as.character(fct_recode(as_factor(Q53),
+                                       "25" = "25 years old.",
+                                       "19" = "19 years old",
+                                       "18" = "18 years of age",
+                                       "20" = "Twenty years of age"))),
          meth_use_ways = Q54, # Think about how to organise factors
          # SDS Scale (Re-scored to not use zero as R is weird with zeros)
          meth_out_of_control = as.numeric(fct_recode(as_factor(Q55),
@@ -1117,6 +1120,6 @@ bad <- bad %>%
     n = n()
 )
 
-kable(bad, caption = "Table 1. Number of Observations Removed by group")
+kable(bad, caption = "Table 1. Number of Observations Removed by group") %>% kable_styling("striped")
 ```
 
