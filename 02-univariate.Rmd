@@ -228,7 +228,19 @@ screened %>%
 
 ### Drugs (MA Users only)
 
-#### Methamphetamine (-)
+#### Methamphetamine {-}
+
+```{r distr.ma, echo = F}
+plot.count <- screened %>%
+  ggplot(aes(x = reorder(meth_user, meth_user, function(x) -length(x)))) +
+  geom_bar(fill = .grey, col = "black") +
+  geom_text(stat = "count", aes(label = ..count..), vjust = -.3) +
+  labs(x = "Type of User", y = "n") +
+  ggtitle("Count of MA and non-MA users") +
+  theme_light()
+
+plot.count
+```
 
 ```{r ma.prep, include = FALSE}
 screened <- screened %>% 
@@ -256,32 +268,45 @@ screened <- screened %>%
          
 ```
 
+```{r ma.rearrange, include = FALSE}
+# Rearranging levels
+screened$meth_use_at_peak <- factor(screened$meth_use_at_peak, levels = c("Daily", "Weekly", "1 to 2 times per month", "Less than or about 1 time per month"))
+screened$meth_recent_use <- factor(screened$meth_recent_use, levels = c("Days", "Weeks", "Months", "Years"))
+screened$meth_use_extreme <- factor(screened$meth_use_extreme, levels = c("Oral", "Snorting", "Smoking", "Injection"))
+```
 
 ```{r ma.summ, echo = FALSE}
-ma.df <- screened %>% filter(meth_ingest == "Yes")
+ma.df <- screened %>% filter(meth_ingest == "Yes") # df with only ma users
 
+ma.df <- ma.df %>% 
+  mutate(polydrug_use = ifelse(ma.df$drug_use_cannabis != "Never" | 
+                                 ma.df$drug_use_club_drugs != "Never" |
+                                 ma.df$drug_use_cocaine != "Never" |
+                                 ma.df$drug_use_hallucinogens != "Never" |
+                                 ma.df$drug_use_heroin != "Never" |
+                                 ma.df$drug_use_sedatives != "Never" , "Yes", "No"))
+
+# Labelling for table
 label(ma.df$meth_use_at_peak) <- "At the time when you were using MA the most, how often did you use it?"
 label(ma.df$meth_last_12_months) <- "In the last 12 months, did you use MA in any form?"
 label(ma.df$meth_use_age) <- "How old were you when you first began using MA?"
 label(ma.df$meth_recent_use) <- "When was the most recent time you used MA?"
 label(ma.df$meth_use_extreme) <- "Most extreme form of use"
+label(ma.df$polydrug_use) <- "Ever used an illicit drug other than MA?"
 
-kable(table1(~meth_use_age + meth_use_at_peak + meth_last_12_months + meth_recent_use + meth_use_extreme , data = ma.df)) %>% 
+kable(table1(~meth_use_age + meth_use_at_peak + meth_last_12_months + meth_recent_use + meth_use_extreme + polydrug_use , data = ma.df)) %>% 
   kable_styling("striped") %>% 
-  scroll_box(height = "500px")
+  scroll_box(height = "800px")
 ```
 
-```{r distr.ma, echo = F}
-plot.count <- screened %>%
-  ggplot(aes(x = reorder(meth_user, meth_user, function(x) -length(x)))) +
-  geom_bar(fill = .grey, col = "black") +
-  geom_text(stat = "count", aes(label = ..count..), vjust = -.3) +
-  labs(x = "Type of User", y = "n") +
-  ggtitle("Count of MA and non-MA users") +
-  theme_light()
-
-plot.count
+```{r ma.plots, echo = F}
+ma.df %>% 
+  ggplot(aes(x = meth_use_age)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "How Old were you when you first began using MA?", y = "")
 ```
+
 ***
 
 ## Distribution of key variables by MA Use
