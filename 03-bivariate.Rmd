@@ -15,7 +15,7 @@ load("data/objects/screened.Rda")
 
 ```
 
-```{r data.prep, include = F}
+```{r data.preparation, include = F}
 # Preparing colours for graphs
 .grey <- "#A6A6A6"
 .ma <- "#DC2D27"
@@ -40,8 +40,8 @@ screened$education <- factor(screened$education, levels = c("Did not finish high
 This section will explore bivariate relationships between each key predictor variable (STAXI-2, K6 Distress, SDS, Attitudes) and will examine in more detail their relationship with the outcome variable (DDDI).  There will be particular attention paid on the relationship between the predictors and the outcome variable and we will seek to graphically identify whether there may be an y interactions present between the predictor variables and MA use on the DDDI.  
 
 ## STAXI-2
-### State Anger
-```{r staxi.state, echo = F, message=F, warning=F}
+### State Anger (STAXI-S)
+```{r bivar.plot.function, include=FALSE}
 plot.bivar <- function(df, xcol, ycol, colour) {
   ggplot(data = df, aes(x = {{xcol}}, y = {{ycol}}, col = {{colour}})) +
     geom_smooth(method = "lm", alpha = 0.1, fullrange = T) +
@@ -49,7 +49,19 @@ plot.bivar <- function(df, xcol, ycol, colour) {
     theme_light() +
     scale_color_manual(values = c(.ma, .nma))
 }
+```
 
+#### DDDI by STAXI-S (ignoring MA) {-}
+```{r staxi.state.bi, echo = F, message=F, warning=F}
+plot.bivar(screened, S_Ang_Total, DDDI_Total) +
+  labs(x = "State Anger Total", y = "DDDI Total") +
+  ggtitle("DDDI by State Anger")
+```
+
+
+#### DDDI by STAXI-S (Stratified by MA) {-}
+
+```{r staxi.state.bivar, echo = F, message=F, warning=F}
 point.sstaxi <- plot.bivar(screened, S_Ang_Total, DDDI_Total, meth_ingest) +
   labs(x = "State Total", y = "DDDI Total", col = "MA Use") +
   ggtitle("DDDI by State Anger")
@@ -66,20 +78,28 @@ point.sstaxi.P <- plot.bivar(screened, S_Ang_P_Total, DDDI_Total, meth_ingest) +
   labs(x = "Physical", y = "", col = "MA Use") +
   theme(legend.position = "none")
 
-lay <- rbind(c(1, 1, 1),
-             c(1, 1, 1),
-             c(1, 1, 1),
-             c(2, 3, 4),
+lay <- rbind(c(2, 3, 4),
              c(2, 3, 4))
 
-grid.arrange(point.sstaxi, point.sstaxi.F, point.sstaxi.V, point.sstaxi.P, layout_matrix = lay)
+point.sstaxi
+
+grid.arrange(point.sstaxi.F, point.sstaxi.V, point.sstaxi.P, layout_matrix = lay, top = "STAXI-S Subscales")
 ```
 
-### Trait Anger
-```{r staxi.trait, echo = F, message = F, warning = F}
+### Trait Anger (STAXI-T)
+#### DDDI by STAXI-T (ignoring MA) {-}
+```{r staxi.trait.bi, echo = F, message = F, warning = F}
+plot.bivar(screened, T_Ang_Total, DDDI_Total) +
+  labs(x = "Trait Anger Total", y = "DDDI Total") +
+  ggtitle("DDDI by Trait Anger (ignoring MA use)")
+
+```
+
+#### DDDI by STAXI-T (stratified by MA Use) {-}
+```{r staxi.trait.bivar, echo = F, message = F, warning = F}
 point.tstaxi <- plot.bivar(screened, T_Ang_Total, DDDI_Total, meth_ingest) +
   labs(x = "Trait ", y = "DDDI Total", col = "MA Use") +
-  ggtitle("DDDI by Trait Anger")
+  ggtitle("DDDI by Trait Anger (stratified by MA use)")
 
 point.tstaxi.R <- plot.bivar(screened, T_Ang_R_Total, DDDI_Total, meth_ingest) +
   labs(x = "Reaction",y = "", col = "MA Use") +
@@ -89,16 +109,39 @@ point.tstaxi.T <- plot.bivar(screened, T_Ang_T_Total, DDDI_Total, meth_ingest) +
   labs(x = "Temperament", y = "", col = "MA Use") +
   theme(legend.position = "none")
 
-lay <- rbind(c(1, 1, 1),
-             c(1, 1, 1),
-             c(2, NA, 3),
-             c(2, NA, 3))
+lay <- rbind(c(2, 2, 3, 3),
+             c(2, 2, 3, 3))
 
-grid.arrange(point.tstaxi, point.tstaxi.R, point.tstaxi.T, layout_matrix = lay)
+point.tstaxi
+grid.arrange(point.tstaxi.R, point.tstaxi.T, layout_matrix = lay, top = "STAXI-T Subscales")
+
+point.tstaxi.R
 ```
 
+#### DDDI Subscales by STAXI-T (stratified by MA Use) {-}
+```{r staxi.trait.dddi.subscales, echo = F, message = F, warning = F}
+point.tstaxi.AD <- plot.bivar(screened, T_Ang_Total, DDDI_AD_Total, meth_ingest) +
+  labs(x = "Trait Anger Total", y = "") +
+  ggtitle("Aggressive Driving") +
+  theme(legend.position = "none")
+
+point.tstaxi.NE <- plot.bivar(screened, T_Ang_Total, DDDI_NE_Total, meth_ingest) +
+  labs(x = "Trait Anger Total", y = "") +
+  ggtitle("Negative Emotional Driving") +
+  theme(legend.position = "none")
+
+point.tstaxi.RD <- plot.bivar(screened, T_Ang_Total, DDDI_RD_Total, meth_ingest) +
+  labs(x = "Trait Anger Total", y = "") +
+  ggtitle("Risky Driving") +
+  theme(legend.position = "none")
+
+grid.arrange(point.tstaxi.AD, point.tstaxi.NE, point.tstaxi.RD, ncol = 3)
+
+```
+
+
 ## K6 Distress Scale
-```{r k6, echo=F, message = F, warning = F}
+```{r k6.bivar, echo=F, message = F, warning = F}
 plot.bivar(screened, k6_total, DDDI_Total, meth_ingest) +
   labs(x = "K6 Distress Score", y = "DDDI Total", col = "MA Use") +
   ggtitle("DDDI by K6 Distress Score")

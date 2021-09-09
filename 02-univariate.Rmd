@@ -54,9 +54,8 @@ label(x$ethnicity) <- "Ethnicity"
 label(x$area_live) <- "Area of Residence"
 
 
-kable(table1(~age + sex + meth_ingest + meth_user + license_status + education + ethnicity + area_live, data = x)) %>% 
-  kable_styling("striped") %>% 
-  scroll_box(height = "500px")
+table1(~age + sex + meth_ingest + meth_user + license_status + education + ethnicity + area_live, data = x) # %>% 
+  # scroll_box(height = "500px")
 
 ```
 
@@ -294,9 +293,9 @@ label(ma.df$meth_recent_use) <- "When was the most recent time you used MA?"
 label(ma.df$meth_use_extreme) <- "Most extreme form of use"
 label(ma.df$polydrug_use) <- "Ever used an illicit drug other than MA?"
 
-kable(table1(~meth_use_age + meth_use_at_peak + meth_last_12_months + meth_recent_use + meth_use_extreme + polydrug_use , data = ma.df)) %>% 
-  kable_styling("striped") %>% 
-  scroll_box(height = "800px")
+table1(~meth_use_age + meth_use_at_peak + meth_last_12_months + meth_recent_use + meth_use_extreme + polydrug_use , data = ma.df)# %>% 
+  # kable_styling("striped") %>% 
+  # scroll_box(height = "800px")
 ```
 
 ```{r ma.plots, echo = F}

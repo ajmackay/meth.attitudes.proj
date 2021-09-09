@@ -4,6 +4,7 @@ library(tidyverse)
 library(lubridate)
 library(bookdown)
 library(knitr)
+library(kableExtra)
 ```
 
 ```{r processing.data, include = F}
