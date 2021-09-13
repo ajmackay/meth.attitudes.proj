@@ -44,3 +44,9 @@ sds-scale
 drugs-duid
 drug-use-1
 alcohol-1
+dula-danderous-driving-index-dddi
+alcohol-audit-c
+age-1
+audit-c
+proportion-considered-hazardous-drinkers
+age-tbc

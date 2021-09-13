@@ -1,15 +1,63 @@
-# Footnotes and citations 
+# Appendix
 
-## Footnotes
+```{r appendix.packages, include=F}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
 
-Footnotes are put inside the square brackets after a caret `^[]`. Like this one ^[This is a footnote.]. 
+## Attitudes Questionnaire
+### Attitudes towards drink driving
+Ten statements regarding the tolerance of participants toward drink driving behaviour,
+formed the body of this measure. Participants were asked to rate whether they agreed or
+disagreed with the statements on a 7‐point Likert scale (from “strongly agree” = 1 to “strongly
+disagree” = 7). The mean score on all ten statements will be calculated after reverse scoring
+of negatively worded items to give an attitude toward drink driving rating, which range from
+1 “unfavourable attitude to drink driving” to 7 “favourable attitude to drink driving.”
 
-## Citations
+1. Most of my friends think its ok to drink and drive
+2. It's ok to drive after drinking as long as you're not too drunk
+3. People who take drink and drive should go to jail
+4. My community needs stricter laws against drink driving
+5. The police aren't tough enough on drink drivers
+6. It's ok to drink‐drive as long as you don't get caught
+7. Everybody who drinks alcohol, drives under their influence once in a while
+8. My friends would think I was dumb if I drove after drinking alcohol
+9. The dangers of drink‐driving are overrated
+10. People who drink and drive should lose their driver’s license
 
-Reference items in your bibliography file(s) using `@key`.
 
-For example, we are using the **bookdown** package [@R-bookdown] (check out the last code chunk in index.Rmd to see how this citation key was added) in this sample book, which was built on top of R Markdown and **knitr** [@xie2015] (this citation was added manually in an external file book.bib). 
-Note that the `.bib` files need to be listed in the index.Rmd with the YAML `bibliography` key.
+### Attitudes towards drug driving
+
+1. Most of my friends think its ok to take drugs and drive
+2. It's ok to drive after taking drugs as long as you're not too high
+3. People who take drugs and drive should go to jail
+4. My community needs stricter laws against drug driving
+5. The police aren't tough enough on drug drivers
+6. It's ok to drug drive as long as you don't get caught
+7. Everybody who takes drugs, drives under their influence once in a while
+8. My friends would think I was dumb if I drove after taking drugs
+9. The dangers of drug driving are overrated
+10. People who take drugs and drive should lose their driver’s license
+
+## Dula Danderous Driving Index (DDDI)
+The following Table demonstrates all the DDDI items (and their respective subscales) that were used for the present study:
+
+```{r DDDI, echo=F}
+di.qs <- read_csv("data/dddi.csv", col_names = FALSE)
+
+di.clean <- str_remove_all(di.qs$X1, "\\d{1,2}\\.?\\s?\\d?\\.?\\s?")
+
+subscale <- str_extract(di.clean, "[A-Z]{2}")
+item <- str_remove(di.clean, "\\([A-Z]{2}\\)") %>% str_trim
+
+dddi <- tibble(
+  item = item,
+  subscale = subscale
+) %>% arrange(subscale)
 
 
-The RStudio Visual Markdown Editor can also make it easier to insert citations: <https://rstudio.github.io/visual-markdown-editing/#/citations>
+
+kable(dddi) %>% kable_classic() %>% scroll_box()
+
+```

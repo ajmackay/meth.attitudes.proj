@@ -37,7 +37,7 @@ screened$education <- factor(screened$education, levels = c("Did not finish high
                                                           "Postgraduate Degree"))
 ```
 
-This section will explore bivariate relationships between each key predictor variable (STAXI-2, K6 Distress, SDS, Attitudes) and will examine in more detail their relationship with the outcome variable (DDDI).  There will be particular attention paid on the relationship between the predictors and the outcome variable and we will seek to graphically identify whether there may be an y interactions present between the predictor variables and MA use on the DDDI.  
+This section will explore bivariate relationships between each key predictor variable (STAXI-2, K6 Distress, SDS, Attitudes) and will examine in more detail their relationship with the outcome variable (DDDI).  There will be particular attention paid on the relationship between the predictors and the outcome variable and we will seek to graphically identify whether there may be an y interactions present between the predictor variables and MA use on the DDDI.
 
 ## STAXI-2
 ### State Anger (STAXI-S)
@@ -114,8 +114,6 @@ lay <- rbind(c(2, 2, 3, 3),
 
 point.tstaxi
 grid.arrange(point.tstaxi.R, point.tstaxi.T, layout_matrix = lay, top = "STAXI-T Subscales")
-
-point.tstaxi.R
 ```
 
 #### DDDI Subscales by STAXI-T (stratified by MA Use) {-}
@@ -139,13 +137,72 @@ grid.arrange(point.tstaxi.AD, point.tstaxi.NE, point.tstaxi.RD, ncol = 3)
 
 ```
 
+***
 
 ## K6 Distress Scale
 ```{r k6.bivar, echo=F, message = F, warning = F}
+plot.bivar(screened, k6_total, DDDI_Total) +
+  labs(x = "K6 Distress Score", y = "DDDI Total")
+
 plot.bivar(screened, k6_total, DDDI_Total, meth_ingest) +
   labs(x = "K6 Distress Score", y = "DDDI Total", col = "MA Use") +
-  ggtitle("DDDI by K6 Distress Score")
+  ggtitle("DDDI by K6 Distress Score (Stratified by MA use")
 ```
+
+***
+
+## SDS Scale
+Bivariate relationship between SDS and DDDI and STAXI and stuff
+```{r SDS.bivar}
+screened %>% 
+  ggplot(aes(x = meth_SDS, y = DDDI_Total)) +
+  geom_point()
+
+screened %>% 
+  ggplot(aes(x = meth_SDS, y = T_Ang_Total)) +
+  geom_point()
+
+```
+
+***
+
+## Drug Use
+### Alcohol (AUDIT-C)
+```{r alcohol.bivar, echo = F, warning=F}
+plot.bivar(screened, AUDIT_Total, DDDI_Total, meth_ingest) +
+  labs(x = "AUDIT-C Total", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI Total with AUDIT-C")
+
+box.audit.di <- screened %>% 
+  ggplot(aes(x = AUDIT_Risky, y = DDDI_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, height = 0, width = 0.3, alpha = 0.5) +
+  geom_jitter(aes(col = meth_ingest), height = 0, width = 0.05, alpha = 0.8) +
+  theme_light() +
+  labs(x = "AUDIT-C Risky Drinking", y = "DDDI Total", fill = "MA Use", col = "MA Use") +
+  ggtitle("DDDI Total by AUDIT-C Risky Drinking")
+
+box.audit.di
+```
+
+```{r drug.use.bivar, echo = F}
+
+
+```
+
+***
+
+## Age TBC
+```{r age bivar, echo=F}
+# screened %>% 
+#   ggplot(aes(x = age, y = DDDI_Total, col = sex)) +
+#   geom_point(size = 2) +
+#   theme_light() +
+#   labs(x = "Age", y = "DDDI Total Score") +
+#   facet_grid(~meth_ingest) +
+#   ggtitle("Does this work")
+```
+
+***
 
 ## Attitudes
 ### DUI
@@ -263,6 +320,7 @@ key.vars.total <- screened %>%
          k6_total, 
          S_Ang_Total,
          T_Ang_Total,
+         AUDIT_Total,
          DUI_attitude_Total,
          DUID_attitude_Total)
 
