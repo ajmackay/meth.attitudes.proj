@@ -210,19 +210,130 @@ grid.arrange(bar.res, bar.res.ma, nrow = 2, top = "Area of Residence Distributio
 ***
 ## Drug Use
 ### Alcohol
-*NTS: Would be good to show proportions within MA group instead of count.
 ```{r, echo=FALSE}
 # Rearranging levels
-levels(screened$alcohol_frequency) <- c("Four or more times a week", "Two to three times per week", "Two to four times a month","Monthly or less", "Never")
+levels(screened$AUDIT_frequency) <- c("Four or more times a week", "Two to three times per week", "Two to four times a month","Monthly or less", "Never")
 
-screened %>% 
-  ggplot(aes(x = alcohol_frequency, fill = meth_ingest)) +
-  geom_bar() +
-  coord_flip() +
-  facet_wrap(~meth_ingest) +
-  scale_fill_manual(values = c(.ma, .nma)) +
+label(screened$alcohol_ever) <- "Have you ever consumed Alcohol?"
+label(screened$AUDIT_frequency) <- "How often (if at all) do you consume Alcohol"
+
+table1(~alcohol_ever, data = screened, caption = "Alcohol Consumption (Overall)")
+table1(~alcohol_ever, data = screened %>% filter(meth_ingest == "Yes"), caption = "Alcohol Consumption (MA Users)")
+table1(~alcohol_ever, data = screened %>% filter(meth_ingest == "No"), caption = "Alcohol Consumption (non-drug users)")
+
+# Frequency (covered in AUDIT)
+# table1(~AUDIT_frequency, data = screened, caption = "Frequency of Alcohol Use (Total)")
+# table1(~AUDIT_frequency, data = screened %>% filter(meth_ingest == "Yes"), caption = "Frequency of Alcohol Use (MA Users)")
+# table1(~AUDIT_frequency, data = screened %>% filter(meth_ingest == "No"), caption = "Frequency of Alcohol Use (Non-Drug Users)")
+# 
+# alc.freq.ma <- screened %>% 
+#   filter(meth_ingest == "Yes") %>% 
+#   ggplot(aes(x = AUDIT_frequency, fill = meth_ingest)) +
+#   geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+#   coord_flip() +
+#   scale_fill_manual(values = .ma) +
+#   theme_light() +
+#   theme(legend.position = "none") +
+#   labs(x = "", y = "Proportion (%)") +
+#   ggtitle("Alcohol Frequency in MA Users")
+# 
+# alc.freq.nma <- screened %>% 
+#   filter(meth_ingest == "No") %>% 
+#   ggplot(aes(x = AUDIT_frequency, fill = meth_ingest)) +
+#   geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+#   coord_flip() +
+#   scale_fill_manual(values = .nma) +
+#   theme_light() +
+#   theme(legend.position = "none") +
+#   labs(x = "", y = "Proportion (%)") +
+#   ggtitle("Alcohol Frequency in non-drug users")
+# 
+# grid.arrange(alc.freq.ma, alc.freq.nma)
+```
+
+#### AUDIT-C {-}
+The <a href = https://cde.drugabuse.gov/instrument/f229c68a-67ce-9a58-e040-bb89ad432be4> Alcohol Use Disorders Identification Test-Concise (AUDIT-C) </a> is a brief alcohol screening instrument that reliably identifies persons who are hazardous drinkers or have active alcohol use disorders (including alcohol abuse or dependence).
+
+The AUDIT-C has 3 questions and is scored on a scale of 0-12. Each AUDIT-C question has 5 answer choices valued from 0 points to 4 points. In men, a score of 4 or more is considered positive, optimal for identifying hazardous drinking or active alcohol use disorders. In women, a score of 3 or more is considered positive. Generally the higher the score, the more likely it is that a person's drinking is affecting his or her safety.
+
+```{r AUDIT.Prep, include = F}
+label(screened$AUDIT_Total) <- "AUDIT-C Total"
+label(screened$AUDIT_Risky) <- "AUDIT-C Risky"
+
+# Proportional bar chart function
+bar.prop <- function(df, xcol, ycol, fill) {
+  ggplot(data = df, aes(x = {{xcol}}, fill = {{fill}})) +
+    geom_bar(aes(y = (..count..) / sum(..count..) * 100)) +
+    theme_light()
+}
+
+bar.audit <- bar.prop(screened %>% filter(!is.na(AUDIT_Risky)), xcol = AUDIT_Risky) +
+  scale_fill_manual(values = .grey) +
+  labs(x = "AUDIT-C Hazardous Drinking", y = "Proportion (%)") +
+  ggtitle("AUDIT-C High Score (>3 Men, >2 Women)")
+  
+  
+bar.audit.ma <- screened %>% 
+  filter(meth_ingest == "Yes", !is.na(AUDIT_Risky)) %>% 
+  ggplot(aes(x = AUDIT_Risky, fill = meth_ingest)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+  scale_fill_manual(values = .ma) +
   theme_light() +
-  labs(x = "Alcohol Frequency", y = "Count", fill = "MA Use")
+  theme(legend.position = "none") +
+  labs(x = "AUDIT-C Hazardous Drinking", y = "Proportion (%)") +
+  ggtitle("AUDIT-C High Score (MA Users)")
+
+bar.audit.nma <- bar.prop(screened %>% filter(meth_ingest == "No", !is.na(AUDIT_Risky)), xcol = AUDIT_Risky, fill = meth_ingest) +
+  scale_fill_manual(values = .nma) +
+  theme(legend.position = "none") +
+  labs(x = "AUDIT-C Hazardous Drinking", y = "Proportion (%)") +
+  ggtitle("AUDIT-C High Score (Non-Drug Users)")
+```
+
+##### Distribution of AUDIT-C Scores {-}
+```{r AUDIT.distr, echo = F, warning=F}
+hist.audit.all <- screened %>% 
+  ggplot(aes(x = AUDIT_Total)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "AUDIT-C Total Score", y = "Count")
+
+dens.audit <- screened %>% 
+  ggplot(aes(x = AUDIT_Total, fill = meth_ingest)) +
+  geom_density(alpha = 0.5) +
+  theme_light() +
+  labs(x = "AUDIT-C Total", y = "Density", fill = "MA Use") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+hist.audit <- screened %>% 
+  ggplot(aes(x = AUDIT_Total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  facet_grid(meth_ingest ~ .) +
+  labs(x = "AUDIT-C Total Score", y = "Count", fill = "Meth Use")
+
+box.audit <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = AUDIT_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.5) +
+  geom_jitter(height = 0, width = 0.03, alpha = 0.5) +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "MA Use", y = "AUDIT-C Total") +
+  theme(legend.position = "none")
+
+grid.arrange(hist.audit.all, hist.audit, dens.audit, box.audit, ncol = 2)
+```
+
+##### Proportion considered "Hazardous Drinkers" {-}
+```{r AUDIT, echo = F}
+table1(~AUDIT_Total + AUDIT_Risky, data = screened %>% filter(!is.na(AUDIT_Total)), caption = "AUDIT-C Overall Scores")
+
+table1(~AUDIT_Total + AUDIT_Risky, data = screened %>% filter(meth_ingest == "Yes", !is.na(AUDIT_Total)), caption = "AUDIT-C Scores (MA Users)")
+
+table1(~AUDIT_Total + AUDIT_Risky, data = screened %>% filter(meth_ingest == "No", !is.na(AUDIT_Total)), caption = "AUDIT-C Scores (Non-Drug Users)")
+
+bar.audit
+grid.arrange(bar.audit.ma, bar.audit.nma, ncol = 2)
 ```
 
 ### Drugs (MA Users only)
@@ -306,6 +417,89 @@ ma.df %>%
   labs(x = "How Old were you when you first began using MA?", y = "")
 ```
 
+#### Other Drug Use {-}
+TBC
+
+***
+
+## Driving Under the Influence
+### Alcohol (DUI)
+Instances of driving Under the Influence of Alcohol (DUI) was assessed with the following dichotomous item:
+
+*Have you EVER had your driver's license or learner's permit suspended or revoked for moving violations related to alcohol use? (Yes/No)*
+
+If respondents selected "yes" to the above question, they were asked the following question*:
+
+*Have you EVER done things that could have easily hurt you or someone else like speeding or driving or using heavy machinery while under the influence of alcohol? (Yes/No)*
+
+The first question was only presented to respondents that responded affirmative to having consumed alcohol.
+
+
+* Note: For ease of interpretation, only the suspension question has been analysed.
+
+```{r dui.incidence.tables, echo=F}
+label(screened$DUI_suspended) <- "License Suspended or Revoked from DUI"
+
+table1(~DUI_suspended, data = screened %>% filter(!is.na(DUI_suspended)), caption = "Suspended Overall")
+table1(~DUI_suspended, data = screened %>% filter(meth_ingest == "Yes", !is.na(DUI_suspended)), caption = "Suspended MA Users")
+table1(~DUI_suspended, data = screened %>% filter(meth_ingest == "No", !is.na(DUI_suspended)), caption = "Suspended Non-drug users")
+```
+
+```{r dui.incidence.plots, echo = F}
+bar.dui.ma <- screened %>%
+  filter(!is.na(DUI_suspended),
+         meth_ingest == "Yes") %>% 
+  ggplot(aes(x = DUI_suspended, fill = meth_ingest)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100), position = "dodge") +
+  theme_light() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = .ma) +
+  labs(x = "Licence Suspended", y = "Proportion (%)") +
+  ggtitle("License Suspended from DUI (MA Users)") +
+  coord_flip()
+
+bar.dui.nma <- screened %>%
+  filter(!is.na(DUI_suspended),
+         meth_ingest == "No") %>% 
+  ggplot(aes(x = DUI_suspended, fill = meth_ingest)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100), position = "dodge") +
+  theme_light() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = .nma) +
+  labs(x = "Licence Suspended", y = "Proportion (%)") +
+  ggtitle("License Suspended from DUI (Non-drug Users)") +
+  coord_flip()
+
+grid.arrange(bar.dui.ma, bar.dui.nma, nrow = 2)
+
+```
+
+### Drugs (DUID)
+Instances of driving under the influence of drugs (DUID) was assessed with the following question:
+
+*Have you ever driven a car, motorcycle, truck, boat or other vehicle when you were under the influence of drugs?*
+
+An affirmative response would then present the participant with questions relating to the recency of the DUID (Last 12 months and/or Before last 12 months) and the medicines or drugs that the DUID occurred with.  
+
+Respondents were also presented with the same questions (regarding license suspension) as the DUI questions (TBC)
+
+```{r DUID.prep, include = F}
+screened <- screened %>% mutate(
+  DUID_recent_meth = ifelse(str_detect(screened$DUID_recent_drugs, "Amphetamine"), TRUE, FALSE),
+  DUID_lifetime_meth = ifelse(str_detect(screened$DUID_lifetime_drugs, "Amphetamine"), TRUE, FALSE),
+  DUID_any_meth = ifelse(DUID_recent_meth == TRUE | DUID_lifetime_meth == TRUE, TRUE, FALSE),
+  DUID_suspended_meth = ifelse(str_detect(screened$DUID_suspended_drugs, "Amphetamine"), TRUE, FALSE)
+)
+```
+
+
+```{r DUID.tables, echo = F}
+label(screened$DUID_incidence) <- "DUID Incidence"
+label(screened$DUID_any_meth) <- "Ever Driven under the Influence of MA?"
+
+table1(~DUID_incidence + DUID_any_meth + DUID_recent + DUID_recent_meth + DUID_lifetime + DUID_lifetime_meth + DUID_suspended + DUID_suspended_meth + DUID_ongoing, data = screened %>% filter(meth_ingest == "Yes"))
+```
+
 ***
 
 ## Distribution of key variables by MA Use
@@ -343,7 +537,7 @@ Scores range from 11 to 55.
 <br>
 <br>
 
-$^*$The present study used 27 items with one item from the "Risky Driving" subscale - *I will weave in and out of slower traffic* - omitted from the questionnaire. 
+$^*$The present study used 27 items with one item from the "Risky Driving" subscale - *I will weave in and out of slower traffic* - omitted from the questionnaire.  To view all the items used in the questionnaire, see the Appendix
 
 ***
 
@@ -541,7 +735,7 @@ box.ad.1 <- screened %>%
   theme_light() +
   theme(legend.position = "none") +
   labs(x = "MA Use", y = "Score") +
-  ggtitle("Q68")
+  ggtitle("I flash my headlights when I am annoyed by another driver")
 
 box.ad.2 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_AD_2, fill = meth_ingest)) +
@@ -550,7 +744,7 @@ box.ad.2 <- screened %>%
   theme_light() +
   theme(legend.position = "none") +
   labs(x = "MA Use", y = "Score") +
-  ggtitle("Q69")
+  ggtitle("I make rude gestures toward drivers who annoy me")
 
 box.ad.3 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_AD_3, fill = meth_ingest)) +
@@ -559,16 +753,16 @@ box.ad.3 <- screened %>%
   theme_light() +
   theme(legend.position = "none") +
   labs(x = "MA Use", y = "Score") +
-  ggtitle("Q70")
+  ggtitle("I verbally insult drivers who annoy me")
 
 box.ad.4 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_AD_4, fill = meth_ingest)) +
   geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
   geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
   theme_light() +
-  theme(legend.position = "none") +
   labs(x = "MA Use", y = "Score") +
-  ggtitle("Q73")
+  theme(legend.position = "none") +
+  ggtitle("I would tailgate a driver who annoys me")
 
 box.ad.5 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_AD_5, fill = meth_ingest)) +
@@ -577,7 +771,7 @@ box.ad.5 <- screened %>%
   theme_light() +
   theme(legend.position = "none") +
   labs(x = "MA Use", y = "Score") +
-  ggtitle("Q75")
+  ggtitle("I deliberately use my car/truck to block drivers who tailgate me.")
 
 box.ad.6 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_AD_6, fill = meth_ingest)) +
@@ -586,7 +780,7 @@ box.ad.6 <- screened %>%
   theme_light() +
   theme(legend.position = "none") +
   labs(x = "MA Use", y = "Score") +
-  ggtitle("Q77")
+  ggtitle("I feel it is my right to strike back in some way...")
 
 box.ad.7 <- screened %>% 
   ggplot(aes(x = meth_ingest, y = DDDI_AD_7, fill = meth_ingest)) +
@@ -595,7 +789,7 @@ box.ad.7 <- screened %>%
   theme_light() +
   theme(legend.position = "none") +
   labs(x = "MA Use", y = "Score") +
-  ggtitle("Q82")
+  ggtitle("When someone cuts me off, I feel I should punish him/her")
 
 grid.arrange(box.ad.1, box.ad.2, box.ad.3, box.ad.4) 
 grid.arrange(box.ad.5, box.ad.6, box.ad.7, ncol = 2)

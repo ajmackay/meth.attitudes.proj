@@ -61,9 +61,30 @@ data.full <- data.raw[c(-1, -2),] %>% # Remove first two rows (contains descript
          # Alcohol Use
          alcohol_ever = as_factor(Q28),
          alcohol_past_12_least_12 = as_factor(Q29),
-         alcohol_frequency = as_factor(Q33...40),
-         alcohol_consumption = as_factor(Q31),
-         alcohol_six_or_more = as_factor(Q32),
+         ## AUDIT-C
+         AUDIT_frequency = as.numeric(as.character(fct_recode(as_factor(Q33...40),
+                                                    "0" = "Never",
+                                                    "1" = "Monthly or less",
+                                                    "2" = "Two to four times a month",
+                                                    "3" = "Two to three times per week",
+                                                    "4" = "Four or more times a week"))
+         ),
+         AUDIT_typical = as.numeric(as.character(fct_recode(as_factor(Q31),
+                                                          "0" = "1 or 2",
+                                                          "1" = "3 or 4",
+                                                          "2" = "5 or 6",
+                                                          "3" = "7 to 9",
+                                                          "4" = "10 or more"))
+         ),
+         AUDIT_six = as.numeric(as.character(fct_recode(as_factor(Q32),
+                                                      "0" = "Never",
+                                                      "1" = "Less than Monthly",
+                                                      "2" = "Monthly",
+                                                      "3" = "Two to three times per week",
+                                                      "4" = "Four or more times a week"))
+         ),
+         AUDIT_Total = AUDIT_frequency + AUDIT_typical + AUDIT_six,
+         AUDIT_Risky = ifelse((sex == "Male" & AUDIT_Total > 3 | sex == "Female" & AUDIT_Total > 2), "TRUE", "FALSE"),
          # Drug Use
          drug_use_cocaine = fct_recode(as_factor(Q63_1),
                                        "Never" = "Neither/not used",
