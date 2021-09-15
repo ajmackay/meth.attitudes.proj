@@ -152,16 +152,29 @@ plot.bivar(screened, k6_total, DDDI_Total, meth_ingest) +
 ***
 
 ## SDS Scale
-Bivariate relationship between SDS and DDDI and STAXI and stuff
-```{r SDS.bivar}
-screened %>% 
-  ggplot(aes(x = meth_SDS, y = DDDI_Total)) +
-  geom_point()
+Bivariate relationship between SDS and DDDI (MA Users only)
+```{r SDS.bivar, echo=F, message=F, warning=F}
+plot.bivar(screened, meth_SDS, DDDI_Total)
 
-screened %>% 
-  ggplot(aes(x = meth_SDS, y = T_Ang_Total)) +
-  geom_point()
+point.di.sds <- plot.bivar(screened, meth_SDS, DDDI_Total) +
+  labs(x = "SDS Score", y = "DDDI Score") +
+  theme(legend.position = "none") +
+  ggtitle("DDDI total")
 
+point.di.ad.sds <- plot.bivar(screened, meth_SDS, DDDI_AD_Total) +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Aggressive Driving")
+
+point.di.ne.sds <- plot.bivar(screened, meth_SDS, DDDI_NE_Total) +
+  labs(x = "SDS Score", y = "DDDI Negative Emotional Driving") +
+  theme(legend.position = "none") +
+  ggtitle("Negative Emotional Driving")
+
+point.di.rd.sds <- plot.bivar(screened, meth_SDS, DDDI_RD_Total) +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Risky Driving")
+
+grid.arrange(point.di.sds, point.di.ad.sds, point.di.ne.sds, point.di.rd.sds, ncol = 2)
 ```
 
 ***
@@ -191,8 +204,12 @@ box.audit.di
 
 ***
 
-## Age TBC
+## Age
 ```{r age bivar, echo=F}
+plot.bivar(screened, age, DDDI_Total, meth_ingest) +
+  labs(x = "Age", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by Age (stratified by MA use)")
+
 # screened %>% 
 #   ggplot(aes(x = age, y = DDDI_Total, col = sex)) +
 #   geom_point(size = 2) +
@@ -316,10 +333,11 @@ key.vars <- screened %>%
          DUID_attitude_Total)
 
 key.vars.total <- screened %>%
-  select(DDDI_Total, 
+  select(DDDI_Total, DDDI_AD_Total, DDDI_RD_Total, DDDI_NE_Total,
+         age,
          k6_total, 
          S_Ang_Total,
-         T_Ang_Total,
+         T_Ang_Total, T_Ang_R_Total, T_Ang_T_Total,
          AUDIT_Total,
          DUI_attitude_Total,
          DUID_attitude_Total)
