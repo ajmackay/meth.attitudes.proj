@@ -50,3 +50,17 @@ age-1
 audit-c
 proportion-considered-hazardous-drinkers
 age-tbc
+univariate-distributions
+dddi
+age-2
+sex-1
+substance-dependence-severity-sds
+bivariate-distributions
+age-3
+sex-2
+alcohol-use
+sds
+staxi-t
+correlation-matrix-1
+hierarchical-linear-regression-outline
+statistical-analysis
