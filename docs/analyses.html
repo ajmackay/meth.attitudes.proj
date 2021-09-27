@@ -24,7 +24,7 @@
 <meta name="author" content="Aaron Mackay" />
 
 
-<meta name="date" content="2021-09-23" />
+<meta name="date" content="2021-09-27" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -58,6 +58,70 @@
 <link href="libs/lightable-0.0.1/lightable.css" rel="stylesheet" />
 
 
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
 
 
 <link rel="stylesheet" href="style.css" type="text/css" />
@@ -156,7 +220,29 @@
 <li class="chapter" data-level="4.2.6" data-path="analyses.html"><a href="analyses.html#correlation-matrix-1"><i class="fa fa-check"></i><b>4.2.6</b> Correlation Matrix</a></li>
 </ul></li>
 <li class="chapter" data-level="4.3" data-path="analyses.html"><a href="analyses.html#hierarchical-linear-regression-outline"><i class="fa fa-check"></i><b>4.3</b> Hierarchical Linear Regression Outline</a></li>
-<li class="chapter" data-level="4.4" data-path="analyses.html"><a href="analyses.html#statistical-analysis"><i class="fa fa-check"></i><b>4.4</b> Statistical Analysis</a></li>
+<li class="chapter" data-level="4.4" data-path="analyses.html"><a href="analyses.html#statistical-analysis"><i class="fa fa-check"></i><b>4.4</b> Statistical Analysis</a>
+<ul>
+<li class="chapter" data-level="4.4.1" data-path="analyses.html"><a href="analyses.html#building-each-linear-model"><i class="fa fa-check"></i><b>4.4.1</b> Building each linear model</a></li>
+<li class="chapter" data-level="4.4.2" data-path="analyses.html"><a href="analyses.html#sums-of-squares"><i class="fa fa-check"></i><b>4.4.2</b> Sums of Squares</a></li>
+<li class="chapter" data-level="4.4.3" data-path="analyses.html"><a href="analyses.html#model-summaries"><i class="fa fa-check"></i><b>4.4.3</b> Model Summaries</a></li>
+<li class="chapter" data-level="4.4.4" data-path="analyses.html"><a href="analyses.html#removing-non-significant-variables"><i class="fa fa-check"></i><b>4.4.4</b> Removing non-significant variables</a></li>
+</ul></li>
+<li class="chapter" data-level="4.5" data-path="analyses.html"><a href="analyses.html#assumptions"><i class="fa fa-check"></i><b>4.5</b> Assumptions</a>
+<ul>
+<li class="chapter" data-level="4.5.1" data-path="analyses.html"><a href="analyses.html#plot-of-residuals"><i class="fa fa-check"></i><b>4.5.1</b> Plot of Residuals</a></li>
+<li class="chapter" data-level="4.5.2" data-path="analyses.html"><a href="analyses.html#colinearity-model-3"><i class="fa fa-check"></i><b>4.5.2</b> Colinearity (model 3)</a></li>
+<li class="chapter" data-level="4.5.3" data-path="analyses.html"><a href="analyses.html#homogeneity"><i class="fa fa-check"></i><b>4.5.3</b> Homogeneity</a></li>
+<li class="chapter" data-level="4.5.4" data-path="analyses.html"><a href="analyses.html#linearity"><i class="fa fa-check"></i><b>4.5.4</b> Linearity</a></li>
+<li class="chapter" data-level="4.5.5" data-path="analyses.html"><a href="analyses.html#normality-of-residuals"><i class="fa fa-check"></i><b>4.5.5</b> Normality of Residuals</a></li>
+<li class="chapter" data-level="4.5.6" data-path="analyses.html"><a href="analyses.html#outliers"><i class="fa fa-check"></i><b>4.5.6</b> Outliers</a></li>
+</ul></li>
+<li class="chapter" data-level="4.6" data-path="analyses.html"><a href="analyses.html#analysis-without-outlier"><i class="fa fa-check"></i><b>4.6</b> Analysis without Outlier</a>
+<ul>
+<li class="chapter" data-level="4.6.1" data-path="analyses.html"><a href="analyses.html#building-models"><i class="fa fa-check"></i><b>4.6.1</b> Building Models</a></li>
+<li class="chapter" data-level="4.6.2" data-path="analyses.html"><a href="analyses.html#sums-of-squares-1"><i class="fa fa-check"></i><b>4.6.2</b> Sums of Squares</a></li>
+<li class="chapter" data-level="4.6.3" data-path="analyses.html"><a href="analyses.html#model-summaries-1"><i class="fa fa-check"></i><b>4.6.3</b> Model Summaries</a></li>
+<li class="chapter" data-level="4.6.4" data-path="analyses.html"><a href="analyses.html#assumptions-1"><i class="fa fa-check"></i><b>4.6.4</b> Assumptions</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="5" data-path="discussion.html"><a href="discussion.html"><i class="fa fa-check"></i><b>5</b> Discussion</a></li>
 <li class="chapter" data-level="6" data-path="appendix.html"><a href="appendix.html"><i class="fa fa-check"></i><b>6</b> Appendix</a>
@@ -288,15 +374,11 @@
 </tr>
 <tr>
 <td class='rowlabel'>Mean (SD)</td>
-<td>5.32 (2.73)</td>
+<td>5.22 (2.80)</td>
 </tr>
 <tr>
-<td class='rowlabel'>Median [Min, Max]</td>
-<td>5.00 [0, 12.0]</td>
-</tr>
-<tr>
-<td class='rowlabel lastrow'>Missing</td>
-<td class='lastrow'>1 (1.7%)</td>
+<td class='rowlabel lastrow'>Median [Min, Max]</td>
+<td class='lastrow'>5.00 [0, 12.0]</td>
 </tr>
 </tbody>
 </table>
@@ -361,6 +443,7 @@
 </div>
 <div id="bivariate-distributions" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> Bivariate Distributions</h2>
+<p>One entry (id = 146) was identified as having a DDDI score</p>
 <div id="age-3" class="section level3" number="4.2.1">
 <h3><span class="header-section-number">4.2.1</span> Age</h3>
 <pre><code>## # A tibble: 1 x 1
@@ -383,7 +466,7 @@
 <pre><code>## # A tibble: 1 x 1
 ##   PearsonR
 ##      &lt;dbl&gt;
-## 1    0.489</code></pre>
+## 1    0.448</code></pre>
 <p><img src="_main_files/figure-html/ma.bivar.alc-1.png" width="672" /></p>
 </div>
 <div id="sds" class="section level3" number="4.2.4">
@@ -536,19 +619,765 @@ T_Ang_Total
 </div>
 <div id="statistical-analysis" class="section level2" number="4.4">
 <h2><span class="header-section-number">4.4</span> Statistical Analysis</h2>
-<p>Does MA Use predict dangerous driving?</p>
-<ul>
-<li><span class="math inline">\(y_i=\beta x_i + \alpha\)</span></li>
-<li><span class="math inline">\(DDDI_i = \beta \delta^{MA}_i + \alpha\)</span></li>
-<li><span class="math inline">\(\alpha\)</span>: Mean DDDI of MA users</li>
-<li><span class="math inline">\(\beta\)</span>: Difference in DDDI between non-drug users and MA users</li>
-</ul>
-<pre><code>## Analysis of Variance Table
+<div id="building-each-linear-model" class="section level3" number="4.4.1">
+<h3><span class="header-section-number">4.4.1</span> Building each linear model</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="analyses.html#cb6-1" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total<span class="sc">~</span><span class="dv">1</span>, <span class="at">data =</span> ma) <span class="co"># Total SS</span></span>
+<span id="cb6-2"><a href="analyses.html#cb6-2" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total<span class="sc">~</span>age <span class="sc">+</span> sex, <span class="at">data =</span> ma) <span class="co"># Model 1 (demographics)</span></span>
+<span id="cb6-3"><a href="analyses.html#cb6-3" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total<span class="sc">~</span>age <span class="sc">+</span> sex <span class="sc">+</span> AUDIT_Total <span class="sc">+</span> meth_SDS, <span class="at">data =</span> ma) <span class="co"># Alcohol and MA use characteristics</span></span>
+<span id="cb6-4"><a href="analyses.html#cb6-4" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total<span class="sc">~</span>age <span class="sc">+</span> sex <span class="sc">+</span> AUDIT_Total <span class="sc">+</span> meth_SDS <span class="sc">+</span> T_Ang_Total, <span class="at">data =</span> ma) <span class="co"># STAXI</span></span></code></pre></div>
+</div>
+<div id="sums-of-squares" class="section level3" number="4.4.2">
+<h3><span class="header-section-number">4.4.2</span> Sums of Squares</h3>
+<div id="total-ss" class="section level4 unnumbered">
+<h4>Total SS</h4>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Df
+</th>
+<th style="text-align:right;">
+Sum Sq
+</th>
+<th style="text-align:right;">
+Mean Sq
+</th>
+<th style="text-align:right;">
+F value
+</th>
+<th style="text-align:right;">
+Pr(&gt;F)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Residuals
+</td>
+<td style="text-align:right;">
+57
+</td>
+<td style="text-align:right;">
+12531.4
+</td>
+<td style="text-align:right;">
+219.8491
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="model-ss" class="section level4 unnumbered">
+<h4>Model SS</h4>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+Res.Df
+</th>
+<th style="text-align:right;">
+RSS
+</th>
+<th style="text-align:right;">
+Df
+</th>
+<th style="text-align:right;">
+Sum of Sq
+</th>
+<th style="text-align:right;">
+F
+</th>
+<th style="text-align:right;">
+Pr(&gt;F)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+55
+</td>
+<td style="text-align:right;">
+11126.850
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+53
+</td>
+<td style="text-align:right;">
+8038.787
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3088.062
+</td>
+<td style="text-align:right;">
+12.91829
+</td>
+<td style="text-align:right;">
+0.0000279
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+52
+</td>
+<td style="text-align:right;">
+6215.190
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1823.597
+</td>
+<td style="text-align:right;">
+15.25731
+</td>
+<td style="text-align:right;">
+0.0002721
+</td>
+</tr>
+</tbody>
+</table>
+<p>The model with Alcohol and SDS accounts for an additional 3088.06 Sum of Squares over and above the model including age and gender and this change was statistically significant (p &lt; .01). The <span class="math inline">\(R^2\)</span> increased by 24.6% in model 2.</p>
+<p>The model with Trait Anger accounts for an additional 1823.60 Sum of Squares controlling for demographics and alcohol/substance use and this too was statistically significant (p &lt; .01). The <span class="math inline">\(R^2\)</span> increased by 14.6%.</p>
+</div>
+</div>
+<div id="model-summaries" class="section level3" number="4.4.3">
+<h3><span class="header-section-number">4.4.3</span> Model Summaries</h3>
+<div id="model-1" class="section level4 unnumbered">
+<h4>Model 1</h4>
+<pre><code>## 
+## Call:
+## lm(formula = DDDI_Total ~ age + sex, data = ma)
 ## 
-## Response: DDDI_Total
-##            Df Sum Sq Mean Sq F value Pr(&gt;F)
-## Residuals 244  45900  188.11</code></pre>
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -23.217  -9.725  -2.183   9.174  64.106 
+## 
+## Coefficients:
+##             Estimate Std. Error t value          Pr(&gt;|t|)    
+## (Intercept)  90.7628     9.3625   9.694 0.000000000000168 ***
+## age          -0.7818     0.3156  -2.477            0.0163 *  
+## sexMale      -1.4139     4.0210  -0.352            0.7265    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 14.22 on 55 degrees of freedom
+## Multiple R-squared:  0.1121, Adjusted R-squared:  0.07979 
+## F-statistic: 3.471 on 2 and 55 DF,  p-value: 0.03804</code></pre>
+</div>
+<div id="model-2" class="section level4 unnumbered">
+<h4>Model 2</h4>
+<pre><code>## 
+## Call:
+## lm(formula = DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS, 
+##     data = ma)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -31.869  -6.899   0.273   5.901  50.099 
+## 
+## Coefficients:
+##             Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)  52.3907    12.2043   4.293 0.0000754 ***
+## age          -0.3063     0.2957  -1.036   0.30501    
+## sexMale      -0.9925     3.5173  -0.282   0.77890    
+## AUDIT_Total   1.7256     0.6142   2.810   0.00693 ** 
+## meth_SDS      2.0145     0.7301   2.759   0.00793 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 12.32 on 53 degrees of freedom
+## Multiple R-squared:  0.3585, Adjusted R-squared:  0.3101 
+## F-statistic: 7.405 on 4 and 53 DF,  p-value: 0.00008162</code></pre>
+</div>
+<div id="model-3" class="section level4 unnumbered">
+<h4>Model 3</h4>
+<pre><code>## 
+## Call:
+## lm(formula = DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS + 
+##     T_Ang_Total, data = ma)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -25.100  -4.895   0.294   7.017  32.923 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) 32.91881   11.92570   2.760 0.007957 ** 
+## age         -0.09415    0.26803  -0.351 0.726819    
+## sexMale     -3.89796    3.20969  -1.214 0.230068    
+## AUDIT_Total  1.21691    0.56057   2.171 0.034531 *  
+## meth_SDS     1.79791    0.65044   2.764 0.007876 ** 
+## T_Ang_Total  1.00379    0.25698   3.906 0.000272 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 10.93 on 52 degrees of freedom
+## Multiple R-squared:  0.504,  Adjusted R-squared:  0.4563 
+## F-statistic: 10.57 on 5 and 52 DF,  p-value: 0.000000488</code></pre>
+</div>
+</div>
+<div id="removing-non-significant-variables" class="section level3" number="4.4.4">
+<h3><span class="header-section-number">4.4.4</span> Removing non-significant variables</h3>
+<div id="model-2-1" class="section level4" number="4.4.4.1">
+<h4><span class="header-section-number">4.4.4.1</span> Model 2</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="analyses.html#cb10-1" aria-hidden="true" tabindex="-1"></a>m2.rm <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total <span class="sc">~</span> age <span class="sc">+</span> AUDIT_Total <span class="sc">+</span> meth_SDS, <span class="at">data =</span> ma)</span>
+<span id="cb10-2"><a href="analyses.html#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(m2.rm)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = DDDI_Total ~ age + AUDIT_Total + meth_SDS, data = ma)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -32.250  -6.900   0.186   5.988  49.729 
+## 
+## Coefficients:
+##             Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)  52.0408    12.0372   4.323 0.0000666 ***
+## age          -0.3201     0.2891  -1.107   0.27312    
+## AUDIT_Total   1.7096     0.6063   2.820   0.00671 ** 
+## meth_SDS      2.0406     0.7180   2.842   0.00631 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 12.21 on 54 degrees of freedom
+## Multiple R-squared:  0.3575, Adjusted R-squared:  0.3219 
+## F-statistic: 10.02 on 3 and 54 DF,  p-value: 0.00002376</code></pre>
+</div>
+<div id="model-3-1" class="section level4" number="4.4.4.2">
+<h4><span class="header-section-number">4.4.4.2</span> Model 3</h4>
+<pre><code>## 
+## Call:
+## lm(formula = DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, 
+##     data = ma)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -26.679  -5.732   1.618   7.426  31.661 
+## 
+## Coefficients:
+##             Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)  26.6669     5.8876   4.529 0.0000331 ***
+## AUDIT_Total   1.2134     0.5586   2.172  0.034243 *  
+## meth_SDS      2.0449     0.6044   3.383  0.001339 ** 
+## T_Ang_Total   0.9564     0.2463   3.883  0.000283 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 10.92 on 54 degrees of freedom
+## Multiple R-squared:  0.4864, Adjusted R-squared:  0.4578 
+## F-statistic: 17.05 on 3 and 54 DF,  p-value: 0.000000065</code></pre>
+</div>
+</div>
+</div>
+<div id="assumptions" class="section level2" number="4.5">
+<h2><span class="header-section-number">4.5</span> Assumptions</h2>
+<div id="plot-of-residuals" class="section level3" number="4.5.1">
+<h3><span class="header-section-number">4.5.1</span> Plot of Residuals</h3>
+<p><img src="_main_files/figure-html/ass.resid.fitted-1.png" width="672" /></p>
+</div>
+<div id="colinearity-model-3" class="section level3" number="4.5.2">
+<h3><span class="header-section-number">4.5.2</span> Colinearity (model 3)</h3>
+<div id="all-variables" class="section level4 unnumbered">
+<h4>All Variables</h4>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="analyses.html#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">Variable =</span> <span class="fu">c</span>(<span class="st">&quot;Age&quot;</span>, <span class="st">&quot;Sex&quot;</span>, <span class="st">&quot;AUDIT-C&quot;</span>, <span class="st">&quot;SDS&quot;</span>, <span class="st">&quot;STAXI-T&quot;</span>),</span>
+<span id="cb13-2"><a href="analyses.html#cb13-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">VIF =</span> <span class="fu">vif</span>(m3))</span></code></pre></div>
+<pre><code>## # A tibble: 5 x 2
+##   Variable   VIF
+##   &lt;chr&gt;    &lt;dbl&gt;
+## 1 Age       1.28
+## 2 Sex       1.13
+## 3 AUDIT-C   1.17
+## 4 SDS       1.28
+## 5 STAXI-T   1.21</code></pre>
+</div>
+<div id="removed-variables" class="section level4 unnumbered">
+<h4>Removed Variables</h4>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="analyses.html#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">Variable =</span> <span class="fu">c</span>(<span class="st">&quot;AUDIT-C&quot;</span>, <span class="st">&quot;SDS&quot;</span>, <span class="st">&quot;STAXI-T&quot;</span>),</span>
+<span id="cb15-2"><a href="analyses.html#cb15-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">VIF =</span> <span class="fu">vif</span>(m3.rm))</span></code></pre></div>
+<pre><code>## # A tibble: 3 x 2
+##   Variable   VIF
+##   &lt;chr&gt;    &lt;dbl&gt;
+## 1 AUDIT-C   1.17
+## 2 SDS       1.10
+## 3 STAXI-T   1.11</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="analyses.html#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apa.reg.table</span>(m3)</span></code></pre></div>
+<pre><code>## 
+## 
+## Regression results using DDDI_Total as the criterion
+##  
+## 
+##    Predictor       b       b_95%_CI sr2  sr2_95%_CI             Fit
+##  (Intercept) 32.92**  [8.99, 56.85]                                
+##          age   -0.09  [-0.63, 0.44] .00 [-.01, .01]                
+##      sexMale   -3.90 [-10.34, 2.54] .01 [-.03, .06]                
+##  AUDIT_Total   1.22*   [0.09, 2.34] .04 [-.03, .12]                
+##     meth_SDS  1.80**   [0.49, 3.10] .07 [-.02, .17]                
+##  T_Ang_Total  1.00**   [0.49, 1.52] .15  [.01, .28]                
+##                                                         R2 = .504**
+##                                                     95% CI[.26,.60]
+##                                                                    
+## 
+## Note. A significant b-weight indicates the semi-partial correlation is also significant.
+## b represents unstandardized regression weights. 
+## sr2 represents the semi-partial correlation squared.
+## Square brackets are used to enclose the lower and upper limits of a confidence interval.
+## * indicates p &lt; .05. ** indicates p &lt; .01.
+## </code></pre>
+</div>
+</div>
+<div id="homogeneity" class="section level3" number="4.5.3">
+<h3><span class="header-section-number">4.5.3</span> Homogeneity</h3>
+<div id="all-variables-1" class="section level4 unnumbered">
+<h4>All Variables</h4>
+<p><img src="_main_files/figure-html/ass.homo-1.png" width="672" /></p>
+</div>
+<div id="removed-variables-1" class="section level4 unnumbered">
+<h4>Removed Variables</h4>
+<p><img src="_main_files/figure-html/ass.homo.rm-1.png" width="672" /></p>
+</div>
+</div>
+<div id="linearity" class="section level3" number="4.5.4">
+<h3><span class="header-section-number">4.5.4</span> Linearity</h3>
+<div id="all-variables-2" class="section level4 unnumbered">
+<h4>All Variables</h4>
+<p><img src="_main_files/figure-html/ass.lin-1.png" width="672" /></p>
+</div>
+<div id="removed-variables-2" class="section level4 unnumbered">
+<h4>Removed Variables</h4>
+<p><img src="_main_files/figure-html/ass.lin.rm-1.png" width="672" /></p>
+</div>
+</div>
+<div id="normality-of-residuals" class="section level3" number="4.5.5">
+<h3><span class="header-section-number">4.5.5</span> Normality of Residuals</h3>
+<div id="all-variables-3" class="section level4 unnumbered">
+<h4>All Variables</h4>
+<p><img src="_main_files/figure-html/ass.norm-1.png" width="672" />
+#### Removed Variables {-}
+<img src="_main_files/figure-html/ass.norm.rm-1.png" width="672" /></p>
+</div>
+</div>
+<div id="outliers" class="section level3" number="4.5.6">
+<h3><span class="header-section-number">4.5.6</span> Outliers</h3>
+<p><img src="_main_files/figure-html/ass.out-1.png" width="672" /><img src="_main_files/figure-html/ass.out-2.png" width="672" /></p>
+<p>There are 3 points that have been identified as being potentially influential to the regression model. One of these is a clear outlier with a Cooks D of 0.69. The index numbers and their respective id numbers are as follows:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="analyses.html#cb19-1" aria-hidden="true" tabindex="-1"></a>outliers <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">Index =</span> <span class="fu">c</span>(<span class="dv">13</span>, <span class="dv">46</span>, <span class="dv">50</span>),</span>
+<span id="cb19-2"><a href="analyses.html#cb19-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">ID =</span> <span class="fu">c</span>(<span class="dv">146</span>, <span class="dv">233</span>, <span class="dv">237</span>), </span>
+<span id="cb19-3"><a href="analyses.html#cb19-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">CooksD =</span> <span class="fu">c</span>(<span class="fl">0.69</span>, <span class="fl">0.11</span>, <span class="fl">0.16</span>)</span>
+<span id="cb19-4"><a href="analyses.html#cb19-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-5"><a href="analyses.html#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="analyses.html#cb19-6" aria-hidden="true" tabindex="-1"></a>outliers <span class="sc">%&gt;%</span> <span class="fu">kable</span>() <span class="sc">%&gt;%</span> <span class="fu">kable_styling</span>()</span></code></pre></div>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+Index
+</th>
+<th style="text-align:right;">
+ID
+</th>
+<th style="text-align:right;">
+CooksD
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+146
+</td>
+<td style="text-align:right;">
+0.69
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+233
+</td>
+<td style="text-align:right;">
+0.11
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+237
+</td>
+<td style="text-align:right;">
+0.16
+</td>
+</tr>
+</tbody>
+</table>
+<p>The most influential outlier comes from participant ID 146 who reported a DDDI score of 130 (the next highest score being 86). This participant also demonstrated the highest Trait Anger score (a score of 40/40 - within 4 SDs of the mean) and demonstrated the highest score (with one other participant) in State anger with a score of 56/56 (within 3 SDs of the mean) . They demonstrated high Psychological distress with a k6 score of 27/30, had a reasonably high (though not abnormal) AUDIT-C score of 9/12 and scored an SDS of 11/15.</p>
+<div id="visualising-responses" class="section level4 unnumbered">
+<h4>Visualising Responses</h4>
+<div id="id-146" class="section level5 unnumbered">
+<h5>ID = 146</h5>
+<img src="_main_files/figure-html/unnamed-chunk-5-1.png" width="672" /><img src="_main_files/figure-html/unnamed-chunk-5-2.png" width="672" />
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-5">Table 4.1: </span>Quickest 5 responses (in seconds)
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+id
+</th>
+<th style="text-align:center;">
+Duration
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+163
+</td>
+<td style="text-align:center;">
+888
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+223
+</td>
+<td style="text-align:center;">
+909
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+234
+</td>
+<td style="text-align:center;">
+913
+</td>
+</tr>
+<tr>
+<td style="text-align:center;background-color: yellow !important;">
+146
+</td>
+<td style="text-align:center;background-color: yellow !important;">
+943
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+175
+</td>
+<td style="text-align:center;">
+1047
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div id="analysis-without-outlier" class="section level2" number="4.6">
+<h2><span class="header-section-number">4.6</span> Analysis without Outlier</h2>
+<p>Omitting response 146</p>
+<div id="building-models" class="section level3" number="4.6.1">
+<h3><span class="header-section-number">4.6.1</span> Building Models</h3>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="analyses.html#cb20-1" aria-hidden="true" tabindex="-1"></a>ma.nout <span class="ot">&lt;-</span> ma[<span class="sc">-</span><span class="dv">13</span>, ] <span class="co"># Removing observation 146 (index 13)</span></span>
+<span id="cb20-2"><a href="analyses.html#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="analyses.html#cb20-3" aria-hidden="true" tabindex="-1"></a>m0<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total<span class="sc">~</span><span class="dv">1</span>, <span class="at">data =</span> ma.nout) <span class="co"># Total SS</span></span>
+<span id="cb20-4"><a href="analyses.html#cb20-4" aria-hidden="true" tabindex="-1"></a>m1<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total<span class="sc">~</span>age <span class="sc">+</span> sex, <span class="at">data =</span> ma.nout) <span class="co"># Model 1 (demographics)</span></span>
+<span id="cb20-5"><a href="analyses.html#cb20-5" aria-hidden="true" tabindex="-1"></a>m2<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total<span class="sc">~</span>age <span class="sc">+</span> sex <span class="sc">+</span> AUDIT_Total <span class="sc">+</span> meth_SDS, <span class="at">data =</span> ma.nout) <span class="co"># Alcohol and MA use characteristics</span></span>
+<span id="cb20-6"><a href="analyses.html#cb20-6" aria-hidden="true" tabindex="-1"></a>m3<span class="fl">.2</span> <span class="ot">&lt;-</span> <span class="fu">lm</span>(DDDI_Total<span class="sc">~</span>age <span class="sc">+</span> sex <span class="sc">+</span> AUDIT_Total <span class="sc">+</span> meth_SDS <span class="sc">+</span> T_Ang_Total, <span class="at">data =</span> ma.nout) <span class="co"># STAXI</span></span></code></pre></div>
+</div>
+<div id="sums-of-squares-1" class="section level3" number="4.6.2">
+<h3><span class="header-section-number">4.6.2</span> Sums of Squares</h3>
+<div id="total-ss-1" class="section level4 unnumbered">
+<h4>Total SS</h4>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Df
+</th>
+<th style="text-align:right;">
+Sum Sq
+</th>
+<th style="text-align:right;">
+Mean Sq
+</th>
+<th style="text-align:right;">
+F value
+</th>
+<th style="text-align:right;">
+Pr(&gt;F)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Residuals
+</td>
+<td style="text-align:right;">
+56
+</td>
+<td style="text-align:right;">
+8446.211
+</td>
+<td style="text-align:right;">
+150.8252
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="model-ss-1" class="section level4 unnumbered">
+<h4>Model SS</h4>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:center;">
+Res.Df
+</th>
+<th style="text-align:center;">
+RSS
+</th>
+<th style="text-align:center;">
+Df
+</th>
+<th style="text-align:center;">
+Sum of Sq
+</th>
+<th style="text-align:center;">
+F
+</th>
+<th style="text-align:center;">
+Pr(&gt;F)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+54
+</td>
+<td style="text-align:center;">
+6905.453
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+<td style="text-align:center;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+52
+</td>
+<td style="text-align:center;">
+5276.860
+</td>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+1628.5930
+</td>
+<td style="text-align:center;">
+8.717052
+</td>
+<td style="text-align:center;">
+0.0005541
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+51
+</td>
+<td style="text-align:center;">
+4764.125
+</td>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+512.7356
+</td>
+<td style="text-align:center;">
+5.488839
+</td>
+<td style="text-align:center;">
+0.0230774
+</td>
+</tr>
+</tbody>
+</table>
+<p>The model with Alcohol and SDS accounts for an additional 3088.06 Sum of Squares over and above the model including age and gender and this change was statistically significant (p &lt; .01). The <span class="math inline">\(R^2\)</span> increased by 24.6% in model 2.</p>
+<p>The model with Trait Anger accounts for an additional 1823.60 Sum of Squares controlling for demographics and alcohol/substance use and this too was statistically significant (p &lt; .01). The <span class="math inline">\(R^2\)</span> increased by 14.6%.</p>
+</div>
+</div>
+<div id="model-summaries-1" class="section level3" number="4.6.3">
+<h3><span class="header-section-number">4.6.3</span> Model Summaries</h3>
+<div id="model-1-1" class="section level4 unnumbered">
+<h4>Model 1</h4>
+<pre><code>## 
+## Call:
+## lm(formula = DDDI_Total ~ age + sex, data = ma.nout)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -23.160  -8.576  -1.528  10.840  16.748 
+## 
+## Coefficients:
+##             Estimate Std. Error t value             Pr(&gt;|t|)    
+## (Intercept)  90.2153     7.4443  12.119 &lt; 0.0000000000000002 ***
+## age          -0.7622     0.2510  -3.037              0.00367 ** 
+## sexMale      -3.1999     3.2119  -0.996              0.32357    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 11.31 on 54 degrees of freedom
+## Multiple R-squared:  0.1824, Adjusted R-squared:  0.1521 
+## F-statistic: 6.024 on 2 and 54 DF,  p-value: 0.004348</code></pre>
+</div>
+<div id="model-2-2" class="section level4 unnumbered">
+<h4>Model 2</h4>
+<pre><code>## 
+## Call:
+## lm(formula = DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS, 
+##     data = ma.nout)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -27.264  -5.672   1.504   6.816  17.708 
+## 
+## Coefficients:
+##             Estimate Std. Error t value    Pr(&gt;|t|)    
+## (Intercept)  62.0425    10.1526   6.111 0.000000129 ***
+## age          -0.4150     0.2427  -1.710     0.09327 .  
+## sexMale      -2.6697     2.8949  -0.922     0.36068    
+## AUDIT_Total   1.3691     0.5070   2.700     0.00933 ** 
+## meth_SDS      1.4207     0.6079   2.337     0.02332 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 10.07 on 52 degrees of freedom
+## Multiple R-squared:  0.3752, Adjusted R-squared:  0.3272 
+## F-statistic: 7.808 on 4 and 52 DF,  p-value: 0.00005251</code></pre>
+</div>
+<div id="model-3-2" class="section level4 unnumbered">
+<h4>Model 3</h4>
+<pre><code>## 
+## Call:
+## lm(formula = DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS + 
+##     T_Ang_Total, data = ma.nout)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -24.229  -4.515   1.055   7.578  16.568 
+## 
+## Coefficients:
+##             Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)  48.7188    11.2794   4.319 0.0000724 ***
+## age          -0.2692     0.2411  -1.117    0.2694    
+## sexMale      -4.0327     2.8378  -1.421    0.1614    
+## AUDIT_Total   1.1431     0.4959   2.305    0.0253 *  
+## meth_SDS      1.4131     0.5833   2.423    0.0190 *  
+## T_Ang_Total   0.5871     0.2506   2.343    0.0231 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 9.665 on 51 degrees of freedom
+## Multiple R-squared:  0.4359, Adjusted R-squared:  0.3806 
+## F-statistic: 7.883 on 5 and 51 DF,  p-value: 0.00001467</code></pre>
+</div>
+</div>
+<div id="assumptions-1" class="section level3" number="4.6.4">
+<h3><span class="header-section-number">4.6.4</span> Assumptions</h3>
+<div id="plot-of-residuals-1" class="section level4 unnumbered">
+<h4>Plot of Residuals</h4>
+<p><img src="_main_files/figure-html/resid.plot.2-1.png" width="672" /></p>
+</div>
+<div id="colinearity-model-3-1" class="section level4 unnumbered">
+<h4>Colinearity (model 3)</h4>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="analyses.html#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">Variable =</span> <span class="fu">c</span>(<span class="st">&quot;Age&quot;</span>, <span class="st">&quot;Sex&quot;</span>, <span class="st">&quot;AUDIT-C&quot;</span>, <span class="st">&quot;SDS&quot;</span>, <span class="st">&quot;STAXI-T&quot;</span>),</span>
+<span id="cb24-2"><a href="analyses.html#cb24-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">VIF =</span> <span class="fu">vif</span>(m3<span class="fl">.2</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 5 x 2
+##   Variable   VIF
+##   &lt;chr&gt;    &lt;dbl&gt;
+## 1 Age       1.32
+## 2 Sex       1.12
+## 3 AUDIT-C   1.14
+## 4 SDS       1.26
+## 5 STAXI-T   1.18</code></pre>
+</div>
+<div id="homogeneity-1" class="section level4 unnumbered">
+<h4>Homogeneity</h4>
+<p><img src="_main_files/figure-html/ass.homo.2-1.png" width="672" /></p>
+</div>
+<div id="linearity-1" class="section level4 unnumbered">
+<h4>Linearity</h4>
+<p><img src="_main_files/figure-html/ass.lin.2-1.png" width="672" /></p>
+</div>
+<div id="normality-of-residuals-1" class="section level4 unnumbered">
+<h4>Normality of Residuals</h4>
+<p><img src="_main_files/figure-html/ass.norm.2-1.png" width="672" /></p>
+</div>
+<div id="outliers-1" class="section level4 unnumbered">
+<h4>Outliers</h4>
+<p><img src="_main_files/figure-html/ass.out.2-1.png" width="672" /><img src="_main_files/figure-html/ass.out.2-2.png" width="672" /></p>
 
+</div>
+</div>
 </div>
 </div>
             </section>
