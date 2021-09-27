@@ -1,0 +1,186 @@
+# Additional Analyses
+```{r additional.lib, include=F}
+library(bookdown)
+library(tidyverse)
+library(apaTables)
+library(gridExtra)
+library(table1)
+library(kableExtra)
+library(car) #VIF
+```
+
+```{r data.load.add, include = F}
+load("data/objects/screened.full.Rda")
+load("data/objects/screened.Rda")
+```
+
+```{r data.preparation.add, include = F}
+# Preparing colours for graphs
+.grey <- "#A6A6A6"
+.ma <- "#DC2D27"
+.nma <- "#39B9FF"
+.lav <- "#D9BBDC"
+.lgreen <- "#BEDCB3"
+
+# Changing NA from meth_ingest and meth_user to "No"
+screened$meth_ingest[is.na(screened$meth_ingest)] <- "No"
+screened$meth_user[is.na(screened$meth_user)] <- "Non-User"
+screened$meth_user <- as.factor(screened$meth_user)
+
+# Rearranging levels for education 
+screened$education <- factor(screened$education, levels = c("Did not finish high school",
+                                                          "High School Diploma",
+                                                          "Vocational/Technical degree or certificate",
+                                                          "Did not finish University",
+                                                          "Bachelor Degree",
+                                                          "Postgraduate Degree"))
+
+# Filtering for MA only
+ma <- screened %>% filter(meth_ingest == "Yes")
+
+# Converting non-drinkers to 0 on AUDIT-C
+ma <- ma %>% 
+  mutate(AUDIT_Total = ifelse(is.na(AUDIT_Total), 0, AUDIT_Total))
+```
+
+## Analysis without Outlier
+**Omitting response 146**
+
+```{r outlier.prep, include=F}
+# Create column to easily remove rows
+ma <- ma %>% 
+  mutate(include = TRUE)
+```
+
+### Building Models
+```{r buil.models.2}
+ma.nout <- ma %>% mutate(include = ifelse(id == 146, FALSE, TRUE)) # Not including id 146
+
+m0.2 <- lm(DDDI_Total~1, data = ma.nout[ma.nout$include == TRUE, ]) # Total SS
+m1.2 <- lm(DDDI_Total~age + sex, data = ma.nout[ma.nout$include == TRUE, ]) # Model 1 (demographics)
+m2.2 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS, data = ma.nout[ma.nout$include == TRUE, ]) # Alcohol and MA use characteristics
+m3.2 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma.nout[ma.nout$include == TRUE, ]) # STAXI
+```
+
+### Sums of Squares
+#### Total SS {-}
+```{r ss.m0.2, echo=F}
+anova(m0.2) %>% kable() %>% kable_styling()
+```
+
+#### Model SS {-}
+```{r ss.models.2, echo=F}
+anova(m1.2, m2.2, m3.2) %>% kable(align = "c") %>% kable_styling()
+```
+The model with Alcohol and SDS accounts for an additional 3088.06 Sum of Squares over and above the model including age and gender and this change was statistically significant (p < .01).  The $R^2$ increased by 24.6% in model 2.  
+
+The model with Trait Anger accounts for an additional 1823.60 Sum of Squares controlling for demographics and alcohol/substance use and this too was statistically significant (p < .01).  The $R^2$ increased by 14.6%.  
+
+### Model Summaries
+#### Model 1 {-}
+```{r model.sum.2, echo=F}
+options(scipen = 999)
+summary(m1.2)
+```
+
+#### Model 2 {-}
+```{r model.2.2, echo=F}
+summary(m2.2)
+```
+
+#### Model 3 {-}
+```{r model.3.2, echo=F}
+summary(m3.2)
+```
+
+### Assumptions
+#### Plot of Residuals {-}
+```{r resid.plot.2, echo=F}
+std.res.2 <- rstandard(m3.2)
+
+m3.2.std.res <- tibble(
+  Std.Res = std.res.2,
+  Fitted = m3.2$fitted.values
+)
+
+m3.2.std.res %>% 
+  ggplot(aes(x = Fitted, y = Std.Res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", alpha = 0.5) +
+  theme_light() +
+  labs(x = "Fitted", y = "Standardised Residuals") +
+  ggtitle("Plot of Residuals")
+
+```
+
+#### Colinearity (model 3) {-}
+```{r}
+tibble(Variable = c("Age", "Sex", "AUDIT-C", "SDS", "STAXI-T"),
+       VIF = vif(m3.2))
+```
+
+#### Homogeneity {-}
+```{r ass.homo.2, echo = F}
+plot(m3.2, 1)
+```
+
+#### Linearity {-}
+
+```{r ass.lin.2, echo=F}
+plot(m3.2, 5)
+```
+
+
+
+#### Normality of Residuals {-}
+```{r ass.norm.2, echo=F}
+plot(m3.2, 2)
+```
+
+#### Outliers {-}
+##### Residuals {-}
+```{r ass.out.2, echo=F}
+# Residuals by index
+ma.nout[ma.nout$include == TRUE, ] %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.nout[ma.nout$include == TRUE, ])), y = std.res.2)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 2), linetype = "dashed", alpha = 0.5) +
+  geom_hline(aes(yintercept = -2), linetype = "dashed", alpha = 0.5) +
+  geom_text(size = 3,
+            label = as.numeric(row.names(ma.nout[ma.nout$include == TRUE,])),
+            nudge_x = 0.25,
+            nudge_y = 0.25,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Std Residuals") +
+  ggtitle("Std. Residual by Index")
+```
+
+##### Cooks D {-}
+```{r cooks.d.2, echo=F}
+# Calculate Cook's D for each observation
+cooksD <- cooks.distance(m3.2)
+
+# Plot Cook's D
+n <- nrow(ma.nout[ma.nout$include == TRUE,])
+
+ma.nout[ma.nout$include == TRUE,] %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.nout[ma.nout$include == TRUE,])), y = cooksD)) +
+  geom_point() +
+  geom_hline(yintercept = 4/n, linetype = "dashed") +
+  geom_text(size = 2.5,
+            label = as.numeric(row.names(ma.nout[ma.nout$include == TRUE,])),
+            nudge_y = 0.01,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Cooks Distance") +
+  ggtitle("Cooks Distance")
+```
+
+##### Mahalanobis Distance {-}
+```{r mahalanobis.2, echo=F}
+
+
+```
+
+

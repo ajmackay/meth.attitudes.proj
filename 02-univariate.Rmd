@@ -1007,6 +1007,8 @@ Total score for State or Trait Anger is obtained by adding up the items from eac
 #### State Anger {-}
 Assesses the intensity of the individual's angry feelings at time of testing.
 
+Minimum Possible Score = 14.  Maximum Possible Score = 56.
+
 ##### Subscales: {-}
 **Feeling Angry (S-Ang/F):**
 Measures the intensity of the angry feelings the person may be experiencing.
@@ -1024,7 +1026,9 @@ Measures the intensity of the current feelings related to the physical expressio
 <br>
 
 #### Trait Anger {-}
-Measures the general tendency of a person to get angry.  
+Measures the general tendency of a person to get angry. 
+
+Minimum Possible Score = 10.  Maximum Possible Score = 40.
 
 ##### Subscales: {-}
 **Angry Temperament (T-Ang/T):**
@@ -1253,6 +1257,8 @@ It measures distress for the period 4 weeks prior to administration of the test.
 Each Item is rated on a 5-point$^*$ likert scale ranging from 1 (none of the time) to 5 (all of the time).
 
 Total score is obtained by simply adding up the item scores together.
+
+The minimum score one can obtain is 6 and the maximum is 30.
 
 
 $^*$The present study used a 4-point scale for the item *During the past 30 days, about how often did you feel depressed?* with the level "A little of the time" omitted from the survey.

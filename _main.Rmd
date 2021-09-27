@@ -1,0 +1,3889 @@
+--- 
+title: "Methamphetamine Use, Driving Behaviour, Aggression and Attitudes"
+author: "Aaron Mackay"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+documentclass: book
+bibliography: [book.bib, packages.bib]
+url: https://ajmackay.github.io/meth.attitudes.proj/
+# cover-image: path to the social sharing image like images/cover.jpg
+description: |
+  The following book is designed to document the process of data processing, exploration and analyses for the Methamphetamine, driving behaviour, aggression and attitudes study.  
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+---
+
+# About {-}
+This document is designed to show the process of data processing, exploration and analyses that I am using on the data collected for the research project on methamphetamine use, driving behaviour, aggression and attitudes.  
+
+The purpose of this document is to be transparent with how the data is screened and cleaned, explored and then analysed.  
+
+As data collection is still ongoing, this document will be updated periodically when new data is made available.  
+
+## Packages Used {-}
+The following packages were used in the processing, exploration and analyses of the data:
+
+- tidyverse
+- lubridate
+
+TBC
+
+<!--chapter:end:index.Rmd-->
+
+# Data Processing
+```{r processing.setup, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(bookdown)
+library(knitr)
+library(kableExtra)
+```
+
+```{r processing.data, include = F}
+data.raw <- read_csv("data/data.1808.csv")
+```
+
+## Cleaning Data
+The following code performs the following duties:
+
+- Renames variables into user-friendly names 
+- Converts character variables with set levels into factors
+- Consolidates overlapping levels of factors into one level
+- Calculates the scores for the following variables:
+
+  - Substance Dependence Severity (SDS) Scale
+  - K6 Psychiatric Inventory (TBC)
+  - Dula Dangerous Driving Index (DDDI)
+  - State Trait Anger Expression Index (STAXI-2)
+
+
+```{r processing.clean, message=FALSE, warning=FALSE, cache=T}
+data.full <- data.raw[c(-1, -2),] %>% # Remove first two rows (contains description of variables)
+  mutate(export_date = today(),
+         # Demographics
+         drivers_license = as_factor(Q126...13),
+         drugs_other_alcohol = as_factor(Q27),
+         age = as.numeric(Q19),
+         sex = as_factor(Q13),
+         ethnicity = fct_recode(as_factor(Q14),
+                                "Eastern European" = "Southern and Eastern European (e.g. Albania, Bosnia and Herzegovina, Bulgaria, Croatia, Greece)",
+                                "Oceanian"= "Oceanian (Australian, Aboriginal, Torres Strait Islander)",
+                                "Undisclosed" = "Prefer not to say",
+                                "North-West European" = "North-West European (e.g.  UK, Ireland, France, Germany, Spain, Belgium, Portugal, Austria, Andorra, Czechia)",
+                                "Central Asian" = "Southern and Central Asian (e.g. Afghanistan, Bangladesh, Bhutan, India, Kyrgyzstan, Kazakhstan, Maldives, Nepal, Pakistan, Sri Lanka)",
+                                "Asian" = "North-East Asian (e.g. China, Japan, North Korea, South Korea, Mongolia)",
+                                "American" = "People of the Americas (e.g. indigenous peoples of the Americas are the pre-Columbian peoples of North, Central and South America)",
+                                "Middle-East" = "North African and Middle Eastern (e.g. Egypt, and Turkey)",
+                                "South-East Asian" = "South-East Asian (e.g. Cambodia, Indonesia, Laos, Malaysia, the Philippines, Singapore, Thailand and Vietnam)",
+                                "African" = "Sub-Saharan African (e.g. Botswana,Cameroon, Central African Republic, Congo, Ethiopia, Ghana, Guinea, Kenya, Liberia, Namibia, Nigeria)"
+         ),
+         marital_status = as_factor(Q15),
+         education = fct_recode(as_factor(Q20),
+                                "Did not finish high school" = "Attended high school but did not finish",
+                                "High School Diploma" = "High School Diploma",
+                                "Vocational/Technical degree or certificate" = "Vocational/Technical degree or certificate",
+                                "Did not finish University" = "Attended University but did not finish",
+                                "Bachelor Degree" = "Bachelor Degree",
+                                "Postgraduate Degree" = "Master’s Degree",
+                                "Postgraduate Degree" = "Postgraduate Degree"
+         ),
+         employment_status = as_factor(Q17),
+         area_live = as_factor(Q21),
+         license_status = as_factor(Q22),
+         # Alcohol Use
+         alcohol_ever = as_factor(Q28),
+         alcohol_past_12_least_12 = as_factor(Q29),
+         ## AUDIT-C
+         AUDIT_frequency = as.numeric(as.character(fct_recode(as_factor(Q33...40),
+                                                    "0" = "Never",
+                                                    "1" = "Monthly or less",
+                                                    "2" = "Two to four times a month",
+                                                    "3" = "Two to three times per week",
+                                                    "4" = "Four or more times a week"))
+         ),
+         AUDIT_typical = as.numeric(as.character(fct_recode(as_factor(Q31),
+                                                          "0" = "1 or 2",
+                                                          "1" = "3 or 4",
+                                                          "2" = "5 or 6",
+                                                          "3" = "7 to 9",
+                                                          "4" = "10 or more"))
+         ),
+         AUDIT_six = as.numeric(as.character(fct_recode(as_factor(Q32),
+                                                      "0" = "Never",
+                                                      "1" = "Less than Monthly",
+                                                      "2" = "Monthly",
+                                                      "3" = "Two to three times per week",
+                                                      "4" = "Four or more times a week"))
+         ),
+         AUDIT_Total = AUDIT_frequency + AUDIT_typical + AUDIT_six,
+         AUDIT_Risky = ifelse((sex == "Male" & AUDIT_Total > 3 | sex == "Female" & AUDIT_Total > 2), "TRUE", "FALSE"),
+         # Drug Use
+         drug_use_cocaine = fct_recode(as_factor(Q63_1),
+                                       "Never" = "Neither/not used",
+                                       "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                       "Past 12 months" = "PAST 12 MONTHS",
+                                       "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_cannabis = fct_recode(as_factor(Q63_2),
+                                        "Never" = "Neither/not used",
+                                        "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                        "Past 12 months" = "PAST 12 MONTHS",
+                                        "Past 12 months" = "PAST 12 MONTHS,Neither/not used",
+                                        "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_club_drugs = fct_recode(as_factor(Q63_3),
+                                          "Never" = "Neither/not used",
+                                          "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                          "Past 12 months" = "PAST 12 MONTHS",
+                                          "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_hallucinogens = fct_recode(as_factor(Q63_4),
+                                             "Never" = "Neither/not used",
+                                             "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                             "Before 12 months" = "BEFORE 12 MONTHS AGO,Neither/not used",
+                                             "Past 12 months" = "PAST 12 MONTHS",
+                                             "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_inhalants = fct_recode(as_factor(Q63_5),
+                                         "Never" = "Neither/not used",
+                                         "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                         "Past 12 months" = "PAST 12 MONTHS",
+                                         "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_heroin = fct_recode(as_factor(Q63_6),
+                                      "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                      "Never" = "Neither/not used",
+                                      "Past 12 months" = "PAST 12 MONTHS"
+         ),
+         drug_use_sedatives = fct_recode(as_factor(Q63_7),
+                                         "Never" = "Neither/not used",
+                                         "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                         "Past 12 months" = "PAST 12 MONTHS",
+                                         "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         drug_use_new_psychoactive = fct_recode(as_factor(Q63_8),
+                                                "Never" = "Neither/not used",
+                                                "Before 12 months" = "BEFORE 12 MONTHS AGO",
+                                                "Before 12 months" = "BEFORE 12 MONTHS AGO,Neither/not used",
+                                                "Past 12 months" = "PAST 12 MONTHS",
+                                                "Both" = "PAST 12 MONTHS,BEFORE 12 MONTHS AGO"
+         ),
+         prescription_drugs = as_factor(Q64),
+         prescription_drug_use = as_factor(Q144), # Will need to consolidate levels
+         pres_use_pain_killer_pres = as_factor(Q125_1), # Off-label prescription drug use, prescription pain killer
+         pres_use_pain_killer_otc = as_factor(Q125_2), # Off-label prescription drug use, over the counter
+         pres_use_sleeping_pill = as_factor(Q125_3),
+         pres_use_methadone = as_factor(Q125_4),
+         pres_use_ritalin = as_factor(Q125_5),
+         # MA use
+         meth_ingest = as_factor(Q47),
+         meth_most_common = as_factor(Q48),
+         meth_use_at_peak = as_factor(Q49),
+         meth_last_12_months = as_factor(Q50),
+         meth_before_last_year = as_factor(Q51),
+         meth_recent_use = as_factor(Q52),
+         meth_use_age = as.numeric(as.character(fct_recode(as_factor(Q53),
+                                       "25" = "25 years old.",
+                                       "19" = "19 years old",
+                                       "18" = "18 years of age",
+                                       "20" = "Twenty years of age"))),
+         meth_use_ways = Q54, # Think about how to organise factors
+         # SDS Scale (Re-scored to not use zero as R is weird with zeros)
+         meth_out_of_control = as.numeric(fct_recode(as_factor(Q55),
+                                                     "1" = "Never or almost never",
+                                                     "2" = "Sometimes",
+                                                     "3" = "Often",
+                                                     "4" = "Always")
+         ),
+         meth_anxious_about_missing = as.numeric(fct_recode(as_factor(Q56),
+                                                            "1" = "Never or almost never",
+                                                            "2" = "Sometimes",
+                                                            "3" = "Often",
+                                                            "4" = "Always")
+         ),
+         meth_worry_about_use = as.numeric(fct_recode(as_factor(Q57),
+                                                      "1" = "Not at all",
+                                                      "2" = "A little",
+                                                      "3" = "Often",
+                                                      "4" = "Always or nearly always")
+         ),
+         meth_wish_stop = as.numeric(fct_recode(as_factor(Q58),
+                                                "1" = "Never or almost never",
+                                                "2" = "Sometimes",
+                                                "3" = "Often",
+                                                "4" = "Always")
+         ),
+         meth_difficulty_stopping = as.numeric(fct_recode(as_factor(Q60),
+                                                          "1" = "Not difficult at all",
+                                                          "2" = "Quite difficult",
+                                                          "3" = "Very difficult",
+                                                          "4" = "Impossible")
+         ),
+         meth_SDS = ((meth_out_of_control - 1) + (meth_anxious_about_missing - 1) + (meth_worry_about_use - 1) + 
+                  (meth_wish_stop - 1) + (meth_difficulty_stopping - 1)),
+         meth_user = ifelse(meth_SDS > 4, "MUD", "Recreational"),
+         meth_want_to_change = as_factor(Q61),
+         meth_could_change = as_factor(Q62),
+         # K6 Distress scale
+         k6_nervous = as.numeric(fct_recode(as_factor(Q33...58),
+                                            "1" = "None of the time",
+                                            "2" = "A little of the time",
+                                            "3" = "Some of the time",
+                                            "4" = "Most of the time",
+                                            "5" = "All of the time")
+         ),
+         k6_hopeless = as.numeric(fct_recode(as_factor(Q34),
+                                            "1" = "None of the time",
+                                            "2" = "A little of the time",
+                                            "3" = "Some of the time",
+                                            "4" = "Most of the time",
+                                            "5" = "All of the time")
+         ),
+         k6_restless = as.numeric(fct_recode(as_factor(Q35),
+                                            "1" = "None of the time",
+                                            "2" = "A little of the time",
+                                            "3" = "Some of the time",
+                                            "4" = "Most of the time",
+                                            "5" = "All of the time")
+         ),
+         k6_depressed = as.numeric(fct_recode(as_factor(Q44),
+                                            "1" = "None of the time",
+                                            "3" = "Some of the time",
+                                            "4" = "Most of the time",
+                                            "5" = "All of the time")
+         ),
+         k6_effort = as.numeric(fct_recode(as_factor(Q36),
+                                            "1" = "None of the time",
+                                            "2" = "A little of the time",
+                                            "3" = "Some of the time",
+                                            "4" = "Most of the time",
+                                            "5" = "All of the time")
+         ),
+         k6_worthless = as.numeric(fct_recode(as_factor(Q37),
+                                            "1" = "None of the time",
+                                            "2" = "A little of the time",
+                                            "3" = "Some of the time",
+                                            "4" = "Most of the time",
+                                            "5" = "All of the time")
+         ),
+         k6_physical_cause = as.numeric(fct_recode(as_factor(Q43),
+                                            "1" = "None of the time",
+                                            "2" = "A little of the time",
+                                            "3" = "Some of the time",
+                                            "4" = "Most of the time",
+                                            "5" = "All of the time")
+         ),
+         k6_total = k6_nervous + k6_hopeless + k6_restless + k6_depressed + k6_effort + k6_worthless,
+         # Add psychiatric diagnoses (consolidate levels)
+         psychiatric_diagnoses = fct_recode(as_factor(Q46), # I think it might be best to have separate columns for each diagnosis.
+                                            "Major Depressive Disorder" = "Major Depressive Disorder (MDD)",
+                                            "Bipolar Disorder" = "Bipolar I Disorder",
+                                            "Bipolar Disorder" = "Bipolar II Disorder",
+                                            "Eating Disorder" = "Anorexia Nervosa",
+                                            "Eating Disorder" = "Binge-eating disorder",
+                                            "Eating Disorder" = "Bulimia Nervosa",
+                                            "Personality Disorder" = "Borderline Personality Disorder (BPD)",
+                                            "PTSD" = "Post Traumatic Stress Disorder (PTSD)",
+                                            "Attention Deficit Disorder" = "Attention Deficit Disorder (ADD)",
+                                            "Attention Deficit Disorder" = "Attention Deficit Hyperactivity Disorder (ADHD)"
+         ),
+         # Instances Driving Under Influence of Alcohol (DUI)
+         DUI_suspended = as_factor(Q95),
+         DUI_hurt = as_factor(Q96),
+         # Attitudes toward Drink Driving
+         DUI_attitude_friends = as.numeric(fct_recode(as_factor(Q97), # Reverse coded
+                                                      "1" = "Strongly disagree",
+                                                      "2" = "Disagree",
+                                                      "3" = "Somewhat disagree",
+                                                      "4" = "Neither agree nor disagree",
+                                                      "5" = "Somewhat agree",
+                                                      "6" = "Agree",
+                                                      "7" = "Strongly Agree")
+         ),
+         DUI_attitude_drunk = as.numeric(fct_recode(as_factor(Q98), # Reverse coded
+                                                    "1" = "Strongly disagree",
+                                                    "2" = "Disagree",
+                                                    "3" = "Somewhat disagree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat agree",
+                                                    "6" = "Agree",
+                                                    "7" = "Strongly Agree")
+         ),
+         DUI_attitude_jail = as.numeric(fct_recode(as_factor(Q99),
+                                                   "1" = "Strongly Agree",
+                                                   "2" = "Agree",
+                                                   "3" = "Somewhat agree",
+                                                   "4" = "Neither agree nor disagree",
+                                                   "5" = "Somewhat disagree",
+                                                   "6" = "Disagree",
+                                                   "7" = "Strongly disagree")
+         ),
+         DUI_attitude_strict = as.numeric(fct_recode(as_factor(Q100),
+                                                     "1" = "Strongly Agree",
+                                                     "2" = "Agree",
+                                                     "3" = "Somewhat agree",
+                                                     "4" = "Neither agree nor disagree",
+                                                     "5" = "Somewhat disagree",
+                                                     "6" = "Disagree",
+                                                     "7" = "Strongly disagree")
+         ),
+         DUI_attitude_tough = as.numeric(fct_recode(as_factor(Q101),
+                                                    "1" = "Strongly Agree",
+                                                    "2" = "Agree",
+                                                    "3" = "Somewhat agree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat disagree",
+                                                    "6" = "Disagree",
+                                                    "7" = "Strongly disagree")
+         ),
+         DUI_attitude_caught = as.numeric(fct_recode(as_factor(Q102), # Reverse coded
+                                                      "1" = "Strongly disagree",
+                                                      "2" = "Disagree",
+                                                      "3" = "Somewhat disagree",
+                                                      "4" = "Neither agree nor disagree",
+                                                      "5" = "Somewhat agree",
+                                                      "6" = "Agree",
+                                                      "7" = "Strongly Agree")
+         ),
+         DUI_attitude_while = as.numeric(fct_recode(as_factor(Q103), # Reverse coded
+                                                     "1" = "Strongly disagree",
+                                                     "2" = "Disagree",
+                                                     "3" = "Somewhat disagree",
+                                                     "4" = "Neither agree nor disagree",
+                                                     "5" = "Somewhat agree",
+                                                     "6" = "Agree",
+                                                     "7" = "Strongly Agree")
+         ),
+         DUI_attitude_dumb = as.numeric(fct_recode(as_factor(Q104),
+                                                    "1" = "Strongly Agree",
+                                                    "2" = "Agree",
+                                                    "3" = "Somewhat agree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat disagree",
+                                                    "6" = "Disagree",
+                                                    "7" = "Strongly disagree")
+         ),
+         DUI_attitude_overrated = as.numeric(fct_recode(as_factor(Q105), # Reverse coded
+                                                         "1" = "Strongly disagree",
+                                                         "2" = "Disagree",
+                                                         "3" = "Somewhat disagree",
+                                                         "4" = "Neither agree nor disagree",
+                                                         "5" = "Somewhat agree",
+                                                         "6" = "Agree",
+                                                         "7" = "Strongly Agree")
+         ),
+         DUI_attitude_license = as.numeric(fct_recode(as_factor(Q106),
+                                                       "1" = "Strongly Agree",
+                                                       "2" = "Agree",
+                                                       "3" = "Somewhat agree",
+                                                       "4" = "Neither agree nor disagree",
+                                                       "5" = "Somewhat disagree",
+                                                       "6" = "Disagree",
+                                                       "7" = "Strongly disagree")
+         ),
+         DUI_attitude_Total = DUI_attitude_friends + DUI_attitude_drunk + DUI_attitude_jail + DUI_attitude_strict + DUI_attitude_tough + DUI_attitude_caught + DUI_attitude_while + DUI_attitude_dumb + DUI_attitude_overrated + DUI_attitude_license,
+         DUI_attitude_Mean = DUI_attitude_Total/10,
+         # Attitudes towards strategies for avoiding Drink Driving: Discrete
+         DUI_strategy_leave = as.numeric(fct_recode(as_factor(Q107),
+                                                     "1" = "Definitely yes",
+                                                     "2" = "Probably yes",
+                                                     "3" = "Might or might not",
+                                                     "4" = "Probably not",
+                                                     "5" = "Definitely not")
+         ),
+         DUI_strategy_light = as.numeric(fct_recode(as_factor(Q108),
+                                                    "1" = "Extremely likely",
+                                                    "2" = "Moderately likely",
+                                                    "2" = "Slightly likely",
+                                                    "3" = "Neither likely nor unlikely",
+                                                    "4" = "Slightly unlikely",
+                                                    "4" = "Moderately unlikely",
+                                                    "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_plan_driver = as.numeric(fct_recode(as_factor(Q109),
+                                                           "1" = "Extremely likely",
+                                                           "2" = "Moderately likely",
+                                                           "2" = "Slightly likely",
+                                                           "3" = "Neither likely nor unlikely",
+                                                           "4" = "Slightly unlikely",
+                                                           "4" = "Moderately unlikely",
+                                                           "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_plan_use = as.numeric(fct_recode(as_factor(Q110),
+                                                        "1" = "Extremely likely",
+                                                        "2" = "Moderately likely",
+                                                        "2" = "Slightly likely",
+                                                        "3" = "Neither likely nor unlikely",
+                                                        "4" = "Slightly unlikely",
+                                                        "4" = "Moderately unlikely",
+                                                        "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_taxi = as.numeric(fct_recode(as_factor(Q111),
+                                                    "1" = "Extremely likely",
+                                                    "2" = "Moderately likely",
+                                                    "2" = "Slightly likely",
+                                                    "3" = "Neither likely nor unlikely",
+                                                    "4" = "Slightly unlikely",
+                                                    "4" = "Moderately unlikely",
+                                                    "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_track = as.numeric(fct_recode(as_factor(Q112),
+                                                     "1" = "Extremely likely",
+                                                     "2" = "Moderately likely",
+                                                     "2" = "Slightly likely",
+                                                     "3" = "Neither likely nor unlikely",
+                                                     "4" = "Slightly unlikely",
+                                                     "4" = "Moderately unlikely",
+                                                     "5" = "Extremely unlikely")
+         ),
+         DUI_strategy_overnight = as.numeric(fct_recode(as_factor(Q113),
+                                                         "1" = "Extremely likely",
+                                                         "2" = "Moderately likely",
+                                                         "2" = "Slightly likely",
+                                                         "3" = "Neither likely nor unlikely",
+                                                         "4" = "Slightly unlikely",
+                                                         "4" = "Moderately unlikely",
+                                                         "5" = "Extremely unlikely")
+         ),
+         # Attitudes towards strategies for avoiding Drink Driving: Dichotomous
+         DUI_strategy_leave_dich = as.numeric(fct_recode(as_factor(Q107),
+                                                    "agree" = "Definitely yes",
+                                                    "agree" = "Probably yes",
+                                                    "disagree" = "Might or might not",
+                                                    "disagree" = "Probably not",
+                                                    "disagree" = "Definitely not")
+         ),
+         DUI_strategy_light_dich = as.numeric(fct_recode(as_factor(Q108),
+                                                    "agree" = "Extremely likely",
+                                                    "agree" = "Moderately likely",
+                                                    "agree" = "Slightly likely",
+                                                    "disagree" = "Neither likely nor unlikely",
+                                                    "disagree" = "Slightly unlikely",
+                                                    "disagree" = "Moderately unlikely",
+                                                    "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_plan_driver_dich = as.numeric(fct_recode(as_factor(Q109),
+                                                               "agree" = "Extremely likely",
+                                                               "agree" = "Moderately likely",
+                                                               "agree" = "Slightly likely",
+                                                               "disagree" = "Neither likely nor unlikely",
+                                                               "disagree" = "Slightly unlikely",
+                                                               "disagree" = "Moderately unlikely",
+                                                               "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_plan_use_dich = as.numeric(fct_recode(as_factor(Q110),
+                                                            "agree" = "Extremely likely",
+                                                            "agree" = "Moderately likely",
+                                                            "agree" = "Slightly likely",
+                                                            "disagree" = "Neither likely nor unlikely",
+                                                            "disagree" = "Slightly unlikely",
+                                                            "disagree" = "Moderately unlikely",
+                                                            "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_taxi_dich = as.numeric(fct_recode(as_factor(Q111),
+                                                        "agree" = "Extremely likely",
+                                                        "agree" = "Moderately likely",
+                                                        "agree" = "Slightly likely",
+                                                        "disagree" = "Neither likely nor unlikely",
+                                                        "disagree" = "Slightly unlikely",
+                                                        "disagree" = "Moderately unlikely",
+                                                        "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_track_dich = as.numeric(fct_recode(as_factor(Q112),
+                                                    "agree" = "Extremely likely",
+                                                    "agree" = "Moderately likely",
+                                                    "agree" = "Slightly likely",
+                                                    "disagree" = "Neither likely nor unlikely",
+                                                    "disagree" = "Slightly unlikely",
+                                                    "disagree" = "Moderately unlikely",
+                                                    "disagree" = "Extremely unlikely")
+         ),
+         DUI_strategy_overnight_dich = as.numeric(fct_recode(as_factor(Q113),
+                                                             "agree" = "Extremely likely",
+                                                             "agree" = "Moderately likely",
+                                                             "agree" = "Slightly likely",
+                                                             "disagree" = "Neither likely nor unlikely",
+                                                             "disagree" = "Slightly unlikely",
+                                                             "disagree" = "Moderately unlikely",
+                                                             "disagree" = "Extremely unlikely")
+         ),
+         # Instances Driving Under Influence of Drugs (DUID)
+         DUID_incidence = as_factor(Q114),
+         DUID_recent = as_factor(Q118),
+         DUID_recent_drugs = fct_recode(as_factor(Q119), # Should Consolidate levels in a better way
+                                        "Amphetamine only" = "Amphetamine",
+                                        "Cocaine only" = "Cocaine",
+                                        "Marijuana only" = "Marijuana/Cannabis",
+                                        "Club drugs only" = "Club drugs (e.g ketamine, GHB)",
+                                        "Hallucinogens only" = "Hallucinogens/psychedelics (e.g acid, LSD, DMT)",
+                                        "Sedatives only" = "Sedatives/tranquilisers (e.g. Xanax, Valium)"
+         ),
+         DUID_lifetime = as_factor(Q120),
+         DUID_lifetime_drugs = Q121, # Consolidate levels
+         DUID_ongoing = as_factor(ifelse(DUID_recent == "Yes" & DUID_lifetime == "Yes", "Yes", "No")),
+         DUID_suspended = as_factor(Q122),
+         DUID_suspended_drugs = Q124, # Consolidate levels
+         DUID_hurt = as_factor(Q123),
+         DUID_hurt_drugs = as_factor(Q125),
+         # Attitudes toward Drug Driving
+         DUID_attitude_friends = as.numeric(fct_recode(as_factor(Q126...75), # Reverse coded
+                                                       "1" = "Strongly disagree",
+                                                       "2" = "Disagree",
+                                                       "3" = "Somewhat disagree",
+                                                       "4" = "Neither agree nor disagree",
+                                                       "5" = "Somewhat agree",
+                                                       "6" = "Agree",
+                                                       "7" = "Strongly agree")
+         ),
+         DUID_attitude_high = as.numeric(fct_recode(as_factor(Q128), # Reverse coded
+                                                    "1" = "Strongly disagree",
+                                                    "2" = "Disagree",
+                                                    "3" = "Somewhat disagree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat agree",
+                                                    "6" = "Agree",
+                                                    "7" = "Strongly agree")
+         ),
+         DUID_attitude_jail = as.numeric(fct_recode(as_factor(Q129),
+                                                    "1" = "Strongly agree",
+                                                    "2" = "Agree",
+                                                    "3" = "Somewhat agree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat disagree",
+                                                    "6" = "Disagree",
+                                                    "7" = "Strongly disagree")
+         ),
+         DUID_attitude_strict = as.numeric(fct_recode(as_factor(Q130),
+                                                      "1" = "Strongly agree",
+                                                      "2" = "Agree",
+                                                      "3" = "Somewhat agree",
+                                                      "4" = "Neither agree nor disagree",
+                                                      "5" = "Somewhat disagree",
+                                                      "6" = "Disagree",
+                                                      "7" = "Strongly disagree")
+         ),
+         DUID_attitude_tough = as.numeric(fct_recode(as_factor(Q131),
+                                                     "1" = "Strongly agree",
+                                                     "2" = "Agree",
+                                                     "3" = "Somewhat agree",
+                                                     "4" = "Neither agree nor disagree",
+                                                     "5" = "Somewhat disagree",
+                                                     "6" = "Disagree",
+                                                     "7" = "Strongly disagree")
+         ),
+         DUID_attitude_caught = as.numeric(fct_recode(as_factor(Q132), # Reverse coded
+                                                      "1" = "Strongly disagree",
+                                                      "2" = "Disagree",
+                                                      "3" = "Somewhat disagree",
+                                                      "4" = "Neither agree nor disagree",
+                                                      "5" = "Somewhat agree",
+                                                      "6" = "Agree",
+                                                      "7" = "Strongly agree")
+         ),
+         DUID_attitude_while = as.numeric(fct_recode(as_factor(Q133), # Reverse coded
+                                                     "1" = "Strongly disagree",
+                                                     "2" = "Disagree",
+                                                     "3" = "Somewhat disagree",
+                                                     "4" = "Neither agree nor disagree",
+                                                     "5" = "Somewhat agree",
+                                                     "6" = "Agree",
+                                                     "7" = "Strongly agree")
+         ),
+         DUID_attitude_dumb = as.numeric(fct_recode(as_factor(Q134),
+                                                    "1" = "Strongly agree",
+                                                    "2" = "Agree",
+                                                    "3" = "Somewhat agree",
+                                                    "4" = "Neither agree nor disagree",
+                                                    "5" = "Somewhat disagree",
+                                                    "6" = "Disagree",
+                                                    "7" = "Strongly disagree")
+         ),
+         DUID_attitude_overrated = as.numeric(fct_recode(as_factor(Q135), # Reverse coded
+                                                         "1" = "Strongly disagree",
+                                                         "2" = "Disagree",
+                                                         "3" = "Somewhat disagree",
+                                                         "4" = "Neither agree nor disagree",
+                                                         "5" = "Somewhat agree",
+                                                         "6" = "Agree",
+                                                         "7" = "Strongly agree")
+         ),
+         DUID_attitude_license = as.numeric(fct_recode(as_factor(Q136),
+                                                       "1" = "Strongly agree",
+                                                       "2" = "Agree",
+                                                       "3" = "Somewhat agree",
+                                                       "4" = "Neither agree nor disagree",
+                                                       "5" = "Somewhat disagree",
+                                                       "6" = "Disagree",
+                                                       "7" = "Strongly disagree")
+         ),
+         DUID_attitude_Total = DUID_attitude_caught + DUID_attitude_dumb + DUID_attitude_friends + DUID_attitude_high + DUID_attitude_jail + DUID_attitude_license + DUID_attitude_overrated + DUID_attitude_strict + DUID_attitude_tough + DUID_attitude_while,
+         DUID_attitude_Mean = DUID_attitude_Total/10,
+         # Attitudes towards strategies for avoiding Drug Driving: Discrete
+         DUID_strategy_leave = as.numeric(fct_recode(as_factor(Q137),
+                                                     "1" = "Definitely yes",
+                                                     "2" = "Probably yes",
+                                                     "3" = "Might or might not",
+                                                     "4" = "Probably not",
+                                                     "5" = "Definitely not")
+         ),
+         DUID_strategy_less = as.numeric(fct_recode(as_factor(Q138),
+                                                    "1" = "Extremely likely",
+                                                    "2" = "Moderately likely",
+                                                    "2" = "Slightly likely",
+                                                    "3" = "Neither likely nor unlikely",
+                                                    "4" = "Slightly unlikely",
+                                                    "4" = "Moderately unlikely",
+                                                    "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_plan_driver = as.numeric(fct_recode(as_factor(Q139),
+                                                           "1" = "Extremely likely",
+                                                           "2" = "Moderately likely",
+                                                           "2" = "Slightly likely",
+                                                           "3" = "Neither likely nor unlikely",
+                                                           "4" = "Slightly unlikely",
+                                                           "4" = "Moderately unlikely",
+                                                           "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_plan_use = as.numeric(fct_recode(as_factor(Q140),
+                                                        "1" = "Extremely likely",
+                                                        "2" = "Moderately likely",
+                                                        "2" = "Slightly likely",
+                                                        "3" = "Neither likely nor unlikely",
+                                                        "4" = "Slightly unlikely",
+                                                        "4" = "Moderately unlikely",
+                                                        "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_taxi = as.numeric(fct_recode(as_factor(Q141),
+                                                    "1" = "Extremely likely",
+                                                    "2" = "Moderately likely",
+                                                    "2" = "Slightly likely",
+                                                    "3" = "Neither likely nor unlikely",
+                                                    "4" = "Slightly unlikely",
+                                                    "4" = "Moderately unlikely",
+                                                    "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_track = as.numeric(fct_recode(as_factor(Q142),
+                                                     "1" = "Extremely likely",
+                                                     "2" = "Moderately likely",
+                                                     "2" = "Slightly likely",
+                                                     "3" = "Neither likely nor unlikely",
+                                                     "4" = "Slightly unlikely",
+                                                     "4" = "Moderately unlikely",
+                                                     "5" = "Extremely unlikely")
+         ),
+         DUID_strategy_overnight = as.numeric(fct_recode(as_factor(Q143),
+                                                         "1" = "Extremely likely",
+                                                         "2" = "Moderately likely",
+                                                         "2" = "Slightly likely",
+                                                         "3" = "Neither likely nor unlikely",
+                                                         "4" = "Slightly unlikely",
+                                                         "4" = "Moderately unlikely",
+                                                         "5" = "Extremely unlikely")
+         ),
+         # Attitudes towards strategies for avoiding Drug Driving: Dichotomous
+         DUID_strategy_leave_dich = as.numeric(fct_recode(as_factor(Q137),
+                                                     "agree" = "Definitely yes",
+                                                     "agree" = "Probably yes",
+                                                     "disagree" = "Might or might not",
+                                                     "disagree" = "Probably not",
+                                                     "disagree" = "Definitely not")
+         ),
+         DUID_strategy_less = as.numeric(fct_recode(as_factor(Q138),
+                                                    "agree" = "Extremely likely",
+                                                    "agree" = "Moderately likely",
+                                                    "agree" = "Slightly likely",
+                                                    "disagree" = "Neither likely nor unlikely",
+                                                    "disagree" = "Slightly unlikely",
+                                                    "disagree" = "Moderately unlikely",
+                                                    "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_plan_driver = as.numeric(fct_recode(as_factor(Q139),
+                                                           "agree" = "Extremely likely",
+                                                           "agree" = "Moderately likely",
+                                                           "agree" = "Slightly likely",
+                                                           "disagree" = "Neither likely nor unlikely",
+                                                           "disagree" = "Slightly unlikely",
+                                                           "disagree" = "Moderately unlikely",
+                                                           "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_plan_use = as.numeric(fct_recode(as_factor(Q140),
+                                                        "agree" = "Extremely likely",
+                                                        "agree" = "Moderately likely",
+                                                        "agree" = "Slightly likely",
+                                                        "disagree" = "Neither likely nor unlikely",
+                                                        "disagree" = "Slightly unlikely",
+                                                        "disagree" = "Moderately unlikely",
+                                                        "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_taxi = as.numeric(fct_recode(as_factor(Q141),
+                                                    "agree" = "Extremely likely",
+                                                    "agree" = "Moderately likely",
+                                                    "agree" = "Slightly likely",
+                                                    "disagree" = "Neither likely nor unlikely",
+                                                    "disagree" = "Slightly unlikely",
+                                                    "disagree" = "Moderately unlikely",
+                                                    "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_track = as.numeric(fct_recode(as_factor(Q142),
+                                                     "agree" = "Extremely likely",
+                                                     "agree" = "Moderately likely",
+                                                     "agree" = "Slightly likely",
+                                                     "disagree" = "Neither likely nor unlikely",
+                                                     "disagree" = "Slightly unlikely",
+                                                     "disagree" = "Moderately unlikely",
+                                                     "disagree" = "Extremely unlikely")
+         ),
+         DUID_strategy_overnight = as.numeric(fct_recode(as_factor(Q143),
+                                                         "agree" = "Extremely likely",
+                                                         "agree" = "Moderately likely",
+                                                         "agree" = "Slightly likely",
+                                                         "disagree" = "Neither likely nor unlikely",
+                                                         "disagree" = "Slightly unlikely",
+                                                         "disagree" = "Moderately unlikely",
+                                                         "disagree" = "Extremely unlikely")
+         ),
+         # Dula Dangerous Driving Index (DDDI)
+         DDDI_NE_1 = as.numeric(fct_recode(as_factor(Q65),
+                                "1" = "Never",
+                                "2" = "Rarely",
+                                "3" = "Sometimes",
+                                "4" = "Often",
+                                "5" = "Always")
+         ),
+         DDDI_NE_2 = as.numeric(fct_recode(as_factor(Q66),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_3 = as.numeric(fct_recode(as_factor(Q67),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_1 = as.numeric(fct_recode(as_factor(Q68),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_2 = as.numeric(fct_recode(as_factor(Q69),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_3 = as.numeric(fct_recode(as_factor(Q70),
+                                          "1" = "Never",
+                                          "2" = "Rarely",
+                                          "3" = "Sometimes",
+                                          "4" = "Often",
+                                          "5" = "Always")
+         ),
+         DDDI_AD_4 = as.numeric(fct_recode(as_factor(Q73),
+                                          "1" = "Never",
+                                          "2" = "Rarely",
+                                          "3" = "Sometimes",
+                                          "4" = "Often",
+                                          "5" = "Always")
+         ),
+         DDDI_RD_1 = as.numeric(fct_recode(as_factor(Q74),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_5 = as.numeric(fct_recode(as_factor(Q75),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_2 = as.numeric(fct_recode(as_factor(Q76),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_6 = as.numeric(fct_recode(as_factor(Q77),
+                                         "1" = "Never",
+                                         "2" = "Rarely",
+                                         "3" = "Sometimes",
+                                         "4" = "Often",
+                                         "5" = "Always")
+         ),
+         DDDI_NE_4 = as.numeric(fct_recode(as_factor(Q79),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_3 = as.numeric(fct_recode(as_factor(Q80),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_4 = as.numeric(fct_recode(as_factor(Q81),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_AD_7 = as.numeric(fct_recode(as_factor(Q82),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_5 = as.numeric(fct_recode(as_factor(Q83),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_6 = as.numeric(fct_recode(as_factor(Q84),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_7 = as.numeric(fct_recode(as_factor(Q85),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_5 = as.numeric(fct_recode(as_factor(Q86),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_6 = as.numeric(fct_recode(as_factor(Q87),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_8 = as.numeric(fct_recode(as_factor(Q88),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_7 = as.numeric(fct_recode(as_factor(Q89),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_8 = as.numeric(fct_recode(as_factor(Q90),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_9 = as.numeric(fct_recode(as_factor(Q91),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_NE_9 = as.numeric(fct_recode(as_factor(Q92),
+                                           "1" = "Never",
+                                           "2" = "Rarely",
+                                           "3" = "Sometimes",
+                                           "4" = "Often",
+                                           "5" = "Always")
+         ),
+         DDDI_RD_10 = as.numeric(fct_recode(as_factor(Q93),
+                                            "1" = "Never",
+                                            "2" = "Rarely",
+                                            "3" = "Sometimes",
+                                            "4" = "Often",
+                                            "5" = "Always")
+         ),
+         DDDI_RD_11 = as.numeric(fct_recode(as_factor(Q94),
+                                            "1" = "Never",
+                                            "2" = "Rarely",
+                                            "3" = "Sometimes",
+                                            "4" = "Often",
+                                            "5" = "Always")
+         ),
+         ## DDDI summing up scores
+         DDDI_NE_Total = (DDDI_NE_1 + DDDI_NE_2 + DDDI_NE_3 + DDDI_NE_4 + DDDI_NE_5 + DDDI_NE_6 + DDDI_NE_7 + DDDI_NE_8 + DDDI_NE_9), # Negative Emotions
+         DDDI_AD_Total = (DDDI_AD_1 + DDDI_AD_2 + DDDI_AD_3 + DDDI_AD_4 + DDDI_AD_5 + DDDI_AD_6 + DDDI_AD_7), # Agressive Driving
+         DDDI_RD_Total = (DDDI_RD_1 + DDDI_RD_2 + DDDI_RD_3 + DDDI_RD_4 + DDDI_RD_5 + DDDI_RD_6 + DDDI_RD_7 + DDDI_RD_8 + DDDI_RD_9 + DDDI_RD_10 + DDDI_RD_11), # Risky Driving
+         DDDI_Total = (DDDI_NE_Total + DDDI_AD_Total + DDDI_RD_Total),
+         keep_DDDI = !is.na(DDDI_Total), # Logical to indicate whether DDDI has been completed
+         # STAXI - 2
+         ## State Anger
+         S_Ang_F_1 = as.numeric(fct_recode(as_factor(Q146_1),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_2 = as.numeric(fct_recode(as_factor(Q146_2),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_3 = as.numeric(fct_recode(as_factor(Q146_3),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_V_1 = as.numeric(fct_recode(as_factor(Q146_4),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_1 = as.numeric(fct_recode(as_factor(Q146_5),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_4 = as.numeric(fct_recode(as_factor(Q146_6),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_2 = as.numeric(fct_recode(as_factor(Q146_7),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_3 = as.numeric(fct_recode(as_factor(Q146_8),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_V_2 = as.numeric(fct_recode(as_factor(Q146_9),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_5 = as.numeric(fct_recode(as_factor(Q146_10),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_4 = as.numeric(fct_recode(as_factor(Q146_11),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_V_3 = as.numeric(fct_recode(as_factor(Q146_12),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_V_4 = as.numeric(fct_recode(as_factor(Q146_13),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_P_5 = as.numeric(fct_recode(as_factor(Q146_14),
+                                           "1" = "Not at all",
+                                           "2" = "Somewhat",
+                                           "3" = "Moderately so",
+                                           "4" = "Very much so")
+         ),
+         S_Ang_F_Total = (S_Ang_F_1 + S_Ang_F_2 + S_Ang_F_3 + S_Ang_F_4 + S_Ang_F_5),
+         S_Ang_P_Total = (S_Ang_P_1 + S_Ang_P_2 + S_Ang_P_3 + S_Ang_P_4 + S_Ang_P_5),
+         S_Ang_V_Total = (S_Ang_V_1 + S_Ang_V_2 + S_Ang_V_3 + S_Ang_V_4), 
+         S_Ang_Total = (S_Ang_F_1 + S_Ang_F_2 + S_Ang_F_3 + S_Ang_F_4 + S_Ang_F_5 + 
+                          S_Ang_P_1 + S_Ang_P_2 + S_Ang_P_3 + S_Ang_P_4 + S_Ang_P_5 +
+                          S_Ang_V_1 + S_Ang_V_2 + S_Ang_V_3 + S_Ang_V_4),
+         ## Trait Anger
+         T_Ang_T_1 = as.numeric(fct_recode(as_factor(Q147_1),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_T_2 = as.numeric(fct_recode(as_factor(Q147_2),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Sometimes,Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_T_3 = as.numeric(fct_recode(as_factor(Q147_3),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Sometimes,Often",
+                                           "3" = "Almost never,Often",
+                                           "4" = "Almost always",
+                                           "4" = "Sometimes,Often,Almost always")
+         ),
+         T_Ang_R_1 = as.numeric(fct_recode(as_factor(Q147_4),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Sometimes,Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_R_2 = as.numeric(fct_recode(as_factor(Q147_5),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Almost never,Sometimes,Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_T_4 = as.numeric(fct_recode(as_factor(Q147_6),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "4" = "Almost always",
+                                           "4" = "Often,Almost always")
+         ),
+         T_Ang_1 = as.numeric(fct_recode(as_factor(Q147_7),
+                                         "1" = "Almost never",
+                                         "2" = "Sometimes",
+                                         "2" = "Almost never,Sometimes",
+                                         "3" = "Often",
+                                         "3" = "Sometimes,Often",
+                                         "4" = "Almost always",
+                                         "4" = "Sometimes,Often,Almost always")
+         ),
+         T_Ang_R_3 = as.numeric(fct_recode(as_factor(Q147_8),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Almost never,Often",
+                                           "4" = "Almost always")
+         ),
+         T_Ang_2 = as.numeric(fct_recode(as_factor(Q147_9),
+                                         "1" = "Almost never",
+                                         "2" = "Sometimes",
+                                         "2" = "Almost never,Sometimes",
+                                         "3" = "Often",
+                                         "4" = "Almost always",
+                                         "4" = "Often,Almost always")
+         ),
+         T_Ang_R_4 = as.numeric(fct_recode(as_factor(Q147_10),
+                                           "1" = "Almost never",
+                                           "2" = "Sometimes",
+                                           "2" = "Almost never,Sometimes",
+                                           "3" = "Often",
+                                           "3" = "Sometimes,Often",
+                                           "3" = "Almost never,Sometimes,Often",
+                                           "3" = "Almost never,Often",
+                                           "4" = "Almost always",
+                                           "4" = "Often,Almost always")
+         ),
+         T_Ang_T_Total = (T_Ang_T_1 + T_Ang_T_2 + T_Ang_T_3 + T_Ang_T_4),
+         T_Ang_R_Total = (T_Ang_R_1 + T_Ang_R_2 + T_Ang_R_3 + T_Ang_R_4),
+         T_Ang_Total = (T_Ang_T_1 + T_Ang_T_2 + T_Ang_T_3 + T_Ang_T_4 +
+                          T_Ang_R_1 + T_Ang_R_2 + T_Ang_R_3 + T_Ang_R_4 +
+                          T_Ang_1 + T_Ang_2)
+    );
+
+```
+
+
+## Screening Data
+The following code screens the data by removing the following responses:
+
+- Responses that did not have a current or expired/revoked full drivers license
+- Responses that did not have a completed STAXI
+- Responses that did not have a completed DDDI
+
+```{r processing.screen, message=FALSE, warning=FALSE}
+# Creating screened data set
+screened.full <- data.full %>% 
+  filter(#[Not needed] Status != "Spam", # Remove spam
+         Q126...13 %in% c("Full license (current/valid)", "Full license (expired/revoked)"), # Removing responses that are not full license
+         !is.na(S_Ang_Total), # Removing responses that have incomplete State Anger
+         !is.na(T_Ang_Total), # Removing responses that have incomplete Trait Anger
+         keep_DDDI == "TRUE") %>%  # Select only observations that have completed DDDI 
+  mutate(id = row_number()) # Assign a number to each participant
+         
+
+screened <- screened.full[c(5, 164:ncol(screened.full))] %>% # Select only variables that have been re-coded
+  select(id, everything()) %>%  # Moving participant id to front of data frame
+  rename(Duration = "Duration (in seconds)") %>% 
+  mutate(Duration = as.numeric(Duration))
+```
+
+```{r processing.save, echo = F}
+#Saving as R objects
+save(data.full, file = "data/objects/data.full.Rda")
+save(screened.full, file = "data/objects/screened.full.Rda")
+save(screened, file = "data/objects/screened.Rda")
+#save(cleaned, file = "Data/Data.frame/cleaned.Rda")
+```
+
+## Summary of Data Screened
+The table below outlines how many observations did not meet any combination of the criteria laid out above.  "TRUE" means that there was a response recorded for that item.
+```{r processing.summary, echo= F, message=FALSE}
+bad <- anti_join(data.full, screened) %>% 
+  select(Q126...13, S_Ang_Total, T_Ang_Total, DDDI_Total)
+bad <- bad %>%
+  mutate(License = fct_recode(as_factor(Q126...13),
+                              "Full License" = "Full license (current/valid)",
+                              "Full License" = "Full license (expired/revoked)",
+                              "Probationary License" = "Probationary license (P-plate)",
+                              "Learners License" = "Learners license (L-plate)"),
+         S_Ang_Total = ifelse(!is.na(S_Ang_Total), T, NA),
+         T_Ang_Total = ifelse(!is.na(T_Ang_Total), T, NA),
+         DDDI_Total = ifelse(!is.na(DDDI_Total), T, NA)) %>% 
+  group_by(License, S_Ang_Total, T_Ang_Total, DDDI_Total) %>% 
+  summarise(
+    n = n()
+)
+
+kable(bad, caption = "Table 1. Number of Observations Removed by group") %>% kable_styling("striped")
+```
+
+
+<!--chapter:end:01-data.processing.Rmd-->
+
+# Univariate Descriptives {#Uni.Descriptives}
+```{r desc.setup, include=FALSE}
+library(bookdown)
+library(tidyverse)
+library(knitr)
+library(gridExtra)
+library(kableExtra)
+library(table1)
+library(gridExtra)
+```
+
+```{r data.prep, include = F}
+# Preparing colours for graphs
+.grey <- "#A6A6A6"
+.ma <- "#DC2D27"
+.nma <- "#39B9FF"
+.lav <- "#D9BBDC"
+.lgreen <- "#BEDCB3"
+
+# Data
+load("data/objects/data.full.Rda")
+load("data/objects/screened.full.Rda")
+load("data/objects/screened.Rda")
+
+# Changing NA from meth_ingest and meth_user to "No"
+screened$meth_ingest[is.na(screened$meth_ingest)] <- "No"
+screened$meth_user[is.na(screened$meth_user)] <- "Non-User"
+screened$meth_user <- as.factor(screened$meth_user)
+
+# Rearranging levels for education 
+screened$education <- factor(screened$education, levels = c("Did not finish high school",
+                                                          "High School Diploma",
+                                                          "Vocational/Technical degree or certificate",
+                                                          "Did not finish University",
+                                                          "Bachelor Degree",
+                                                          "Postgraduate Degree"))
+```
+This section includes Univariate Descriptives (stratified by Methamphetamine Use) for the key variables in the study.
+
+***
+
+## Demographic Summary Table
+```{r desc.summary, echo = F}
+x <- screened %>% mutate(ethnicity = reorder(ethnicity, ethnicity, function(x) -length(x)),
+                        meth_user = reorder(meth_user, meth_user, function(x) length(x)),
+                        area_live = reorder(area_live, area_live, function(x) length(x)))
+label(x$age) <- "Age"
+label(x$sex) <- "Sex"
+label(x$meth_ingest) <- "MA Ingest"
+label(x$meth_user) <- "MA User Type"
+label(x$license_status) <- "License Status"
+label(x$education) <- "Education"
+label(x$ethnicity) <- "Ethnicity"
+label(x$area_live) <- "Area of Residence"
+
+
+table1(~age + sex + meth_ingest + meth_user + license_status + education + ethnicity + area_live, data = x) # %>% 
+  # scroll_box(height = "500px")
+
+```
+
+***
+
+## Distribution of Demographics 
+
+### Sex
+```{r distr.sex, echo = F}
+bar.sex <- screened %>% 
+  ggplot(aes(x = sex, fill = sex)) +
+  geom_bar(col = "black") +
+  geom_text(stat = "count", aes(label = ..count..), vjust = -.3) +
+  labs(x = "Sex", y = "") +
+  ggtitle("Sex Count") +
+  theme_light() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.lav, .lgreen))
+
+bar.sex.ma <- screened %>%
+  ggplot(aes(x = sex, fill = meth_ingest)) +
+  geom_bar(col = "black") +
+  geom_text(stat = "count", aes(label = ..count..), vjust = -.3) +
+  labs(x = "Sex", y = "n") +
+  ggtitle("Sex count by MA use") +
+  theme_light() +
+  theme(legend.position = "none") +
+  facet_wrap(~ meth_ingest) +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(bar.sex, bar.sex.ma, nrow = 1)
+
+```
+
+***
+
+### Age
+```{r distr.age, echo = F}
+# Histogram age
+hist.age <- screened %>% 
+  ggplot(aes(x = age)) +
+  geom_histogram(binwidth = 2, col = "black", fill = .grey) +
+  labs(x = "Age", y = "") +
+  #ggtitle("Distribution of Age") +
+  theme_light()
+
+#Histogram of age by MA
+hist.age.ma <- screened %>%
+  ggplot(aes(x = age, fill = meth_ingest)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  labs(x = "Age", y = "", fill = "MA Use") +
+  #ggtitle("Distribution of Age by MA use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Density plot of age by MA
+dens.age.ma <- screened %>% 
+  ggplot(aes(x = age, fill = meth_ingest)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Age", y = "Density", fill = "MA Use") +
+  #ggtitle("Distribution of Age by MA use (Density)") +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Boxplot of age by MA
+box.age.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y =  age, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  geom_jitter(alpha = 0.5, width = 0.08) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Age");
+  #ggtitle("Distribution of Age by MA use")
+
+grid.arrange(hist.age, hist.age.ma, dens.age.ma, box.age.ma, top = "Distribution of Age by MA Use")
+```
+
+***
+
+### Education
+```{r distr.edu, echo = F}
+bar.edu <- screened %>% 
+  mutate(education = fct_reorder(education, desc(education))) %>% 
+  ggplot(aes(x = education)) +
+  geom_bar(col = "black", fill = .grey) +
+  coord_flip() +
+  labs(x = "Education Level", y = "") +
+  #ggtitle("Education Count") +
+  theme_light()
+
+bar.edu.ma <- screened %>%
+  mutate(education = fct_reorder(education, desc(education))) %>% # Reorder levels of education 
+  ggplot(aes(x = education, fill = meth_ingest)) +
+  geom_bar(position = "dodge", col = "black") +
+  #geom_text(stat = "count", aes(label = ..count..)) +
+  coord_flip() +
+  labs(x = "Education Level", y = "", fill = "MA Use") +
+  #ggtitle("Education count by MA use") +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(bar.edu, bar.edu.ma, nrow = 2, top = "Education Distribution")
+```
+
+***
+
+### Ethnicity
+```{r distr.eth, echo = F}
+bar.eth <- screened %>% 
+  ggplot(aes(x = reorder(ethnicity, ethnicity, function(x) -length(x)))) +
+  geom_bar(fill = .grey, col = "black") +
+  geom_text(stat = "count", aes(label = ..count..), hjust = -.3) +
+  coord_flip() +
+  labs(x = "Ethnicity", y = "") +
+  theme_light()
+
+bar.eth.ma <- screened %>%
+  ggplot(aes(x = reorder(ethnicity, ethnicity, function(x) -length(x)), fill = meth_ingest)) +
+  geom_bar(col = "black", position = "dodge") +
+  coord_flip() +
+  labs(x = "Ethnicity", y = "", fill = "MA Use") +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(bar.eth, bar.eth.ma, nrow = 2, top = "Ethnicity Distribution")
+```
+
+***
+
+### Area of Residence
+```{r distr.live, echo = F}
+bar.res <- screened %>% 
+  ggplot(aes(x = reorder(area_live, area_live, function(x) length(x)))) +
+  geom_bar(fill = .grey, col = "black") +
+  geom_text(stat = "count", aes(label = ..count..), vjust = -.3) +
+  labs(x = "Area of Residence", y = "") +
+  theme_light()
+
+bar.res.ma <- screened %>% 
+  ggplot(aes(x = reorder(area_live, area_live, function(x) length(x)), fill = meth_ingest)) +
+  geom_bar(col = "black", position = "dodge") +
+  labs(x = "Area of Residence", fill = "MA Use") +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  theme_light();
+
+grid.arrange(bar.res, bar.res.ma, nrow = 2, top = "Area of Residence Distribution")
+
+```
+
+***
+## Drug Use
+### Alcohol
+```{r, echo=FALSE}
+# Rearranging levels
+levels(screened$AUDIT_frequency) <- c("Four or more times a week", "Two to three times per week", "Two to four times a month","Monthly or less", "Never")
+
+label(screened$alcohol_ever) <- "Have you ever consumed Alcohol?"
+label(screened$AUDIT_frequency) <- "How often (if at all) do you consume Alcohol"
+
+table1(~alcohol_ever, data = screened, caption = "Alcohol Consumption (Overall)")
+table1(~alcohol_ever, data = screened %>% filter(meth_ingest == "Yes"), caption = "Alcohol Consumption (MA Users)")
+table1(~alcohol_ever, data = screened %>% filter(meth_ingest == "No"), caption = "Alcohol Consumption (non-drug users)")
+
+# Frequency (covered in AUDIT)
+# table1(~AUDIT_frequency, data = screened, caption = "Frequency of Alcohol Use (Total)")
+# table1(~AUDIT_frequency, data = screened %>% filter(meth_ingest == "Yes"), caption = "Frequency of Alcohol Use (MA Users)")
+# table1(~AUDIT_frequency, data = screened %>% filter(meth_ingest == "No"), caption = "Frequency of Alcohol Use (Non-Drug Users)")
+# 
+# alc.freq.ma <- screened %>% 
+#   filter(meth_ingest == "Yes") %>% 
+#   ggplot(aes(x = AUDIT_frequency, fill = meth_ingest)) +
+#   geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+#   coord_flip() +
+#   scale_fill_manual(values = .ma) +
+#   theme_light() +
+#   theme(legend.position = "none") +
+#   labs(x = "", y = "Proportion (%)") +
+#   ggtitle("Alcohol Frequency in MA Users")
+# 
+# alc.freq.nma <- screened %>% 
+#   filter(meth_ingest == "No") %>% 
+#   ggplot(aes(x = AUDIT_frequency, fill = meth_ingest)) +
+#   geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+#   coord_flip() +
+#   scale_fill_manual(values = .nma) +
+#   theme_light() +
+#   theme(legend.position = "none") +
+#   labs(x = "", y = "Proportion (%)") +
+#   ggtitle("Alcohol Frequency in non-drug users")
+# 
+# grid.arrange(alc.freq.ma, alc.freq.nma)
+```
+
+#### AUDIT-C {-}
+The <a href = https://cde.drugabuse.gov/instrument/f229c68a-67ce-9a58-e040-bb89ad432be4> Alcohol Use Disorders Identification Test-Concise (AUDIT-C) </a> is a brief alcohol screening instrument that reliably identifies persons who are hazardous drinkers or have active alcohol use disorders (including alcohol abuse or dependence).
+
+The AUDIT-C has 3 questions and is scored on a scale of 0-12. Each AUDIT-C question has 5 answer choices valued from 0 points to 4 points. In men, a score of 4 or more is considered positive, optimal for identifying hazardous drinking or active alcohol use disorders. In women, a score of 3 or more is considered positive. Generally the higher the score, the more likely it is that a person's drinking is affecting his or her safety.
+
+```{r AUDIT.Prep, include = F}
+label(screened$AUDIT_Total) <- "AUDIT-C Total"
+label(screened$AUDIT_Risky) <- "AUDIT-C Risky"
+
+# Proportional bar chart function
+bar.prop <- function(df, xcol, ycol, fill) {
+  ggplot(data = df, aes(x = {{xcol}}, fill = {{fill}})) +
+    geom_bar(aes(y = (..count..) / sum(..count..) * 100)) +
+    theme_light()
+}
+
+bar.audit <- bar.prop(screened %>% filter(!is.na(AUDIT_Risky)), xcol = AUDIT_Risky) +
+  scale_fill_manual(values = .grey) +
+  labs(x = "AUDIT-C Hazardous Drinking", y = "Proportion (%)") +
+  ggtitle("AUDIT-C High Score (>3 Men, >2 Women)")
+  
+  
+bar.audit.ma <- screened %>% 
+  filter(meth_ingest == "Yes", !is.na(AUDIT_Risky)) %>% 
+  ggplot(aes(x = AUDIT_Risky, fill = meth_ingest)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100)) +
+  scale_fill_manual(values = .ma) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "AUDIT-C Hazardous Drinking", y = "Proportion (%)") +
+  ggtitle("AUDIT-C High Score (MA Users)")
+
+bar.audit.nma <- bar.prop(screened %>% filter(meth_ingest == "No", !is.na(AUDIT_Risky)), xcol = AUDIT_Risky, fill = meth_ingest) +
+  scale_fill_manual(values = .nma) +
+  theme(legend.position = "none") +
+  labs(x = "AUDIT-C Hazardous Drinking", y = "Proportion (%)") +
+  ggtitle("AUDIT-C High Score (Non-Drug Users)")
+```
+
+##### Distribution of AUDIT-C Scores {-}
+```{r AUDIT.distr, echo = F, warning=F}
+hist.audit.all <- screened %>% 
+  ggplot(aes(x = AUDIT_Total)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "AUDIT-C Total Score", y = "Count")
+
+dens.audit <- screened %>% 
+  ggplot(aes(x = AUDIT_Total, fill = meth_ingest)) +
+  geom_density(alpha = 0.5) +
+  theme_light() +
+  labs(x = "AUDIT-C Total", y = "Density", fill = "MA Use") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+hist.audit <- screened %>% 
+  ggplot(aes(x = AUDIT_Total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  facet_grid(meth_ingest ~ .) +
+  labs(x = "AUDIT-C Total Score", y = "Count", fill = "Meth Use")
+
+box.audit <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = AUDIT_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.5) +
+  geom_jitter(height = 0, width = 0.03, alpha = 0.5) +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "MA Use", y = "AUDIT-C Total") +
+  theme(legend.position = "none")
+
+grid.arrange(hist.audit.all, hist.audit, dens.audit, box.audit, ncol = 2)
+```
+
+##### Proportion considered "Hazardous Drinkers" {-}
+```{r AUDIT, echo = F}
+table1(~AUDIT_Total + AUDIT_Risky, data = screened %>% filter(!is.na(AUDIT_Total)), caption = "AUDIT-C Overall Scores")
+
+table1(~AUDIT_Total + AUDIT_Risky, data = screened %>% filter(meth_ingest == "Yes", !is.na(AUDIT_Total)), caption = "AUDIT-C Scores (MA Users)")
+
+table1(~AUDIT_Total + AUDIT_Risky, data = screened %>% filter(meth_ingest == "No", !is.na(AUDIT_Total)), caption = "AUDIT-C Scores (Non-Drug Users)")
+
+bar.audit
+grid.arrange(bar.audit.ma, bar.audit.nma, ncol = 2)
+```
+
+### Drugs (MA Users only)
+
+#### Methamphetamine {-}
+
+```{r distr.ma, echo = F}
+plot.count <- screened %>%
+  ggplot(aes(x = reorder(meth_user, meth_user, function(x) -length(x)))) +
+  geom_bar(fill = .grey, col = "black") +
+  geom_text(stat = "count", aes(label = ..count..), vjust = -.3) +
+  labs(x = "Type of User", y = "n") +
+  ggtitle("Count of MA and non-MA users") +
+  theme_light()
+
+plot.count
+```
+
+```{r ma.prep, include = FALSE}
+screened <- screened %>% 
+  mutate(meth_use_extreme = fct_recode(as_factor(meth_use_ways),
+                                    "Injection" = "Injection under the skin?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "Injection under the skin?,By mouth, drinking or in a pill?",
+                                    "Injection" = "Injection under the skin?,Smoking, freebasing?",
+                                    "Injection" = "Injection under the skin?,Smoking, freebasing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?,By mouth, drinking or in a pill?",
+                                    "Injection" = "Injection under the skin?,Smoking, freebasing?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?,Smoking, freebasing?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "Injection under the skin?",
+                                    "Injection" = "IV, through the veins?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?,Smoking, freebasing?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Injection" = "IV, through the veins?,Injection under the skin?,Snorting, sniffing, breathing?",
+                                    "Smoking" = "Smoking, freebasing?,Snorting, sniffing, breathing?,By mouth, drinking or in a pill?",
+                                    "Smoking" = "Smoking, freebasing?,Snorting, sniffing, breathing?",
+                                    "Smoking" = "Smoking, freebasing?,By mouth, drinking or in a pill?",
+                                    "Smoking" = "Smoking, freebasing?",
+                                    "Snorting" = "Snorting, sniffing, breathing?",
+                                    "Oral" = "By mouth, drinking or in a pill?"))
+         
+```
+
+```{r ma.rearrange, include = FALSE}
+# Rearranging levels
+screened$meth_use_at_peak <- factor(screened$meth_use_at_peak, levels = c("Daily", "Weekly", "1 to 2 times per month", "Less than or about 1 time per month"))
+screened$meth_recent_use <- factor(screened$meth_recent_use, levels = c("Days", "Weeks", "Months", "Years"))
+screened$meth_use_extreme <- factor(screened$meth_use_extreme, levels = c("Oral", "Snorting", "Smoking", "Injection"))
+```
+
+```{r ma.summ, echo = FALSE}
+ma.df <- screened %>% filter(meth_ingest == "Yes") # df with only ma users
+
+ma.df <- ma.df %>% 
+  mutate(polydrug_use = ifelse(ma.df$drug_use_cannabis != "Never" | 
+                                 ma.df$drug_use_club_drugs != "Never" |
+                                 ma.df$drug_use_cocaine != "Never" |
+                                 ma.df$drug_use_hallucinogens != "Never" |
+                                 ma.df$drug_use_heroin != "Never" |
+                                 ma.df$drug_use_sedatives != "Never" , "Yes", "No"))
+
+# Labelling for table
+label(ma.df$meth_use_at_peak) <- "At the time when you were using MA the most, how often did you use it?"
+label(ma.df$meth_last_12_months) <- "In the last 12 months, did you use MA in any form?"
+label(ma.df$meth_use_age) <- "How old were you when you first began using MA?"
+label(ma.df$meth_recent_use) <- "When was the most recent time you used MA?"
+label(ma.df$meth_use_extreme) <- "Most extreme form of use"
+label(ma.df$polydrug_use) <- "Ever used an illicit drug other than MA?"
+
+table1(~meth_use_age + meth_use_at_peak + meth_last_12_months + meth_recent_use + meth_use_extreme + polydrug_use , data = ma.df)# %>% 
+  # kable_styling("striped") %>% 
+  # scroll_box(height = "800px")
+```
+
+```{r ma.plots, echo = F}
+ma.df %>% 
+  ggplot(aes(x = meth_use_age)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "How Old were you when you first began using MA?", y = "")
+```
+
+#### Other Drug Use {-}
+TBC
+
+***
+
+## Driving Under the Influence
+### Alcohol (DUI)
+Instances of driving Under the Influence of Alcohol (DUI) was assessed with the following dichotomous item:
+
+*Have you EVER had your driver's license or learner's permit suspended or revoked for moving violations related to alcohol use? (Yes/No)*
+
+If respondents selected "yes" to the above question, they were asked the following question*:
+
+*Have you EVER done things that could have easily hurt you or someone else like speeding or driving or using heavy machinery while under the influence of alcohol? (Yes/No)*
+
+The first question was only presented to respondents that responded affirmative to having consumed alcohol.
+
+
+* Note: For ease of interpretation, only the suspension question has been analysed.
+
+```{r dui.incidence.tables, echo=F}
+label(screened$DUI_suspended) <- "License Suspended or Revoked from DUI"
+
+table1(~DUI_suspended, data = screened %>% filter(!is.na(DUI_suspended)), caption = "Suspended Overall")
+table1(~DUI_suspended, data = screened %>% filter(meth_ingest == "Yes", !is.na(DUI_suspended)), caption = "Suspended MA Users")
+table1(~DUI_suspended, data = screened %>% filter(meth_ingest == "No", !is.na(DUI_suspended)), caption = "Suspended Non-drug users")
+```
+
+```{r dui.incidence.plots, echo = F}
+bar.dui.ma <- screened %>%
+  filter(!is.na(DUI_suspended),
+         meth_ingest == "Yes") %>% 
+  ggplot(aes(x = DUI_suspended, fill = meth_ingest)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100), position = "dodge") +
+  theme_light() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = .ma) +
+  labs(x = "Licence Suspended", y = "Proportion (%)") +
+  ggtitle("License Suspended from DUI (MA Users)") +
+  coord_flip()
+
+bar.dui.nma <- screened %>%
+  filter(!is.na(DUI_suspended),
+         meth_ingest == "No") %>% 
+  ggplot(aes(x = DUI_suspended, fill = meth_ingest)) +
+  geom_bar(aes(y = (..count..)/sum(..count..)*100), position = "dodge") +
+  theme_light() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = .nma) +
+  labs(x = "Licence Suspended", y = "Proportion (%)") +
+  ggtitle("License Suspended from DUI (Non-drug Users)") +
+  coord_flip()
+
+grid.arrange(bar.dui.ma, bar.dui.nma, nrow = 2)
+
+```
+
+### Drugs (DUID)
+Instances of driving under the influence of drugs (DUID) was assessed with the following question:
+
+*Have you ever driven a car, motorcycle, truck, boat or other vehicle when you were under the influence of drugs?*
+
+An affirmative response would then present the participant with questions relating to the recency of the DUID (Last 12 months and/or Before last 12 months) and the medicines or drugs that the DUID occurred with.  
+
+Respondents were also presented with the same questions (regarding license suspension) as the DUI questions (TBC)
+
+```{r DUID.prep, include = F}
+screened <- screened %>% mutate(
+  DUID_recent_meth = ifelse(str_detect(screened$DUID_recent_drugs, "Amphetamine"), TRUE, FALSE),
+  DUID_lifetime_meth = ifelse(str_detect(screened$DUID_lifetime_drugs, "Amphetamine"), TRUE, FALSE),
+  DUID_any_meth = ifelse(DUID_recent_meth == TRUE | DUID_lifetime_meth == TRUE, TRUE, FALSE),
+  DUID_suspended_meth = ifelse(str_detect(screened$DUID_suspended_drugs, "Amphetamine"), TRUE, FALSE)
+)
+```
+
+
+```{r DUID.tables, echo = F}
+label(screened$DUID_incidence) <- "DUID Incidence"
+label(screened$DUID_any_meth) <- "Ever Driven under the Influence of MA?"
+
+table1(~DUID_incidence + DUID_any_meth + DUID_recent + DUID_recent_meth + DUID_lifetime + DUID_lifetime_meth + DUID_suspended + DUID_suspended_meth + DUID_ongoing, data = screened %>% filter(meth_ingest == "Yes"))
+```
+
+***
+
+## Distribution of key variables by MA Use
+### Dula Dangerous Driving Index (DDDI)
+#### About {-}
+The DDDI includes 28$^*$ items (divided into 3 categorical subscales) with each item assessing a persons tendency to engage in certain driving practices or beliefs held around specific driving behaviours.  Each item is scored on a 5-point Likert scale from 1 (Never) to 5 (Always).
+
+<br>
+
+The total score can be used as a composite measure for one's tendency and/or willingness to engage in dangerous driving.  Scores can range from 27 to 135.
+
+<br>
+
+#### Subscales: {-}
+
+**Aggressive Driving:**
+Assessed with 7 items which reflect behaviours that are intentionally meant to annoy, irritate or punish other drivers.  E.g. *I flash my headlights when I am annoyed by another driver.*
+
+Scores range from 7 to 35.
+
+<br>
+
+**Negative Emotional Driving:**
+Assessed with 9 items which gauge irritability and anger while driving and the tendency to become annoyed with other drivers.  E.g. *I lose my temper while driving.*
+
+Scores range from 9 to 45.
+
+<br>
+
+**Risky Driving:**
+Assessed with 11 items which gauge ones willingness to engage in unsafe driving behaviours.  E.g. *I will "drag race" other drivers at stop lights to get out front.*
+
+Scores range from 11 to 55. 
+
+<br>
+<br>
+
+$^*$The present study used 27 items with one item from the "Risky Driving" subscale - *I will weave in and out of slower traffic* - omitted from the questionnaire.  To view all the items used in the questionnaire, see the Appendix
+
+***
+
+#### Total Score {-}
+```{r di.total, echo = F}
+# Summary Table
+
+# Histogram
+hist.di <- screened %>% 
+  ggplot(aes(x = DDDI_Total)) +
+  geom_histogram(binwidth = 3, col = "black", fill = .grey) +
+  labs(x = "DDDI Total Score", y = "") +
+  theme_light()
+
+# Hist by MA
+hist.di.ma <- screened %>% 
+  ggplot(aes(x = DDDI_Total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 3, col = "black") +
+  labs(x = "DDDI Total Score", y = "", fill = "MA Use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Dens by MA
+dens.di.ma <- screened %>% 
+  ggplot(aes(x = DDDI_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "DDDI Total Score", y = "Density", fill = "MA Use") +
+  theme_light()
+
+# Box and scatter
+box.di.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "DDDI Total") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(hist.di, hist.di.ma, dens.di.ma, box.di.ma, nrow = 2, ncol = 2, top = "Distribution of Total DDDI Scores")
+
+```
+
+***
+
+#### Aggressive Driving {-}
+```{r di.AG, echo = F}
+# Histogram
+hist.ag <- screened %>% 
+  ggplot(aes(x = DDDI_AD_Total)) +
+  geom_histogram(binwidth = 2, col = "black", fill = .grey) +
+  labs(x = "DDDI Aggression Score", y = "") +
+  #ggtitle("Distribution of DDDI Total Score") +
+  theme_light()
+
+# Hist by MA
+hist.ag.ma <- screened %>% 
+  ggplot(aes(x = DDDI_AD_Total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 2, col = "black") +
+  labs(x = "DDDI Aggression Score", y = "", fill = "MA Use") +
+  #ggtitle("DDDI Aggression by MA Use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Dens by MA
+dens.ag.ma <- screened %>% 
+  ggplot(aes(x = DDDI_AD_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "DDDI Aggression Score", y = "Density", fill = "MA Use") +
+  #ggtitle("DDDI Aggression by MA Use (Density)") +
+  theme_light()
+
+# Box and scatter
+box.ag.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "DDDI Aggression") +
+  #ggtitle("Box plot of DDDI Aggression by MA Use") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(hist.ag, hist.ag.ma, dens.ag.ma, box.ag.ma, nrow = 2, top = "Distribution of DDDI Aggressive Driving Scores")
+```
+
+***
+
+#### Negative Emotional Driving {-}
+```{r di.NE, echo = F}
+# Histogram
+hist.ned <- screened %>% 
+  ggplot(aes(x = DDDI_NE_Total)) +
+  geom_histogram(binwidth = 2, col = "black", fill = .grey) +
+  labs(x = "DDDI NED Score", y = "") +
+  #ggtitle("Distribution of DDDI Negative Emotional Driving (NED) Score") +
+  theme_light()
+
+# Hist by MA
+hist.ned.ma <- screened %>% 
+  ggplot(aes(x = DDDI_NE_Total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 2, col = "black") +
+  labs(x = "DDDI NED Score", y = "", fill = "MA Use") +
+  #ggtitle("DDDI NED by MA Use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Dens by MA
+dens.ned.ma <- screened %>% 
+  ggplot(aes(x = DDDI_NE_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "DDDI NED Score", y = "Density", fill = "MA Use") +
+  #ggtitle("DDDI NED by MA Use (Density)") +
+  theme_light()
+
+# Box and scatter
+box.ned.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "DDDI NED") +
+  #ggtitle("Box plot of DDDI NED by MA Use") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(hist.ned, hist.ned.ma, dens.ned.ma, box.ned.ma, nrow = 2, top = "Distribution of DDDI Negative Emotional Driving Scores")
+
+```
+
+***
+
+#### Risky Driving {-}
+```{r di.RD, echo = F}
+# Histogram
+hist.rd <- screened %>% 
+  ggplot(aes(x = DDDI_RD_Total)) +
+  geom_histogram(binwidth = 2, col = "black", fill = .grey) +
+  labs(x = "DDDI Risky Driving Score", y = "") +
+  #ggtitle("Distribution of DDDI Risky Driving Score") +
+  theme_light()
+
+# Hist by MA
+hist.rd.ma <- screened %>% 
+  ggplot(aes(x = DDDI_RD_Total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 2, col = "black") +
+  labs(x = "DDDI Risky Driving Score", y = "", fill = "MA Use") +
+  #ggtitle("DDDI Risky Driving by MA Use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Dens by MA
+dens.rd.ma <- screened %>% 
+  ggplot(aes(x = DDDI_RD_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "DDDI Risky Driving Score", y = "Density", fill = "MA Use") +
+  #ggtitle("DDDI Risky Driving by MA Use (Density)") +
+  theme_light()
+
+# Box and scatter
+box.rd.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "DDDI Risky Driving") +
+  #ggtitle("Box plot of DDDI Risky Driving by MA Use") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(hist.rd, hist.rd.ma, dens.rd.ma, box.rd.ma, nrow = 2, top = "Distribution of DDDI Risky Driving Scores")
+
+```
+
+***
+
+#### Aggressive Driving Items {-}
+```{r di.ad.ind, echo = F}
+box.ad.1 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_1, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("I flash my headlights when I am annoyed by another driver")
+
+box.ad.2 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_2, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("I make rude gestures toward drivers who annoy me")
+
+box.ad.3 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_3, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("I verbally insult drivers who annoy me")
+
+box.ad.4 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_4, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "Score") +
+  theme(legend.position = "none") +
+  ggtitle("I would tailgate a driver who annoys me")
+
+box.ad.5 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_5, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("I deliberately use my car/truck to block drivers who tailgate me.")
+
+box.ad.6 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_6, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("I feel it is my right to strike back in some way...")
+
+box.ad.7 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_AD_7, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.2, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("When someone cuts me off, I feel I should punish him/her")
+
+grid.arrange(box.ad.1, box.ad.2, box.ad.3, box.ad.4) 
+grid.arrange(box.ad.5, box.ad.6, box.ad.7, ncol = 2)
+
+```
+
+
+#### Negative Emotional Driving Items {-}
+```{r di.ned.ind, echo = F}
+box.ne.1 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_1, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q65")
+
+box.ne.2 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_2, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q66")
+
+box.ne.3 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_3, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q67")
+
+box.ne.4 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_4, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q79")
+
+box.ne.5 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_5, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q83")
+
+box.ne.6 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_6, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q84")
+
+box.ne.7 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_7, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q85")
+
+box.ne.8 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_8, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q88")
+
+box.ne.9 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_NE_9, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q92")
+
+grid.arrange(box.ne.1, box.ne.2, box.ne.3, box.ne.4, box.ne.5, ncol = 2)
+grid.arrange(box.ne.6, box.ne.7, box.ne.8, box.ne.9, ncol = 2)
+
+```
+
+#### Risky Driving Items {-}
+```{r di.rd.ind, echo = F}
+box.rd.1 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_1, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q74")
+
+box.rd.2 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_2, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q76")
+
+box.rd.3 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_3, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q80")
+
+box.rd.4 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_4, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q81")
+
+box.rd.5 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_5, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q86")
+
+box.rd.6 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_6, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q87")
+
+box.rd.7 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_7, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q89")
+
+box.rd.8 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_8, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q90")
+
+box.rd.9 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_9, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q92")
+
+box.rd.10 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_10, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q93")
+
+box.rd.11 <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DDDI_RD_11, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, height = 0, alpha = 0.5) +
+  theme_light() +
+  theme(legend.position = "none") +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Q94")
+
+grid.arrange(box.rd.1, box.rd.2, box.rd.3, box.rd.4, box.rd.5, box.rd.6)
+grid.arrange(box.rd.7, box.rd.8, box.rd.9, box.rd.10, box.rd.11)
+```
+
+***
+
+### STAXI-2
+#### About {-}
+The State-Trait Anger Expression Inventory (STAXI-2) is designed to understand the attitudes, emotional states and behaviours that are typical to a person in regard to their feelings, control and expression of anger.  It distinguishes anger between being a passing/present state as a personality trait.
+
+The full STAXI-2 contains 57 items grouped into 12 subscales which lie under three factors (State Anger, Trait Anger and Anger Control and Expression).  
+
+For the purposes of this study, only the subscacles relating to State and Trait Anger were used.  
+
+##### Scoring {-}
+Each Item on the STAXI-2 is rated on a 4-point Likert scale from 1 (Not al all/Almost Never) to 4 (Very much so/Almost Always).
+Total score for State or Trait Anger is obtained by adding up the items from each subscale.  Total scores for the subscales are obtained by adding up the scores of each item for the corresponding subscale.  
+
+#### State Anger {-}
+Assesses the intensity of the individual's angry feelings at time of testing.
+
+Minimum Possible Score = 14.  Maximum Possible Score = 56.
+
+##### Subscales: {-}
+**Feeling Angry (S-Ang/F):**
+Measures the intensity of the angry feelings the person may be experiencing.
+
+<br>
+
+**Feel like verbally expressing anger (S-Ang/V):**
+Measures the intensity of the current feelings related to the verbal expression of anger.
+
+<br>
+
+**Feel like physically expressing anger (A-Ang/P):**
+Measures the intensity of the current feelings related to the physical expression of anger.
+
+<br>
+
+#### Trait Anger {-}
+Measures the general tendency of a person to get angry. 
+
+Minimum Possible Score = 10.  Maximum Possible Score = 40.
+
+##### Subscales: {-}
+**Angry Temperament (T-Ang/T):**
+Measures the disposition to experience anger without specific provocation. 
+
+<br>
+
+**Angry Reaction (T-Ang/T):**
+Measures the frequency with which angry feelings are experienced in situations that involve frustration and/or negative evaluations.  
+<br>
+
+
+***
+
+#### State Anger Total {-}
+```{r staxi.state, echo = F}
+# Histogram
+hist.sstaxi <- screened %>% 
+  ggplot(aes(x = S_Ang_Total)) +
+  geom_histogram(binwidth = 1, col = "black", fill = .grey) +
+  labs(x = "State Anger", y = "") +
+  #ggtitle("Distribution of State Anger Scores") +
+  theme_light()
+
+# Hist by MA
+hist.sstaxi.ma <- screened %>% 
+  ggplot(aes(x = S_Ang_Total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  labs(x = "State Anger", y = "", fill = "MA Use") +
+  #ggtitle("State Anger by MA Use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Dens by MA
+dens.sstaxi.ma <- screened %>% 
+  ggplot(aes(x = S_Ang_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "State Anger", y = "Density", fill = "MA Use") +
+  #ggtitle("State Anger by MA Use (Density)") +
+  theme_light()
+
+# Box and scatter
+box.sstaxi.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = S_Ang_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "State Anger") +
+  #ggtitle("Box plot of State Anger by MA Use") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(hist.sstaxi, hist.sstaxi.ma, dens.sstaxi.ma, box.sstaxi.ma, ncol = 2, top = "Distribution of State STAXI Scores (Total)")
+```
+
+#### State anger Subscales {-}
+```{r staxi.state.subs, echo=F}
+# Feeling box
+box.sstaxi.F <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = S_Ang_F_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Feeling") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+#Verbal box
+box.sstaxi.V <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = S_Ang_V_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "") +
+  ggtitle("Verbal") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Physical box
+box.sstaxi.P <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = S_Ang_P_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "") +
+  ggtitle("Physical") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Feeling Dens
+dens.sstaxi.F <- screened %>% 
+  ggplot(aes(x = S_Ang_F_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Feeling", y = "Density", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+# Verbal Dens
+dens.sstaxi.V <- screened %>% 
+  ggplot(aes(x = S_Ang_V_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Verbal", y = "", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+# Physical Dens
+dens.sstaxi.P <- screened %>% 
+  ggplot(aes(x = S_Ang_P_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Physical", y = "", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+grid.arrange(box.sstaxi.F, box.sstaxi.V, box.sstaxi.P, 
+             dens.sstaxi.F, dens.sstaxi.V, dens.sstaxi.P, nrow = 2, ncol = 3)
+```
+
+***
+
+#### Trait Anger Total {-}
+```{r staxi.trait, echo = F}
+# Histogram
+hist.tstaxi <- screened %>% 
+  ggplot(aes(x = T_Ang_Total)) +
+  geom_histogram(binwidth = 1, col = "black", fill = .grey) +
+  labs(x = "Trait Anger", y = "") +
+  #ggtitle("Distribution of Trait Anger Scores") +
+  theme_light()
+
+# Hist by MA
+hist.tstaxi.ma <- screened %>% 
+  ggplot(aes(x = T_Ang_Total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  labs(x = "Trait Anger", y = "", fill = "MA Use") +
+  #ggtitle("Trait Anger by MA Use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Dens by MA
+dens.tstaxi.ma <- screened %>% 
+  ggplot(aes(x = T_Ang_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Trait Anger", y = "Density", fill = "MA Use") +
+  #ggtitle("Trait Anger by MA Use (Density)") +
+  theme_light()
+
+# Box and scatter
+box.tstaxi.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = T_Ang_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.1, height = 0, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "Trait Anger") +
+  #ggtitle("Box plot of Trait Anger by MA Use") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(hist.tstaxi, hist.tstaxi.ma, dens.tstaxi.ma, box.tstaxi.ma, ncol = 2, top = "Distribution of Trait Staxi Scores (Total)")
+
+```
+
+#### Trait Anger Subscales {-}
+```{r staxi.trait.subs, echo = F}
+# Temperament box
+box.tstaxi.T <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = T_Ang_T_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "Score") +
+  ggtitle("Angry Temperament") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Reaction box
+box.tstaxi.R <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = T_Ang_R_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(width = 0.08, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "") +
+  ggtitle("Angry Reaction") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Temperament dens
+dens.tstaxi.T <- screened %>% 
+  ggplot(aes(x = T_Ang_T_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Temperament", y = "Density", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+# Reaction dens
+dens.tstaxi.R <- screened %>% 
+  ggplot(aes(x = T_Ang_R_Total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "Reaction", y = "", fill = "MA Use") +
+  theme_light() +
+  theme(legend.position = "none")
+
+grid.arrange(box.tstaxi.T, box.tstaxi.R, 
+             dens.tstaxi.T, dens.tstaxi.R, nrow = 2, ncol = 2)
+
+```
+
+***
+
+### K6 Distress Scale
+The K6 Distress scale is a 6-item assessment that measures overall distress from depressive and anxiety related symptoms.
+
+It measures distress for the period 4 weeks prior to administration of the test.  
+
+Each Item is rated on a 5-point$^*$ likert scale ranging from 1 (none of the time) to 5 (all of the time).
+
+Total score is obtained by simply adding up the item scores together.
+
+The minimum score one can obtain is 6 and the maximum is 30.
+
+
+$^*$The present study used a 4-point scale for the item *During the past 30 days, about how often did you feel depressed?* with the level "A little of the time" omitted from the survey.
+
+#### Numeric summary {-}
+```{r num.summ.k6, echo=F}
+label(screened$k6_total) <- "K6 Distress Score"
+
+table1(~k6_total, data = screened, caption = "Overall K6 Distress Scores")
+
+table1(~k6_total, data = screened %>% filter(meth_ingest == "Yes"), caption = "K6 Distress Scores for MA Users")
+
+table1(~k6_total, data = screened %>% filter(meth_ingest != "Yes"), caption = "K6 Distress Scores for non-MA Users")
+```
+
+
+#### K6 Distribution {-}
+```{r dist.k6, echo = F, warning=F}
+# Hist
+hist.k6 <- screened %>% ggplot(aes(x = k6_total)) +
+  geom_histogram(binwidth = 1, col = "black", fill = .grey) +
+  labs(x = "K6 Distress Score", y = "") +
+  theme_light();
+
+# Hist by MA
+hist.k6.ma <- screened %>% 
+  ggplot(aes(x = k6_total, fill = meth_ingest)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  labs(x = "K6 Distress Score", y = "", fill = "MA Use") +
+  theme_light() +
+  facet_grid(meth_ingest ~.) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+# Dens by MA
+dens.k6.ma <- screened %>% 
+  ggplot(aes(x = k6_total, fill = meth_ingest)) +
+  geom_density(col = "black", alpha = 0.5) +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "K6 Distress Score", y = "Density", fill = "MA Use") +
+  theme_light()
+
+# Boxplot by MA
+box.k6.ma <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = k6_total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, alpha = 0.8) +
+  geom_jitter(width = 0.1, height = 0, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "K6 Distress Score") +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(hist.k6, hist.k6.ma, dens.k6.ma, box.k6.ma, top = "Distribution of K6 Distress Scores")
+```
+
+### Severity Dependence Scale (SDS)
+The SDS is a 5 item questionnaire that provides a score indicating the severity of dependence on a given substance.
+Each item is scored from 0 to 3, with a higher score indicating greater dependence.
+
+Those whose total score is above 4 are considered to be dependent users.
+
+```{r sds, echo=F}
+ma <- screened %>% filter(meth_ingest == "Yes")
+label(ma$meth_SDS) <- "SDS"
+table1(~meth_SDS, data = ma)
+
+ma %>% 
+  ggplot(aes(x = meth_SDS)) +
+  geom_histogram(binwidth = 1, col = "black", fill = .grey) +
+  theme_light() +
+  labs(x = "Severity Dependence Score", y = "") +
+  ggtitle("Distribution of SDS Scores")
+```
+
+***
+
+### Attitudes
+Two questionnaires designed to assess participants attitudes toward drink and drug driving were administered.  
+Each questionnaire included 10 items rated on a 7-point Likert scale indicating to what extend the participant agreed or disagreed with the statement (e.g. *My community needs stricter laws against drink driving*).  After taking into account items that were reverse scored (e.g. *It's OK to drive after drinking as long as you're not too drunk*), total scores were calculated with higher scores indicating a more favourable attitude toward drink or drug driving.
+
+#### Attitudes toward Drink Driving (DUI) {-}
+```{r attitudes.DUI, echo = F}
+label(screened$DUI_attitude_Total) <- "DUI Attitude Total"
+table1(~DUI_attitude_Total, data = screened, caption = "DUI Attitude")
+table1(~DUI_attitude_Total, data = screened %>% filter(meth_ingest == "Yes"), caption = "DUI Attitude MA Users")
+table1(~DUI_attitude_Total, data = screened %>% filter(meth_ingest == "No"), caption = "DUI Attitude non-drug Users")
+
+dens.dui.att <- screened %>% 
+  ggplot(aes(x = DUI_attitude_Total, fill = meth_ingest)) +
+  geom_density(alpha = 0.5, col = "black") +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "DUI Attitude Score", y = "Density", fill = "MA User")
+
+box.dui.att <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DUI_attitude_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(height = 0, width = 0.1, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "DUI Attitude Score", fill = "MA User") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(dens.dui.att, box.dui.att, nrow = 2)
+
+```
+
+
+#### Attitudes toward Drug Driving {-}
+
+
+
+```{r attitudes.DUID, echo = F, warning=F}
+label(screened$DUID_attitude_Total) <- "DUID Attitude Total"
+table1(~DUID_attitude_Total, data = screened, caption = "DUID Attitude")
+table1(~DUID_attitude_Total, data = screened %>% filter(meth_ingest == "Yes"), caption = "DUID Attitude MA Users")
+table1(~DUID_attitude_Total, data = screened %>% filter(meth_ingest == "No"), caption = "DUID Attitude non-drug Users")
+
+dens.duid.att <- screened %>% 
+  ggplot(aes(x = DUID_attitude_Total, fill = meth_ingest)) +
+  geom_density(alpha = 0.5, col = "black") +
+  theme_light() +
+  scale_fill_manual(values = c(.ma, .nma)) +
+  labs(x = "DUID Attitude Score", y = "Density", fill = "MA User")
+
+box.duid.att <- screened %>% 
+  ggplot(aes(x = meth_ingest, y = DUID_attitude_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(height = 0, width = 0.1, alpha = 0.5) +
+  theme_light() +
+  labs(x = "MA Use", y = "DUID Attitude Score", fill = "MA User") +
+  scale_fill_manual(values = c(.ma, .nma))
+
+grid.arrange(dens.duid.att, box.duid.att, nrow = 2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--chapter:end:02-univariate.Rmd-->
+
+# Bivariate Descriptives {#Bivar.Descriptives}
+```{r library, include = FALSE}
+library(bookdown)
+library(tidyverse)
+library(gridExtra)
+library(rlang) # For ggplot functions
+library(knitr)
+library(kableExtra)
+```
+
+```{r data.load, include = F}
+load("data/objects/data.full.Rda")
+load("data/objects/screened.full.Rda")
+load("data/objects/screened.Rda")
+
+```
+
+```{r data.preparation, include = F}
+# Preparing colours for graphs
+.grey <- "#A6A6A6"
+.ma <- "#DC2D27"
+.nma <- "#39B9FF"
+.lav <- "#D9BBDC"
+.lgreen <- "#BEDCB3"
+
+# Changing NA from meth_ingest and meth_user to "No"
+screened$meth_ingest[is.na(screened$meth_ingest)] <- "No"
+screened$meth_user[is.na(screened$meth_user)] <- "Non-User"
+screened$meth_user <- as.factor(screened$meth_user)
+
+# Rearranging levels for education 
+screened$education <- factor(screened$education, levels = c("Did not finish high school",
+                                                          "High School Diploma",
+                                                          "Vocational/Technical degree or certificate",
+                                                          "Did not finish University",
+                                                          "Bachelor Degree",
+                                                          "Postgraduate Degree"))
+```
+
+This section will explore bivariate relationships between each key predictor variable (STAXI-2, K6 Distress, SDS, Attitudes) and will examine in more detail their relationship with the outcome variable (DDDI).  There will be particular attention paid on the relationship between the predictors and the outcome variable and we will seek to graphically identify whether there may be an y interactions present between the predictor variables and MA use on the DDDI.
+```{r bivar.plot.function, include=FALSE}
+plot.bivar <- function(df, xcol, ycol, colour) {
+  ggplot(data = df, aes(x = {{xcol}}, y = {{ycol}}, col = {{colour}})) +
+    geom_smooth(method = "lm", alpha = 0.1, fullrange = T) +
+    geom_point(size = 2, alpha = 0.5) +
+    theme_light() +
+    scale_color_manual(values = c(.ma, .nma))
+}
+```
+## STAXI-2
+
+### State Anger (STAXI-S)
+#### DDDI by STAXI-S (ignoring MA) {-}
+```{r staxi.state.bi, echo = F, message=F, warning=F}
+plot.bivar(screened, S_Ang_Total, DDDI_Total) +
+  labs(x = "State Anger Total", y = "DDDI Total") +
+  ggtitle("DDDI by State Anger")
+```
+
+
+#### DDDI by STAXI-S (Stratified by MA) {-}
+
+```{r staxi.state.bivar, echo = F, message=F, warning=F}
+point.sstaxi <- plot.bivar(screened, S_Ang_Total, DDDI_Total, meth_ingest) +
+  labs(x = "State Total", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by State Anger")
+
+point.sstaxi.F <- plot.bivar(screened, S_Ang_F_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Feeling", y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+point.sstaxi.V <- plot.bivar(screened, S_Ang_V_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Verbal", y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+point.sstaxi.P <- plot.bivar(screened, S_Ang_P_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Physical", y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+lay <- rbind(c(2, 3, 4),
+             c(2, 3, 4))
+
+point.sstaxi
+
+grid.arrange(point.sstaxi.F, point.sstaxi.V, point.sstaxi.P, layout_matrix = lay, top = "STAXI-S Subscales")
+```
+
+### Trait Anger (STAXI-T)
+#### DDDI by STAXI-T (ignoring MA) {-}
+```{r staxi.trait.bi, echo = F, message = F, warning = F}
+plot.bivar(screened, T_Ang_Total, DDDI_Total) +
+  labs(x = "Trait Anger Total", y = "DDDI Total") +
+  ggtitle("DDDI by Trait Anger (ignoring MA use)")
+
+```
+
+#### DDDI by STAXI-T (stratified by MA Use) {-}
+```{r staxi.trait.bivar, echo = F, message = F, warning = F}
+point.tstaxi <- plot.bivar(screened, T_Ang_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Trait ", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by Trait Anger (stratified by MA use)")
+
+point.tstaxi.R <- plot.bivar(screened, T_Ang_R_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Reaction",y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+point.tstaxi.T <- plot.bivar(screened, T_Ang_T_Total, DDDI_Total, meth_ingest) +
+  labs(x = "Temperament", y = "", col = "MA Use") +
+  theme(legend.position = "none")
+
+lay <- rbind(c(2, 2, 3, 3),
+             c(2, 2, 3, 3))
+
+point.tstaxi
+grid.arrange(point.tstaxi.R, point.tstaxi.T, layout_matrix = lay, top = "STAXI-T Subscales")
+```
+
+#### DDDI Subscales by STAXI-T (stratified by MA Use) {-}
+```{r staxi.trait.dddi.subscales, echo = F, message = F, warning = F}
+point.tstaxi.AD <- plot.bivar(screened, T_Ang_Total, DDDI_AD_Total, meth_ingest) +
+  labs(x = "Trait Anger Total", y = "") +
+  ggtitle("Aggressive Driving") +
+  theme(legend.position = "none")
+
+point.tstaxi.NE <- plot.bivar(screened, T_Ang_Total, DDDI_NE_Total, meth_ingest) +
+  labs(x = "Trait Anger Total", y = "") +
+  ggtitle("Negative Emotional Driving") +
+  theme(legend.position = "none")
+
+point.tstaxi.RD <- plot.bivar(screened, T_Ang_Total, DDDI_RD_Total, meth_ingest) +
+  labs(x = "Trait Anger Total", y = "") +
+  ggtitle("Risky Driving") +
+  theme(legend.position = "none")
+
+grid.arrange(point.tstaxi.AD, point.tstaxi.NE, point.tstaxi.RD, ncol = 3)
+
+```
+
+***
+
+## K6 Distress Scale
+```{r k6.bivar, echo=F, message = F, warning = F}
+plot.bivar(screened, k6_total, DDDI_Total) +
+  labs(x = "K6 Distress Score", y = "DDDI Total")
+
+plot.bivar(screened, k6_total, DDDI_Total, meth_ingest) +
+  labs(x = "K6 Distress Score", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by K6 Distress Score (Stratified by MA use")
+```
+
+***
+
+## SDS Scale
+Bivariate relationship between SDS and DDDI (MA Users only)
+```{r SDS.bivar, echo=F, message=F, warning=F}
+plot.bivar(screened, meth_SDS, DDDI_Total)
+
+point.di.sds <- plot.bivar(screened, meth_SDS, DDDI_Total) +
+  labs(x = "SDS Score", y = "DDDI Score") +
+  theme(legend.position = "none") +
+  ggtitle("DDDI total")
+
+point.di.ad.sds <- plot.bivar(screened, meth_SDS, DDDI_AD_Total) +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Aggressive Driving")
+
+point.di.ne.sds <- plot.bivar(screened, meth_SDS, DDDI_NE_Total) +
+  labs(x = "SDS Score", y = "DDDI Negative Emotional Driving") +
+  theme(legend.position = "none") +
+  ggtitle("Negative Emotional Driving")
+
+point.di.rd.sds <- plot.bivar(screened, meth_SDS, DDDI_RD_Total) +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Risky Driving")
+
+grid.arrange(point.di.sds, point.di.ad.sds, point.di.ne.sds, point.di.rd.sds, ncol = 2)
+```
+
+***
+
+## Drug Use
+### Alcohol (AUDIT-C)
+```{r alcohol.bivar, echo = F, warning=F, message=F}
+point.di.audit <- plot.bivar(screened, AUDIT_Total, DDDI_Total) +
+  labs(x = "AUDIT-C Total", y = "DDDI Total") +
+  ggtitle("DDDI Total by AUDIT-C")
+
+point.di.audit.ma <- plot.bivar(screened, AUDIT_Total, DDDI_Total, meth_ingest) +
+  labs(x = "AUDIT-C Total", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI Total by AUDIT-C (Stratified by MA)")
+
+
+box.audit.di <- screened %>% 
+  ggplot(aes(x = AUDIT_Risky, y = DDDI_Total)) +
+  geom_boxplot(outlier.alpha = 0, height = 0, width = 0.3, alpha = 0.5) +
+  geom_jitter(height = 0, width = 0.05, alpha = 0.8) +
+  theme_light() +
+  labs(x = "AUDIT-C Risky Drinking", y = "DDDI Total") +
+  ggtitle("DDDI Total by AUDIT-C Risky Drinking")
+
+box.audit.di.ma <- screened %>% 
+  ggplot(aes(x = AUDIT_Risky, y = DDDI_Total, fill = meth_ingest)) +
+  geom_boxplot(outlier.alpha = 0, height = 0, width = 0.3, alpha = 0.5) +
+  geom_jitter(aes(col = meth_ingest), height = 0, width = 0.05, alpha = 0.8) +
+  theme_light() +
+  labs(x = "AUDIT-C Risky Drinking", y = "DDDI Total", fill = "MA Use", col = "MA Use") +
+  ggtitle("DDDI Total by AUDIT-C Risky Drinking (Stratified by MA)")
+
+grid.arrange(point.di.audit, point.di.audit.ma)
+grid.arrange(box.audit.di, box.audit.di.ma, nrow = 2)
+```
+
+```{r drug.use.bivar, echo = F}
+
+
+```
+
+***
+
+## Age
+```{r age bivar, echo=F}
+plot.bivar(screened, age, DDDI_Total) +
+  labs(x = "Age", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by Age")
+
+plot.bivar(screened, age, DDDI_Total, meth_ingest) +
+  labs(x = "Age", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by Age (stratified by MA use)")
+
+# screened %>% 
+#   ggplot(aes(x = age, y = DDDI_Total, col = sex)) +
+#   geom_point(size = 2) +
+#   theme_light() +
+#   labs(x = "Age", y = "DDDI Total Score") +
+#   facet_grid(~meth_ingest) +
+#   ggtitle("Does this work")
+```
+
+***
+
+## Attitudes
+### DUI
+```{r DUI, echo = F, message = F, warning = F}
+plot.bivar(screened, DUI_attitude_Total, DDDI_Total, meth_ingest) +
+  labs(x = "DUI Attitude Total", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by DUI Attitude")
+```
+
+```{r DUID, echo = F, message = F, warning = F}
+plot.bivar(screened, DUID_attitude_Total, DDDI_Total, meth_ingest) +
+  labs(x = "DUID Attitude Total", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by DUID Attitude")
+```
+
+## Correlation Matrix
+```{r cor.matrix.functionn, include=F}
+#' correlation_matrix from https://www.r-bloggers.com/2020/07/create-a-publication-ready-correlation-matrix-with-significance-levels-in-r/
+#' Creates a publication-ready / formatted correlation matrix, using `Hmisc::rcorr` in the backend.
+#'
+#' @param df dataframe; containing numeric and/or logical columns to calculate correlations for
+#' @param type character; specifies the type of correlations to compute; gets passed to `Hmisc::rcorr`; options are `"pearson"` or `"spearman"`; defaults to `"pearson"`
+#' @param digits integer/double; number of decimals to show in the correlation matrix; gets passed to `formatC`; defaults to `3`
+#' @param decimal.mark character; which decimal.mark to use; gets passed to `formatC`; defaults to `.`
+#' @param use character; which part of the correlation matrix to display; options are `"all"`, `"upper"`, `"lower"`; defaults to `"all"`
+#' @param show_significance boolean; whether to add `*` to represent the significance levels for the correlations; defaults to `TRUE`
+#' @param replace_diagonal boolean; whether to replace the correlations on the diagonal; defaults to `FALSE`
+#' @param replacement character; what to replace the diagonal and/or upper/lower triangles with; defaults to `""` (empty string)
+#'
+#' @return a correlation matrix
+#' @export
+#'
+#' @examples
+#' `correlation_matrix(iris)`
+#' `correlation_matrix(mtcars)`
+correlation_matrix <- function(df, 
+                               type = "pearson",
+                               digits = 3, 
+                               decimal.mark = ".",
+                               use = "all", 
+                               show_significance = TRUE, 
+                               replace_diagonal = FALSE, 
+                               replacement = ""){
+  
+  # check arguments
+  stopifnot({
+    is.numeric(digits)
+    digits >= 0
+    use %in% c("all", "upper", "lower")
+    is.logical(replace_diagonal)
+    is.logical(show_significance)
+    is.character(replacement)
+  })
+  # we need the Hmisc package for this
+  require(Hmisc)
+  
+  # retain only numeric and boolean columns
+  isNumericOrBoolean = vapply(df, function(x) is.numeric(x) | is.logical(x), logical(1))
+  if (sum(!isNumericOrBoolean) > 0) {
+    cat('Dropping non-numeric/-boolean column(s):', paste(names(isNumericOrBoolean)[!isNumericOrBoolean], collapse = ', '), '\n\n')
+  }
+  df = df[isNumericOrBoolean]
+  
+  # transform input data frame to matrix
+  x <- as.matrix(df)
+  
+  # run correlation analysis using Hmisc package
+  correlation_matrix <- Hmisc::rcorr(x, type = )
+  R <- correlation_matrix$r # Matrix of correlation coeficients
+  p <- correlation_matrix$P # Matrix of p-value 
+  
+  # transform correlations to specific character format
+  Rformatted = formatC(R, format = 'f', digits = digits, decimal.mark = decimal.mark)
+  
+  # if there are any negative numbers, we want to put a space before the positives to align all
+  if (sum(R < 0) > 0) {
+    Rformatted = ifelse(R > 0, paste0(' ', Rformatted), Rformatted)
+  }
+  
+  # add significance levels if desired
+  if (show_significance) {
+    # define notions for significance levels; spacing is important.
+    stars <- ifelse(is.na(p), "   ", ifelse(p < .001, "***", ifelse(p < .01, "** ", ifelse(p < .05, "*  ", "   "))))
+    Rformatted = paste0(Rformatted, stars)
+  }
+  # build a new matrix that includes the formatted correlations and their significance stars
+  Rnew <- matrix(Rformatted, ncol = ncol(x))
+  rownames(Rnew) <- colnames(x)
+  colnames(Rnew) <- paste(colnames(x), "", sep =" ")
+  
+  # replace undesired values
+  if (use == 'upper') {
+    Rnew[lower.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (use == 'lower') {
+    Rnew[upper.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (replace_diagonal) {
+    diag(Rnew) <- replacement
+  }
+  
+  return(Rnew)
+}
+```
+
+```{r cor.matrix.biv, echo=F, message = F}
+key.vars <- screened %>%
+  select(DDDI_Total, DDDI_AD_Total, DDDI_RD_Total, DDDI_NE_Total, 
+         k6_total, 
+         S_Ang_Total, S_Ang_F_Total, S_Ang_V_Total, S_Ang_P_Total,
+         T_Ang_Total, T_Ang_R_Total, T_Ang_T_Total,
+         DUI_attitude_Total,
+         DUID_attitude_Total)
+
+key.vars.total <- screened %>%
+  select(DDDI_Total, DDDI_AD_Total, DDDI_RD_Total, DDDI_NE_Total,
+         age,
+         k6_total, 
+         S_Ang_Total,
+         T_Ang_Total, T_Ang_R_Total, T_Ang_T_Total,
+         AUDIT_Total,
+         DUI_attitude_Total,
+         DUID_attitude_Total)
+
+corr.vars <- correlation_matrix(key.vars.total, digits = 2, use = "lower")
+
+kable(corr.vars) %>% 
+  kable_styling("striped") %>% 
+  scroll_box(width = "100%")
+```
+
+```{r cor.scatter, echo = F, message = F}
+
+```
+
+<!--chapter:end:03-bivariate.Rmd-->
+
+# Analyses
+```{r analysis.library, include = F}
+library(bookdown)
+library(tidyverse)
+library(apaTables)
+library(gridExtra)
+library(table1)
+library(kableExtra)
+library(car)
+```
+
+```{r data.load.anal, include = F}
+load("data/objects/screened.full.Rda")
+load("data/objects/screened.Rda")
+```
+
+```{r data.preparation.anal, include = F}
+# Preparing colours for graphs
+.grey <- "#A6A6A6"
+.ma <- "#DC2D27"
+.nma <- "#39B9FF"
+.lav <- "#D9BBDC"
+.lgreen <- "#BEDCB3"
+
+# Changing NA from meth_ingest and meth_user to "No"
+screened$meth_ingest[is.na(screened$meth_ingest)] <- "No"
+screened$meth_user[is.na(screened$meth_user)] <- "Non-User"
+screened$meth_user <- as.factor(screened$meth_user)
+
+# Rearranging levels for education 
+screened$education <- factor(screened$education, levels = c("Did not finish high school",
+                                                          "High School Diploma",
+                                                          "Vocational/Technical degree or certificate",
+                                                          "Did not finish University",
+                                                          "Bachelor Degree",
+                                                          "Postgraduate Degree"))
+
+# Filtering for MA only
+ma <- screened %>% filter(meth_ingest == "Yes")
+
+# Converting non-drinkers to 0 on AUDIT-C
+ma <- ma %>% 
+  mutate(AUDIT_Total = ifelse(is.na(AUDIT_Total), 0, AUDIT_Total))
+```
+
+## Univariate Distributions
+### DDDI
+```{r ma distr.di, echo=F}
+label(ma$DDDI_Total) = "DDDI Total"
+table1(~DDDI_Total, data = ma)
+
+hist.di <- ma %>% 
+  ggplot(aes(x = DDDI_Total)) +
+  geom_histogram(binwidth = 2, col = "black") +
+  theme_light() +
+  labs(x = "DDDI Total", y = "") +
+  ggtitle("Histogram")
+
+dens.di <- ma %>% 
+  ggplot(aes(x = DDDI_Total)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "DDDI Total", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.di, dens.di, ncol = 2)
+
+```
+
+### Age
+```{r ma.age.dist, echo=F}
+table1(~age, data = ma)
+
+hist.age <- ma %>% 
+  ggplot(aes(x = age)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "Age", y = "") +
+  ggtitle("Histogram")
+
+dens.age <- ma %>% 
+  ggplot(aes(x = age)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "Age", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.age, dens.age, ncol = 2)
+```
+
+### Sex
+```{r ma.sex.distr, echo=F}
+table1(~sex, data = ma)
+
+ma %>% 
+  ggplot(aes(x = sex)) +
+  geom_bar(col = "black") +
+  theme_light() +
+  labs(x = "Sex", y = "") +
+  ggtitle("Barplot")
+```
+### Alcohol Use
+```{r ma.alc.distr, echo=F, warning=F}
+# Turn non-drinkers into AUDIT score = 0
+
+
+label(ma$AUDIT_Total) = "AUDIT-C Score"
+table1(~AUDIT_Total, data = ma)
+
+hist.alc <- ma %>% 
+  ggplot(aes(x = AUDIT_Total)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "AUDIT-C Score", y= "") +
+  ggtitle("Histogram")
+
+dens.alc <- ma %>% 
+  ggplot(aes(x = AUDIT_Total)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "AUDIT-C Score", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.alc, dens.alc, ncol = 2)
+```
+
+### Substance Dependence Severity (SDS)
+```{r ma.sds.distr, echo=F}
+label(ma$meth_SDS) = "SDS Score"
+table1(~meth_SDS, data = ma)
+
+hist.sds <- ma %>% 
+  ggplot(aes(x = meth_SDS)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Histogram")
+
+dens.sds <- ma %>% 
+  ggplot(aes(x = meth_SDS)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "SDS Score", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.sds, dens.sds, ncol = 2)
+```
+
+### Trait Anger
+```{r ma.staxi.dist, echo=F}
+label(ma$T_Ang_Total) = "STAXI-T Total"
+table1(~T_Ang_Total, data = ma)
+
+hist.staxi <- ma %>% 
+  ggplot(aes(x = T_Ang_Total)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "STAXI-T Total") +
+  ggtitle("Histogram")
+
+dens.staxi <- ma %>% 
+  ggplot(aes(x = T_Ang_Total)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "STAXI-T Total", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.staxi, dens.staxi, ncol = 2)
+```
+
+***
+
+## Bivariate Distributions
+```{r ma.bivar.plot.function, include=FALSE}
+plot.biv <- function(df, xcol, ycol, colour, labx, laby) {
+  ggplot(data = df, aes(x = {{xcol}}, y = {{ycol}}, col = {{colour}})) +
+    geom_smooth(method = "lm", alpha = 0.1, fullrange = T) +
+    geom_point(size = 2, alpha = 0.5) +
+    theme_light() +
+    labs(x = labx, y = laby)
+}
+```
+
+One entry (id = 146) was identified as having a DDDI score 
+
+### Age
+```{r ma.mivar.age, echo = F, message=F}
+ma %>% 
+  summarise(PearsonR = cor(ma$age, ma$DDDI_Total))
+
+plot.biv(ma, age, DDDI_Total, labx = "Age", laby = "DDDI Total")
+```
+
+### Sex
+```{r ma.sex.bivar, echo=F}
+ma %>% group_by(sex) %>% 
+  summarise(Mean = mean(DDDI_Total), SD = sd(DDDI_Total), Median = median(DDDI_Total))
+
+ma %>% 
+  ggplot(aes(x = sex, y = DDDI_Total)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(height = 0, width = 0.03, alpha = 0.8) +
+  theme_light() +
+  labs(x= "Sex", y = "DDDI Score") +
+  ggtitle("Boxplot")
+```
+
+### Alcohol Use
+```{r ma.bivar.alc, echo=F, message=F}
+ma.alc <- ma %>% filter(!is.na(AUDIT_Total))
+  
+ma.alc %>%
+  summarise(PearsonR = cor(ma.alc$AUDIT_Total, ma.alc$DDDI_Total))
+
+plot.biv(ma.alc, AUDIT_Total, DDDI_Total, labx = "AUDIT-C Score", laby = "DDDI Total")
+```
+
+### SDS
+```{r ma.sds.bivar, echo=F, message=F}
+ma %>% 
+  summarise(PearsonR = cor(ma$meth_SDS, ma$DDDI_Total))
+
+plot.biv(ma, meth_SDS, DDDI_Total, labx = "SDS Score", laby = "DDDI Score")
+```
+
+### STAXI-T
+```{r ma.staxi.bivar, echo=F, message=F}
+ma %>% 
+  summarise(PearsonR = cor(ma$T_Ang_Total, ma$DDDI_Total))
+
+plot.biv(ma, T_Ang_Total, DDDI_Total, labx = "STAXI-T Score" , laby = "DDDI Score")
+```
+
+### Correlation Matrix
+```{r cor.matrix.function, include=F}
+#' correlation_matrix from https://www.r-bloggers.com/2020/07/create-a-publication-ready-correlation-matrix-with-significance-levels-in-r/
+#' Creates a publication-ready / formatted correlation matrix, using `Hmisc::rcorr` in the backend.
+#'
+#' @param df dataframe; containing numeric and/or logical columns to calculate correlations for
+#' @param type character; specifies the type of correlations to compute; gets passed to `Hmisc::rcorr`; options are `"pearson"` or `"spearman"`; defaults to `"pearson"`
+#' @param digits integer/double; number of decimals to show in the correlation matrix; gets passed to `formatC`; defaults to `3`
+#' @param decimal.mark character; which decimal.mark to use; gets passed to `formatC`; defaults to `.`
+#' @param use character; which part of the correlation matrix to display; options are `"all"`, `"upper"`, `"lower"`; defaults to `"all"`
+#' @param show_significance boolean; whether to add `*` to represent the significance levels for the correlations; defaults to `TRUE`
+#' @param replace_diagonal boolean; whether to replace the correlations on the diagonal; defaults to `FALSE`
+#' @param replacement character; what to replace the diagonal and/or upper/lower triangles with; defaults to `""` (empty string)
+#'
+#' @return a correlation matrix
+#' @export
+#'
+#' @examples
+#' `correlation_matrix(iris)`
+#' `correlation_matrix(mtcars)`
+correlation_matrix <- function(df, 
+                               type = "pearson",
+                               digits = 3, 
+                               decimal.mark = ".",
+                               use = "all", 
+                               show_significance = TRUE, 
+                               replace_diagonal = FALSE, 
+                               replacement = ""){
+  
+  # check arguments
+  stopifnot({
+    is.numeric(digits)
+    digits >= 0
+    use %in% c("all", "upper", "lower")
+    is.logical(replace_diagonal)
+    is.logical(show_significance)
+    is.character(replacement)
+  })
+  # we need the Hmisc package for this
+  require(Hmisc)
+  
+  # retain only numeric and boolean columns
+  isNumericOrBoolean = vapply(df, function(x) is.numeric(x) | is.logical(x), logical(1))
+  if (sum(!isNumericOrBoolean) > 0) {
+    cat('Dropping non-numeric/-boolean column(s):', paste(names(isNumericOrBoolean)[!isNumericOrBoolean], collapse = ', '), '\n\n')
+  }
+  df = df[isNumericOrBoolean]
+  
+  # transform input data frame to matrix
+  x <- as.matrix(df)
+  
+  # run correlation analysis using Hmisc package
+  correlation_matrix <- Hmisc::rcorr(x, type = )
+  R <- correlation_matrix$r # Matrix of correlation coeficients
+  p <- correlation_matrix$P # Matrix of p-value 
+  
+  # transform correlations to specific character format
+  Rformatted = formatC(R, format = 'f', digits = digits, decimal.mark = decimal.mark)
+  
+  # if there are any negative numbers, we want to put a space before the positives to align all
+  if (sum(R < 0) > 0) {
+    Rformatted = ifelse(R > 0, paste0(' ', Rformatted), Rformatted)
+  }
+  
+  # add significance levels if desired
+  if (show_significance) {
+    # define notions for significance levels; spacing is important.
+    stars <- ifelse(is.na(p), "   ", ifelse(p < .001, "***", ifelse(p < .01, "** ", ifelse(p < .05, "*  ", "   "))))
+    Rformatted = paste0(Rformatted, stars)
+  }
+  # build a new matrix that includes the formatted correlations and their significance stars
+  Rnew <- matrix(Rformatted, ncol = ncol(x))
+  rownames(Rnew) <- colnames(x)
+  colnames(Rnew) <- paste(colnames(x), "", sep =" ")
+  
+  # replace undesired values
+  if (use == 'upper') {
+    Rnew[lower.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (use == 'lower') {
+    Rnew[upper.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (replace_diagonal) {
+    diag(Rnew) <- replacement
+  }
+  
+  return(Rnew)
+}
+```
+
+```{r cor.matrix, echo=F, message = F}
+ma.key.vars <- screened %>%
+  select(DDDI_Total, age, AUDIT_Total, meth_SDS, T_Ang_Total)
+
+
+corr.tbl <- correlation_matrix(ma.key.vars, digits = 2, use = "lower")
+
+kable(corr.tbl) %>%
+  kable_styling("striped") %>%
+  scroll_box(width = "100%")
+```
+
+## Hierarchical Linear Regression Outline
+A Hierarchical Linear Regression will be conducted to explore the relationship between MA use and Dangerous Driving Behaviour.  We are particularly interested in whether Trait Anger (assessed with the STAXI) contributes to Dangerous Driving Behaviour in this cohort when controlling for demographics (age and sex) and Alcohol use (measured with the AUDIT-C) and Severity of MA use (measured using the SDS).
+
+The HLR will be conducted with 3 models (aka blocks):
+
+1. $DDDI = Intercept + Age + Sex$
+2. $DDDI = Intercept + Age + Sex + Alcohol + MA use$
+3. $DDDI = Intercept + Age + Sex + Alcohol + MA use + STAXI$
+
+***
+
+## Statistical Analysis
+### Building each linear model
+```{r buil.models}
+m0 <- lm(DDDI_Total~1, data = ma) # Total SS
+m1 <- lm(DDDI_Total~age + sex, data = ma) # Model 1 (demographics)
+m2 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS, data = ma) # Alcohol and MA use characteristics
+m3 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma) # STAXI
+```
+
+### Sums of Squares
+#### Total SS {-}
+```{r ss.m0, echo=F}
+anova(m0) %>% kable() %>% kable_styling()
+```
+
+#### Model SS {-}
+```{r ss.models, echo=F}
+anova(m1, m2, m3) %>% kable() %>% kable_styling()
+```
+The model with Alcohol and SDS accounts for an additional 3088.06 Sum of Squares over and above the model including age and gender and this change was statistically significant (p < .01).  The $R^2$ increased by 24.6% in model 2.  
+
+The model with Trait Anger accounts for an additional 1823.60 Sum of Squares controlling for demographics and alcohol/substance use and this too was statistically significant (p < .01).  The $R^2$ increased by 14.6%.  
+
+### Model Summaries
+#### Model 1 {-}
+```{r model.sum, echo=F}
+options(scipen = 999)
+summary(m1)
+```
+
+#### Model 2 {-}
+```{r model.2, echo=F}
+summary(m2)
+```
+
+#### Model 3 {-}
+```{r model.3, echo=F}
+summary(m3)
+```
+
+### Removing non-significant variables
+#### Model 2
+```{r test}
+m2.rm <- lm(DDDI_Total ~ age + AUDIT_Total + meth_SDS, data = ma)
+summary(m2.rm)
+```
+
+#### Model 3
+```{r, echo = F}
+m3.rm <- lm(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
+summary(m3.rm)
+```
+
+## Assumptions
+### Plot of Residuals
+```{r ass.resid.fitted, echo=F}
+# Standardised Residuals by Fitted Values
+std.res <- rstandard(m3)
+m3.std.res <- tibble(
+  Std.Res = std.res,
+  Fitted = m3$fitted.values
+)
+
+m3.std.res %>% 
+  ggplot(aes(x = Fitted, y = Std.Res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", alpha = 0.5) +
+  theme_light() +
+  labs(x = "Fitted", y = "Standardised Residuals") +
+  ggtitle("Plot of Residuals")
+
+# m3.resid %>% 
+#   ggplot(aes(x = Fitted, y = Residuals)) +
+#   geom_point() +
+#   geom_hline(aes(yintercept = 0), linetype = "dashed", alpha = 0.5) +
+#   theme_light() +
+#   ggtitle("Residual Plot")
+
+```
+
+### Colinearity (model 3)
+#### All Variables {-} 
+```{r}
+tibble(Variable = c("Age", "Sex", "AUDIT-C", "SDS", "STAXI-T"),
+       VIF = vif(m3))
+```
+
+#### Removed Variables {-}
+```{r}
+tibble(Variable = c("AUDIT-C", "SDS", "STAXI-T"),
+       VIF = vif(m3.rm))
+apa.reg.table(m3)
+```
+
+### Homogeneity
+#### All Variables {-}
+```{r ass.homo, echo = F}
+plot(m3, 1)
+```
+
+#### Removed Variables {-}
+```{r ass.homo.rm, echo=F}
+plot(m3.rm,1)
+```
+
+### Linearity
+#### All Variables {-}
+```{r ass.lin, echo=F}
+m3.diag <- broom::augment(m3) # Not sure what this is for
+plot(m3, 5)
+```
+
+#### Removed Variables {-}
+```{r ass.lin.rm, echo=F}
+plot(m3.rm, 5)
+```
+
+### Normality of Residuals
+#### All Variables {-}
+```{r ass.norm, echo=F}
+plot(m3, 2)
+```
+
+#### Removed Variables {-}
+```{r ass.norm.rm, echo=F}
+plot(m3.rm, 2)
+```
+
+### Outliers
+#### Residual Standard Deviation {-}
+```{r ass.res.std.dev, echo=F}
+# Standardised Residuals
+# std.res.df <- tibble(id = ma$id,
+#        resid = std.res)
+
+# std.res.df %>% arrange(desc(resid)) %>% head(5) %>% kable(caption = "Test", align = "c") %>% kable_styling()
+
+# Residuals by index
+ma %>% 
+  ggplot(aes(x = as.numeric(row.names(ma)), y = std.res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 2), linetype = "dashed", alpha = 0.5) +
+  geom_hline(aes(yintercept = -2), linetype = "dashed", alpha = 0.5) +
+  geom_text(size = 3,
+            label = as.numeric(row.names(ma)),
+            nudge_x = 0.25,
+            nudge_y = 0.25,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Std Residuals") +
+  ggtitle("Std. Residual by Index")
+```
+
+#### Cooks D {-}
+```{r cooks.d, echo=F}
+# Calculate Cook's D for each observation
+cooksD <- cooks.distance(m3)
+
+# Plot Cook's D
+n <- nrow(ma)
+
+ma %>% 
+  ggplot(aes(x = as.numeric(row.names(ma)), y = cooksD)) +
+  geom_point() +
+  geom_hline(yintercept = 4/n, linetype = "dashed") +
+  geom_text(size = 2.5,
+            label = as.numeric(row.names(ma)),
+            nudge_y = 0.025,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Cooks Distance") +
+  ggtitle("Cooks Distance")
+```
+
+#### Mahalinobis Distance {-}
+```{r mahalinobis, echo=F}
+
+
+```
+
+There are 3 points that have been identified as being potentially influential to the regression model.  One of these is a clear outlier with a Cooks D of 0.69.  The index numbers and their respective id numbers are as follows:
+
+```{r}
+outliers <- tibble(Index = c(13, 46, 50),
+       ID = c(146, 233, 237), 
+       CooksD = c(0.69, 0.11, 0.16)
+)
+
+outliers %>% kable() %>% kable_styling()
+```
+
+The most influential outlier comes from participant ID 146 who reported a DDDI score of 130 (the next highest score being 86).  This participant also demonstrated the highest Trait Anger score (a score of 40/40 - within 4 SDs of the mean) and demonstrated the highest score (with one other participant) in State anger with a score of 56/56 (within 3 SDs of the mean) .  They demonstrated high Psychological distress with a k6 score of 27/30, had a reasonably high (though not abnormal) AUDIT-C score of 9/12 and scored an SDS of 11/15.  
+
+#### Digging Deeper {-}
+```{r outlier.plot.function, include = F}
+plot.outlier <- function(x, binw, vline) {
+  ggplot(data = ma, aes(x = {{x}})) +
+    geom_histogram(col = "black", binwidth = binw) +
+    geom_vline(aes(xintercept = {{vline}}), linetype = "dashed", col = "red") +
+    theme_light()
+}
+
+plot.out <- function(df, x, binw, vline) {
+  ggplot(data = df, aes(x = {{x}})) +
+    geom_histogram(col = "black", binwidth = binw) +
+    geom_vline(aes(xintercept = {{vline}}), linetype = "dashed", col = "red") +
+    theme_light()
+}
+```
+
+##### ID: 146 {-}
+
+```{r echo=F, warning=F, message=F}
+x.146.di <- plot.outlier(DDDI_Total, 2, 130) +
+  labs(x = "DDDI Total", y = "") +
+  ggtitle("Dangerous Driving")
+
+x.146.trait <- plot.outlier(T_Ang_Total, 1, 40) +
+  labs(x = "STAXI-T", y = "") +
+  ggtitle("Trait Anger")
+
+x.146.state <- plot.outlier(S_Ang_Total, 1, 56) +
+  labs(x = "STAXI-S", y = "") +
+  ggtitle("State Anger")
+
+x.146.audit <- plot.outlier(AUDIT_Total, 1, 9) +
+  labs(x = "AUDIT-C Total", y = "") +
+  ggtitle("Alcohol Severity")
+
+x.146.sds <- plot.outlier(meth_SDS, 1, 11) +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Substance Dependence Severity")
+
+x.146.k6 <- plot.outlier(k6_total, 1, 27) +
+  labs(x = "k6 Total", y = "") +
+  ggtitle("K6 Distress")
+
+grid.arrange(x.146.di, x.146.trait, x.146.state, x.146.audit, x.146.sds, x.146.k6, top = "MA User Distribution with 146 Highlighted")
+
+# Looking at the time taken to complete survey to rule out foul play
+# ma %>% 
+#   ggplot(aes(x = Duration)) +
+#   geom_histogram(col = "black") +
+#   scale_x_continuous(trans = "log10") +
+#   geom_vline(aes(xintercept = 943), linetype = "dashed", col = "red") +
+#   labs(x = "Duration (log10 transformed)") +
+#   theme_light() +
+#   ggtitle("Duration")
+# 
+# ma %>% 
+#   select(id, Duration) %>% 
+#   arrange(Duration) %>% head(5) %>% kable(align = "c", caption = "Quickest 5 responses (in seconds)") %>% kable_styling() %>% row_spec(4, background = "yellow")
+```
+
+##### ID: 237 {-}
+```{r 237, echo=F}
+x.237.age <- plot.outlier(age, 1, 25) +
+  labs(x = "Age", y = "") +
+  ggtitle("Age")
+
+x.237.di <- plot.outlier(DDDI_Total, 2, 51) +
+  labs(x = "DDDI Total", y = "") +
+  ggtitle("Dangerous Driving")
+
+x.237.trait <- plot.outlier(T_Ang_Total, 1, 18) +
+  labs(x = "STAXI-T", y = "") +
+  ggtitle("Trait Anger")
+
+# x.146.state <- plot.outlier(S_Ang_Total, 1, 14) +
+#   labs(x = "STAXI-S", y = "") +
+#   ggtitle("State Anger")
+
+x.237.audit <- plot.outlier(AUDIT_Total, 1, 11) +
+  labs(x = "AUDIT-C Total", y = "") +
+  ggtitle("Alcohol Severity")
+
+x.237.sds <- plot.outlier(meth_SDS, 1, 10) +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Substance Dependence Severity")
+
+# x.146.k6 <- plot.outlier(k6_total, 1, 28) +
+#   labs(x = "k6 Total", y = "") +
+#   ggtitle("K6 Distress")
+
+grid.arrange(x.237.age, x.237.di, x.237.trait, x.237.audit, x.237.sds, top = "MA User Distribution with 237 Highlighted")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--chapter:end:04-analyses.Rmd-->
+
+# Additional Analyses
+```{r additional.lib, include=F}
+library(bookdown)
+library(tidyverse)
+library(apaTables)
+library(gridExtra)
+library(table1)
+library(kableExtra)
+library(car) #VIF
+```
+
+```{r data.load.add, include = F}
+load("data/objects/screened.full.Rda")
+load("data/objects/screened.Rda")
+```
+
+```{r data.preparation.add, include = F}
+# Preparing colours for graphs
+.grey <- "#A6A6A6"
+.ma <- "#DC2D27"
+.nma <- "#39B9FF"
+.lav <- "#D9BBDC"
+.lgreen <- "#BEDCB3"
+
+# Changing NA from meth_ingest and meth_user to "No"
+screened$meth_ingest[is.na(screened$meth_ingest)] <- "No"
+screened$meth_user[is.na(screened$meth_user)] <- "Non-User"
+screened$meth_user <- as.factor(screened$meth_user)
+
+# Rearranging levels for education 
+screened$education <- factor(screened$education, levels = c("Did not finish high school",
+                                                          "High School Diploma",
+                                                          "Vocational/Technical degree or certificate",
+                                                          "Did not finish University",
+                                                          "Bachelor Degree",
+                                                          "Postgraduate Degree"))
+
+# Filtering for MA only
+ma <- screened %>% filter(meth_ingest == "Yes")
+
+# Converting non-drinkers to 0 on AUDIT-C
+ma <- ma %>% 
+  mutate(AUDIT_Total = ifelse(is.na(AUDIT_Total), 0, AUDIT_Total))
+```
+
+## Analysis without Outlier
+**Omitting response 146**
+
+```{r outlier.prep, include=F}
+# Create column to easily remove rows
+ma <- ma %>% 
+  mutate(include = TRUE)
+```
+
+### Building Models
+```{r buil.models.2}
+ma.nout <- ma %>% mutate(include = ifelse(id == 146, FALSE, TRUE)) # Not including id 146
+
+m0.2 <- lm(DDDI_Total~1, data = ma.nout[ma.nout$include == TRUE, ]) # Total SS
+m1.2 <- lm(DDDI_Total~age + sex, data = ma.nout[ma.nout$include == TRUE, ]) # Model 1 (demographics)
+m2.2 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS, data = ma.nout[ma.nout$include == TRUE, ]) # Alcohol and MA use characteristics
+m3.2 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma.nout[ma.nout$include == TRUE, ]) # STAXI
+```
+
+### Sums of Squares
+#### Total SS {-}
+```{r ss.m0.2, echo=F}
+anova(m0.2) %>% kable() %>% kable_styling()
+```
+
+#### Model SS {-}
+```{r ss.models.2, echo=F}
+anova(m1.2, m2.2, m3.2) %>% kable(align = "c") %>% kable_styling()
+```
+The model with Alcohol and SDS accounts for an additional 3088.06 Sum of Squares over and above the model including age and gender and this change was statistically significant (p < .01).  The $R^2$ increased by 24.6% in model 2.  
+
+The model with Trait Anger accounts for an additional 1823.60 Sum of Squares controlling for demographics and alcohol/substance use and this too was statistically significant (p < .01).  The $R^2$ increased by 14.6%.  
+
+### Model Summaries
+#### Model 1 {-}
+```{r model.sum.2, echo=F}
+options(scipen = 999)
+summary(m1.2)
+```
+
+#### Model 2 {-}
+```{r model.2.2, echo=F}
+summary(m2.2)
+```
+
+#### Model 3 {-}
+```{r model.3.2, echo=F}
+summary(m3.2)
+```
+
+### Assumptions
+#### Plot of Residuals {-}
+```{r resid.plot.2, echo=F}
+std.res.2 <- rstandard(m3.2)
+
+m3.2.std.res <- tibble(
+  Std.Res = std.res.2,
+  Fitted = m3.2$fitted.values
+)
+
+m3.2.std.res %>% 
+  ggplot(aes(x = Fitted, y = Std.Res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", alpha = 0.5) +
+  theme_light() +
+  labs(x = "Fitted", y = "Standardised Residuals") +
+  ggtitle("Plot of Residuals")
+
+```
+
+#### Colinearity (model 3) {-}
+```{r}
+tibble(Variable = c("Age", "Sex", "AUDIT-C", "SDS", "STAXI-T"),
+       VIF = vif(m3.2))
+```
+
+#### Homogeneity {-}
+```{r ass.homo.2, echo = F}
+plot(m3.2, 1)
+```
+
+#### Linearity {-}
+
+```{r ass.lin.2, echo=F}
+plot(m3.2, 5)
+```
+
+
+
+#### Normality of Residuals {-}
+```{r ass.norm.2, echo=F}
+plot(m3.2, 2)
+```
+
+#### Outliers {-}
+##### Residuals {-}
+```{r ass.out.2, echo=F}
+# Residuals by index
+ma.nout[ma.nout$include == TRUE, ] %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.nout[ma.nout$include == TRUE, ])), y = std.res.2)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 2), linetype = "dashed", alpha = 0.5) +
+  geom_hline(aes(yintercept = -2), linetype = "dashed", alpha = 0.5) +
+  geom_text(size = 3,
+            label = as.numeric(row.names(ma.nout[ma.nout$include == TRUE,])),
+            nudge_x = 0.25,
+            nudge_y = 0.25,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Std Residuals") +
+  ggtitle("Std. Residual by Index")
+```
+
+##### Cooks D {-}
+```{r cooks.d.2, echo=F}
+# Calculate Cook's D for each observation
+cooksD <- cooks.distance(m3.2)
+
+# Plot Cook's D
+n <- nrow(ma.nout[ma.nout$include == TRUE,])
+
+ma.nout[ma.nout$include == TRUE,] %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.nout[ma.nout$include == TRUE,])), y = cooksD)) +
+  geom_point() +
+  geom_hline(yintercept = 4/n, linetype = "dashed") +
+  geom_text(size = 2.5,
+            label = as.numeric(row.names(ma.nout[ma.nout$include == TRUE,])),
+            nudge_y = 0.01,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Cooks Distance") +
+  ggtitle("Cooks Distance")
+```
+
+##### Mahalanobis Distance {-}
+```{r mahalanobis.2, echo=F}
+
+
+```
+
+
+
+<!--chapter:end:05-additional.Rmd-->
+
+# Appendix
+
+```{r appendix.packages, include=F}
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+```
+
+## Attitudes Questionnaire
+### Attitudes towards drink driving
+Ten statements regarding the tolerance of participants toward drink driving behaviour,
+formed the body of this measure. Participants were asked to rate whether they agreed or
+disagreed with the statements on a 7‐point Likert scale (from “strongly agree” = 1 to “strongly
+disagree” = 7). The mean score on all ten statements will be calculated after reverse scoring
+of negatively worded items to give an attitude toward drink driving rating, which range from
+1 “unfavourable attitude to drink driving” to 7 “favourable attitude to drink driving.”
+
+1. Most of my friends think its ok to drink and drive
+2. It's ok to drive after drinking as long as you're not too drunk
+3. People who take drink and drive should go to jail
+4. My community needs stricter laws against drink driving
+5. The police aren't tough enough on drink drivers
+6. It's ok to drink‐drive as long as you don't get caught
+7. Everybody who drinks alcohol, drives under their influence once in a while
+8. My friends would think I was dumb if I drove after drinking alcohol
+9. The dangers of drink‐driving are overrated
+10. People who drink and drive should lose their driver’s license
+
+
+### Attitudes towards drug driving
+
+1. Most of my friends think its ok to take drugs and drive
+2. It's ok to drive after taking drugs as long as you're not too high
+3. People who take drugs and drive should go to jail
+4. My community needs stricter laws against drug driving
+5. The police aren't tough enough on drug drivers
+6. It's ok to drug drive as long as you don't get caught
+7. Everybody who takes drugs, drives under their influence once in a while
+8. My friends would think I was dumb if I drove after taking drugs
+9. The dangers of drug driving are overrated
+10. People who take drugs and drive should lose their driver’s license
+
+## Dula Danderous Driving Index (DDDI)
+The following Table demonstrates all the DDDI items (and their respective subscales) that were used for the present study:
+
+```{r DDDI, echo=F}
+di.qs <- read_csv("data/dddi.csv", col_names = FALSE)
+
+di.clean <- str_remove_all(di.qs$X1, "\\d{1,2}\\.?\\s?\\d?\\.?\\s?")
+
+subscale <- str_extract(di.clean, "[A-Z]{2}")
+item <- str_remove(di.clean, "\\([A-Z]{2}\\)") %>% str_trim
+
+dddi <- tibble(
+  item = item,
+  subscale = subscale
+) %>% arrange(subscale)
+
+
+
+kable(dddi) %>% kable_classic() %>% scroll_box()
+
+```
+
+<!--chapter:end:07-citations.Rmd-->
+
+# Discussion
+
+<!--chapter:end:08-discussion.Rmd-->
+
+`r if (knitr::is_html_output()) '
+# References {-}
+'`
+
+<!--chapter:end:08-references.Rmd-->
+

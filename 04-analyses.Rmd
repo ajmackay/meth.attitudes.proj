@@ -1,3 +1,642 @@
 # Analyses
+```{r analysis.library, include = F}
+library(bookdown)
+library(tidyverse)
+library(apaTables)
+library(gridExtra)
+library(table1)
+library(kableExtra)
+library(car)
+```
 
-Does MA Use predict Dangerous driving, controlling for Anger?
+```{r data.load.anal, include = F}
+load("data/objects/screened.full.Rda")
+load("data/objects/screened.Rda")
+```
+
+```{r data.preparation.anal, include = F}
+# Preparing colours for graphs
+.grey <- "#A6A6A6"
+.ma <- "#DC2D27"
+.nma <- "#39B9FF"
+.lav <- "#D9BBDC"
+.lgreen <- "#BEDCB3"
+
+# Changing NA from meth_ingest and meth_user to "No"
+screened$meth_ingest[is.na(screened$meth_ingest)] <- "No"
+screened$meth_user[is.na(screened$meth_user)] <- "Non-User"
+screened$meth_user <- as.factor(screened$meth_user)
+
+# Rearranging levels for education 
+screened$education <- factor(screened$education, levels = c("Did not finish high school",
+                                                          "High School Diploma",
+                                                          "Vocational/Technical degree or certificate",
+                                                          "Did not finish University",
+                                                          "Bachelor Degree",
+                                                          "Postgraduate Degree"))
+
+# Filtering for MA only
+ma <- screened %>% filter(meth_ingest == "Yes")
+
+# Converting non-drinkers to 0 on AUDIT-C
+ma <- ma %>% 
+  mutate(AUDIT_Total = ifelse(is.na(AUDIT_Total), 0, AUDIT_Total))
+```
+
+## Univariate Distributions
+### DDDI
+```{r ma distr.di, echo=F}
+label(ma$DDDI_Total) = "DDDI Total"
+table1(~DDDI_Total, data = ma)
+
+hist.di <- ma %>% 
+  ggplot(aes(x = DDDI_Total)) +
+  geom_histogram(binwidth = 2, col = "black") +
+  theme_light() +
+  labs(x = "DDDI Total", y = "") +
+  ggtitle("Histogram")
+
+dens.di <- ma %>% 
+  ggplot(aes(x = DDDI_Total)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "DDDI Total", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.di, dens.di, ncol = 2)
+
+```
+
+### Age
+```{r ma.age.dist, echo=F}
+table1(~age, data = ma)
+
+hist.age <- ma %>% 
+  ggplot(aes(x = age)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "Age", y = "") +
+  ggtitle("Histogram")
+
+dens.age <- ma %>% 
+  ggplot(aes(x = age)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "Age", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.age, dens.age, ncol = 2)
+```
+
+### Sex
+```{r ma.sex.distr, echo=F}
+table1(~sex, data = ma)
+
+ma %>% 
+  ggplot(aes(x = sex)) +
+  geom_bar(col = "black") +
+  theme_light() +
+  labs(x = "Sex", y = "") +
+  ggtitle("Barplot")
+```
+### Alcohol Use
+```{r ma.alc.distr, echo=F, warning=F}
+# Turn non-drinkers into AUDIT score = 0
+
+
+label(ma$AUDIT_Total) = "AUDIT-C Score"
+table1(~AUDIT_Total, data = ma)
+
+hist.alc <- ma %>% 
+  ggplot(aes(x = AUDIT_Total)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "AUDIT-C Score", y= "") +
+  ggtitle("Histogram")
+
+dens.alc <- ma %>% 
+  ggplot(aes(x = AUDIT_Total)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "AUDIT-C Score", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.alc, dens.alc, ncol = 2)
+```
+
+### Substance Dependence Severity (SDS)
+```{r ma.sds.distr, echo=F}
+label(ma$meth_SDS) = "SDS Score"
+table1(~meth_SDS, data = ma)
+
+hist.sds <- ma %>% 
+  ggplot(aes(x = meth_SDS)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Histogram")
+
+dens.sds <- ma %>% 
+  ggplot(aes(x = meth_SDS)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "SDS Score", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.sds, dens.sds, ncol = 2)
+```
+
+### Trait Anger
+```{r ma.staxi.dist, echo=F}
+label(ma$T_Ang_Total) = "STAXI-T Total"
+table1(~T_Ang_Total, data = ma)
+
+hist.staxi <- ma %>% 
+  ggplot(aes(x = T_Ang_Total)) +
+  geom_histogram(binwidth = 1, col = "black") +
+  theme_light() +
+  labs(x = "STAXI-T Total") +
+  ggtitle("Histogram")
+
+dens.staxi <- ma %>% 
+  ggplot(aes(x = T_Ang_Total)) +
+  geom_density(fill = .ma, alpha = 0.8) +
+  theme_light() +
+  labs(x = "STAXI-T Total", y = "Density") +
+  ggtitle("Density Plot")
+
+grid.arrange(hist.staxi, dens.staxi, ncol = 2)
+```
+
+***
+
+## Bivariate Distributions
+```{r ma.bivar.plot.function, include=FALSE}
+plot.biv <- function(df, xcol, ycol, colour, labx, laby) {
+  ggplot(data = df, aes(x = {{xcol}}, y = {{ycol}}, col = {{colour}})) +
+    geom_smooth(method = "lm", alpha = 0.1, fullrange = T) +
+    geom_point(size = 2, alpha = 0.5) +
+    theme_light() +
+    labs(x = labx, y = laby)
+}
+```
+
+One entry (id = 146) was identified as having a DDDI score 
+
+### Age
+```{r ma.mivar.age, echo = F, message=F}
+ma %>% 
+  summarise(PearsonR = cor(ma$age, ma$DDDI_Total))
+
+plot.biv(ma, age, DDDI_Total, labx = "Age", laby = "DDDI Total")
+```
+
+### Sex
+```{r ma.sex.bivar, echo=F}
+ma %>% group_by(sex) %>% 
+  summarise(Mean = mean(DDDI_Total), SD = sd(DDDI_Total), Median = median(DDDI_Total))
+
+ma %>% 
+  ggplot(aes(x = sex, y = DDDI_Total)) +
+  geom_boxplot(outlier.alpha = 0) +
+  geom_jitter(height = 0, width = 0.03, alpha = 0.8) +
+  theme_light() +
+  labs(x= "Sex", y = "DDDI Score") +
+  ggtitle("Boxplot")
+```
+
+### Alcohol Use
+```{r ma.bivar.alc, echo=F, message=F}
+ma.alc <- ma %>% filter(!is.na(AUDIT_Total))
+  
+ma.alc %>%
+  summarise(PearsonR = cor(ma.alc$AUDIT_Total, ma.alc$DDDI_Total))
+
+plot.biv(ma.alc, AUDIT_Total, DDDI_Total, labx = "AUDIT-C Score", laby = "DDDI Total")
+```
+
+### SDS
+```{r ma.sds.bivar, echo=F, message=F}
+ma %>% 
+  summarise(PearsonR = cor(ma$meth_SDS, ma$DDDI_Total))
+
+plot.biv(ma, meth_SDS, DDDI_Total, labx = "SDS Score", laby = "DDDI Score")
+```
+
+### STAXI-T
+```{r ma.staxi.bivar, echo=F, message=F}
+ma %>% 
+  summarise(PearsonR = cor(ma$T_Ang_Total, ma$DDDI_Total))
+
+plot.biv(ma, T_Ang_Total, DDDI_Total, labx = "STAXI-T Score" , laby = "DDDI Score")
+```
+
+### Correlation Matrix
+```{r cor.matrix.function, include=F}
+#' correlation_matrix from https://www.r-bloggers.com/2020/07/create-a-publication-ready-correlation-matrix-with-significance-levels-in-r/
+#' Creates a publication-ready / formatted correlation matrix, using `Hmisc::rcorr` in the backend.
+#'
+#' @param df dataframe; containing numeric and/or logical columns to calculate correlations for
+#' @param type character; specifies the type of correlations to compute; gets passed to `Hmisc::rcorr`; options are `"pearson"` or `"spearman"`; defaults to `"pearson"`
+#' @param digits integer/double; number of decimals to show in the correlation matrix; gets passed to `formatC`; defaults to `3`
+#' @param decimal.mark character; which decimal.mark to use; gets passed to `formatC`; defaults to `.`
+#' @param use character; which part of the correlation matrix to display; options are `"all"`, `"upper"`, `"lower"`; defaults to `"all"`
+#' @param show_significance boolean; whether to add `*` to represent the significance levels for the correlations; defaults to `TRUE`
+#' @param replace_diagonal boolean; whether to replace the correlations on the diagonal; defaults to `FALSE`
+#' @param replacement character; what to replace the diagonal and/or upper/lower triangles with; defaults to `""` (empty string)
+#'
+#' @return a correlation matrix
+#' @export
+#'
+#' @examples
+#' `correlation_matrix(iris)`
+#' `correlation_matrix(mtcars)`
+correlation_matrix <- function(df, 
+                               type = "pearson",
+                               digits = 3, 
+                               decimal.mark = ".",
+                               use = "all", 
+                               show_significance = TRUE, 
+                               replace_diagonal = FALSE, 
+                               replacement = ""){
+  
+  # check arguments
+  stopifnot({
+    is.numeric(digits)
+    digits >= 0
+    use %in% c("all", "upper", "lower")
+    is.logical(replace_diagonal)
+    is.logical(show_significance)
+    is.character(replacement)
+  })
+  # we need the Hmisc package for this
+  require(Hmisc)
+  
+  # retain only numeric and boolean columns
+  isNumericOrBoolean = vapply(df, function(x) is.numeric(x) | is.logical(x), logical(1))
+  if (sum(!isNumericOrBoolean) > 0) {
+    cat('Dropping non-numeric/-boolean column(s):', paste(names(isNumericOrBoolean)[!isNumericOrBoolean], collapse = ', '), '\n\n')
+  }
+  df = df[isNumericOrBoolean]
+  
+  # transform input data frame to matrix
+  x <- as.matrix(df)
+  
+  # run correlation analysis using Hmisc package
+  correlation_matrix <- Hmisc::rcorr(x, type = )
+  R <- correlation_matrix$r # Matrix of correlation coeficients
+  p <- correlation_matrix$P # Matrix of p-value 
+  
+  # transform correlations to specific character format
+  Rformatted = formatC(R, format = 'f', digits = digits, decimal.mark = decimal.mark)
+  
+  # if there are any negative numbers, we want to put a space before the positives to align all
+  if (sum(R < 0) > 0) {
+    Rformatted = ifelse(R > 0, paste0(' ', Rformatted), Rformatted)
+  }
+  
+  # add significance levels if desired
+  if (show_significance) {
+    # define notions for significance levels; spacing is important.
+    stars <- ifelse(is.na(p), "   ", ifelse(p < .001, "***", ifelse(p < .01, "** ", ifelse(p < .05, "*  ", "   "))))
+    Rformatted = paste0(Rformatted, stars)
+  }
+  # build a new matrix that includes the formatted correlations and their significance stars
+  Rnew <- matrix(Rformatted, ncol = ncol(x))
+  rownames(Rnew) <- colnames(x)
+  colnames(Rnew) <- paste(colnames(x), "", sep =" ")
+  
+  # replace undesired values
+  if (use == 'upper') {
+    Rnew[lower.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (use == 'lower') {
+    Rnew[upper.tri(Rnew, diag = replace_diagonal)] <- replacement
+  } else if (replace_diagonal) {
+    diag(Rnew) <- replacement
+  }
+  
+  return(Rnew)
+}
+```
+
+```{r cor.matrix, echo=F, message = F}
+ma.key.vars <- screened %>%
+  select(DDDI_Total, age, AUDIT_Total, meth_SDS, T_Ang_Total)
+
+
+corr.tbl <- correlation_matrix(ma.key.vars, digits = 2, use = "lower")
+
+kable(corr.tbl) %>%
+  kable_styling("striped") %>%
+  scroll_box(width = "100%")
+```
+
+## Hierarchical Linear Regression Outline
+A Hierarchical Linear Regression will be conducted to explore the relationship between MA use and Dangerous Driving Behaviour.  We are particularly interested in whether Trait Anger (assessed with the STAXI) contributes to Dangerous Driving Behaviour in this cohort when controlling for demographics (age and sex) and Alcohol use (measured with the AUDIT-C) and Severity of MA use (measured using the SDS).
+
+The HLR will be conducted with 3 models (aka blocks):
+
+1. $DDDI = Intercept + Age + Sex$
+2. $DDDI = Intercept + Age + Sex + Alcohol + MA use$
+3. $DDDI = Intercept + Age + Sex + Alcohol + MA use + STAXI$
+
+***
+
+## Statistical Analysis
+### Building each linear model
+```{r buil.models}
+m0 <- lm(DDDI_Total~1, data = ma) # Total SS
+m1 <- lm(DDDI_Total~age + sex, data = ma) # Model 1 (demographics)
+m2 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS, data = ma) # Alcohol and MA use characteristics
+m3 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma) # STAXI
+```
+
+### Sums of Squares
+#### Total SS {-}
+```{r ss.m0, echo=F}
+anova(m0) %>% kable() %>% kable_styling()
+```
+
+#### Model SS {-}
+```{r ss.models, echo=F}
+anova(m1, m2, m3) %>% kable() %>% kable_styling()
+```
+The model with Alcohol and SDS accounts for an additional 3088.06 Sum of Squares over and above the model including age and gender and this change was statistically significant (p < .01).  The $R^2$ increased by 24.6% in model 2.  
+
+The model with Trait Anger accounts for an additional 1823.60 Sum of Squares controlling for demographics and alcohol/substance use and this too was statistically significant (p < .01).  The $R^2$ increased by 14.6%.  
+
+### Model Summaries
+#### Model 1 {-}
+```{r model.sum, echo=F}
+options(scipen = 999)
+summary(m1)
+```
+
+#### Model 2 {-}
+```{r model.2, echo=F}
+summary(m2)
+```
+
+#### Model 3 {-}
+```{r model.3, echo=F}
+summary(m3)
+```
+
+### Removing non-significant variables
+#### Model 2
+```{r test}
+m2.rm <- lm(DDDI_Total ~ age + AUDIT_Total + meth_SDS, data = ma)
+summary(m2.rm)
+```
+
+#### Model 3
+```{r, echo = F}
+m3.rm <- lm(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
+summary(m3.rm)
+```
+
+## Assumptions
+### Plot of Residuals
+```{r ass.resid.fitted, echo=F}
+# Standardised Residuals by Fitted Values
+std.res <- rstandard(m3)
+m3.std.res <- tibble(
+  Std.Res = std.res,
+  Fitted = m3$fitted.values
+)
+
+m3.std.res %>% 
+  ggplot(aes(x = Fitted, y = Std.Res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", alpha = 0.5) +
+  theme_light() +
+  labs(x = "Fitted", y = "Standardised Residuals") +
+  ggtitle("Plot of Residuals")
+
+# m3.resid %>% 
+#   ggplot(aes(x = Fitted, y = Residuals)) +
+#   geom_point() +
+#   geom_hline(aes(yintercept = 0), linetype = "dashed", alpha = 0.5) +
+#   theme_light() +
+#   ggtitle("Residual Plot")
+
+```
+
+### Colinearity (model 3)
+#### All Variables {-} 
+```{r}
+tibble(Variable = c("Age", "Sex", "AUDIT-C", "SDS", "STAXI-T"),
+       VIF = vif(m3))
+```
+
+#### Removed Variables {-}
+```{r}
+tibble(Variable = c("AUDIT-C", "SDS", "STAXI-T"),
+       VIF = vif(m3.rm))
+apa.reg.table(m3)
+```
+
+### Homogeneity
+#### All Variables {-}
+```{r ass.homo, echo = F}
+plot(m3, 1)
+```
+
+#### Removed Variables {-}
+```{r ass.homo.rm, echo=F}
+plot(m3.rm,1)
+```
+
+### Linearity
+#### All Variables {-}
+```{r ass.lin, echo=F}
+m3.diag <- broom::augment(m3) # Not sure what this is for
+plot(m3, 5)
+```
+
+#### Removed Variables {-}
+```{r ass.lin.rm, echo=F}
+plot(m3.rm, 5)
+```
+
+### Normality of Residuals
+#### All Variables {-}
+```{r ass.norm, echo=F}
+plot(m3, 2)
+```
+
+#### Removed Variables {-}
+```{r ass.norm.rm, echo=F}
+plot(m3.rm, 2)
+```
+
+### Outliers
+#### Residual Standard Deviation {-}
+```{r ass.res.std.dev, echo=F}
+# Standardised Residuals
+# std.res.df <- tibble(id = ma$id,
+#        resid = std.res)
+
+# std.res.df %>% arrange(desc(resid)) %>% head(5) %>% kable(caption = "Test", align = "c") %>% kable_styling()
+
+# Residuals by index
+ma %>% 
+  ggplot(aes(x = as.numeric(row.names(ma)), y = std.res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 2), linetype = "dashed", alpha = 0.5) +
+  geom_hline(aes(yintercept = -2), linetype = "dashed", alpha = 0.5) +
+  geom_text(size = 3,
+            label = as.numeric(row.names(ma)),
+            nudge_x = 0.25,
+            nudge_y = 0.25,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Std Residuals") +
+  ggtitle("Std. Residual by Index")
+```
+
+#### Cooks D {-}
+```{r cooks.d, echo=F}
+# Calculate Cook's D for each observation
+cooksD <- cooks.distance(m3)
+
+# Plot Cook's D
+n <- nrow(ma)
+
+ma %>% 
+  ggplot(aes(x = as.numeric(row.names(ma)), y = cooksD)) +
+  geom_point() +
+  geom_hline(yintercept = 4/n, linetype = "dashed") +
+  geom_text(size = 2.5,
+            label = as.numeric(row.names(ma)),
+            nudge_y = 0.025,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Cooks Distance") +
+  ggtitle("Cooks Distance")
+```
+
+#### Mahalinobis Distance {-}
+```{r mahalinobis, echo=F}
+
+
+```
+
+There are 3 points that have been identified as being potentially influential to the regression model.  One of these is a clear outlier with a Cooks D of 0.69.  The index numbers and their respective id numbers are as follows:
+
+```{r}
+outliers <- tibble(Index = c(13, 46, 50),
+       ID = c(146, 233, 237), 
+       CooksD = c(0.69, 0.11, 0.16)
+)
+
+outliers %>% kable() %>% kable_styling()
+```
+
+The most influential outlier comes from participant ID 146 who reported a DDDI score of 130 (the next highest score being 86).  This participant also demonstrated the highest Trait Anger score (a score of 40/40 - within 4 SDs of the mean) and demonstrated the highest score (with one other participant) in State anger with a score of 56/56 (within 3 SDs of the mean) .  They demonstrated high Psychological distress with a k6 score of 27/30, had a reasonably high (though not abnormal) AUDIT-C score of 9/12 and scored an SDS of 11/15.  
+
+#### Digging Deeper {-}
+```{r outlier.plot.function, include = F}
+plot.outlier <- function(x, binw, vline) {
+  ggplot(data = ma, aes(x = {{x}})) +
+    geom_histogram(col = "black", binwidth = binw) +
+    geom_vline(aes(xintercept = {{vline}}), linetype = "dashed", col = "red") +
+    theme_light()
+}
+
+plot.out <- function(df, x, binw, vline) {
+  ggplot(data = df, aes(x = {{x}})) +
+    geom_histogram(col = "black", binwidth = binw) +
+    geom_vline(aes(xintercept = {{vline}}), linetype = "dashed", col = "red") +
+    theme_light()
+}
+```
+
+##### ID: 146 {-}
+
+```{r echo=F, warning=F, message=F}
+x.146.di <- plot.outlier(DDDI_Total, 2, 130) +
+  labs(x = "DDDI Total", y = "") +
+  ggtitle("Dangerous Driving")
+
+x.146.trait <- plot.outlier(T_Ang_Total, 1, 40) +
+  labs(x = "STAXI-T", y = "") +
+  ggtitle("Trait Anger")
+
+x.146.state <- plot.outlier(S_Ang_Total, 1, 56) +
+  labs(x = "STAXI-S", y = "") +
+  ggtitle("State Anger")
+
+x.146.audit <- plot.outlier(AUDIT_Total, 1, 9) +
+  labs(x = "AUDIT-C Total", y = "") +
+  ggtitle("Alcohol Severity")
+
+x.146.sds <- plot.outlier(meth_SDS, 1, 11) +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Substance Dependence Severity")
+
+x.146.k6 <- plot.outlier(k6_total, 1, 27) +
+  labs(x = "k6 Total", y = "") +
+  ggtitle("K6 Distress")
+
+grid.arrange(x.146.di, x.146.trait, x.146.state, x.146.audit, x.146.sds, x.146.k6, top = "MA User Distribution with 146 Highlighted")
+
+# Looking at the time taken to complete survey to rule out foul play
+# ma %>% 
+#   ggplot(aes(x = Duration)) +
+#   geom_histogram(col = "black") +
+#   scale_x_continuous(trans = "log10") +
+#   geom_vline(aes(xintercept = 943), linetype = "dashed", col = "red") +
+#   labs(x = "Duration (log10 transformed)") +
+#   theme_light() +
+#   ggtitle("Duration")
+# 
+# ma %>% 
+#   select(id, Duration) %>% 
+#   arrange(Duration) %>% head(5) %>% kable(align = "c", caption = "Quickest 5 responses (in seconds)") %>% kable_styling() %>% row_spec(4, background = "yellow")
+```
+
+##### ID: 237 {-}
+```{r 237, echo=F}
+x.237.age <- plot.outlier(age, 1, 25) +
+  labs(x = "Age", y = "") +
+  ggtitle("Age")
+
+x.237.di <- plot.outlier(DDDI_Total, 2, 51) +
+  labs(x = "DDDI Total", y = "") +
+  ggtitle("Dangerous Driving")
+
+x.237.trait <- plot.outlier(T_Ang_Total, 1, 18) +
+  labs(x = "STAXI-T", y = "") +
+  ggtitle("Trait Anger")
+
+# x.146.state <- plot.outlier(S_Ang_Total, 1, 14) +
+#   labs(x = "STAXI-S", y = "") +
+#   ggtitle("State Anger")
+
+x.237.audit <- plot.outlier(AUDIT_Total, 1, 11) +
+  labs(x = "AUDIT-C Total", y = "") +
+  ggtitle("Alcohol Severity")
+
+x.237.sds <- plot.outlier(meth_SDS, 1, 10) +
+  labs(x = "SDS Score", y = "") +
+  ggtitle("Substance Dependence Severity")
+
+# x.146.k6 <- plot.outlier(k6_total, 1, 28) +
+#   labs(x = "k6 Total", y = "") +
+#   ggtitle("K6 Distress")
+
+grid.arrange(x.237.age, x.237.di, x.237.trait, x.237.audit, x.237.sds, top = "MA User Distribution with 237 Highlighted")
+```
+
+
+
+
+
+
+
+
+
+
+
+

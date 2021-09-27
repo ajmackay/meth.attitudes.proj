@@ -38,9 +38,6 @@ screened$education <- factor(screened$education, levels = c("Did not finish high
 ```
 
 This section will explore bivariate relationships between each key predictor variable (STAXI-2, K6 Distress, SDS, Attitudes) and will examine in more detail their relationship with the outcome variable (DDDI).  There will be particular attention paid on the relationship between the predictors and the outcome variable and we will seek to graphically identify whether there may be an y interactions present between the predictor variables and MA use on the DDDI.
-
-## STAXI-2
-### State Anger (STAXI-S)
 ```{r bivar.plot.function, include=FALSE}
 plot.bivar <- function(df, xcol, ycol, colour) {
   ggplot(data = df, aes(x = {{xcol}}, y = {{ycol}}, col = {{colour}})) +
@@ -50,7 +47,9 @@ plot.bivar <- function(df, xcol, ycol, colour) {
     scale_color_manual(values = c(.ma, .nma))
 }
 ```
+## STAXI-2
 
+### State Anger (STAXI-S)
 #### DDDI by STAXI-S (ignoring MA) {-}
 ```{r staxi.state.bi, echo = F, message=F, warning=F}
 plot.bivar(screened, S_Ang_Total, DDDI_Total) +
@@ -181,20 +180,34 @@ grid.arrange(point.di.sds, point.di.ad.sds, point.di.ne.sds, point.di.rd.sds, nc
 
 ## Drug Use
 ### Alcohol (AUDIT-C)
-```{r alcohol.bivar, echo = F, warning=F}
-plot.bivar(screened, AUDIT_Total, DDDI_Total, meth_ingest) +
+```{r alcohol.bivar, echo = F, warning=F, message=F}
+point.di.audit <- plot.bivar(screened, AUDIT_Total, DDDI_Total) +
+  labs(x = "AUDIT-C Total", y = "DDDI Total") +
+  ggtitle("DDDI Total by AUDIT-C")
+
+point.di.audit.ma <- plot.bivar(screened, AUDIT_Total, DDDI_Total, meth_ingest) +
   labs(x = "AUDIT-C Total", y = "DDDI Total", col = "MA Use") +
-  ggtitle("DDDI Total with AUDIT-C")
+  ggtitle("DDDI Total by AUDIT-C (Stratified by MA)")
+
 
 box.audit.di <- screened %>% 
+  ggplot(aes(x = AUDIT_Risky, y = DDDI_Total)) +
+  geom_boxplot(outlier.alpha = 0, height = 0, width = 0.3, alpha = 0.5) +
+  geom_jitter(height = 0, width = 0.05, alpha = 0.8) +
+  theme_light() +
+  labs(x = "AUDIT-C Risky Drinking", y = "DDDI Total") +
+  ggtitle("DDDI Total by AUDIT-C Risky Drinking")
+
+box.audit.di.ma <- screened %>% 
   ggplot(aes(x = AUDIT_Risky, y = DDDI_Total, fill = meth_ingest)) +
   geom_boxplot(outlier.alpha = 0, height = 0, width = 0.3, alpha = 0.5) +
   geom_jitter(aes(col = meth_ingest), height = 0, width = 0.05, alpha = 0.8) +
   theme_light() +
   labs(x = "AUDIT-C Risky Drinking", y = "DDDI Total", fill = "MA Use", col = "MA Use") +
-  ggtitle("DDDI Total by AUDIT-C Risky Drinking")
+  ggtitle("DDDI Total by AUDIT-C Risky Drinking (Stratified by MA)")
 
-box.audit.di
+grid.arrange(point.di.audit, point.di.audit.ma)
+grid.arrange(box.audit.di, box.audit.di.ma, nrow = 2)
 ```
 
 ```{r drug.use.bivar, echo = F}
@@ -206,6 +219,10 @@ box.audit.di
 
 ## Age
 ```{r age bivar, echo=F}
+plot.bivar(screened, age, DDDI_Total) +
+  labs(x = "Age", y = "DDDI Total", col = "MA Use") +
+  ggtitle("DDDI by Age")
+
 plot.bivar(screened, age, DDDI_Total, meth_ingest) +
   labs(x = "Age", y = "DDDI Total", col = "MA Use") +
   ggtitle("DDDI by Age (stratified by MA use)")
@@ -236,7 +253,7 @@ plot.bivar(screened, DUID_attitude_Total, DDDI_Total, meth_ingest) +
 ```
 
 ## Correlation Matrix
-```{r cor.matrix.function, include=F}
+```{r cor.matrix.functionn, include=F}
 #' correlation_matrix from https://www.r-bloggers.com/2020/07/create-a-publication-ready-correlation-matrix-with-significance-levels-in-r/
 #' Creates a publication-ready / formatted correlation matrix, using `Hmisc::rcorr` in the backend.
 #'
@@ -323,7 +340,7 @@ correlation_matrix <- function(df,
 }
 ```
 
-```{r cor.matrix, echo=F, message = F}
+```{r cor.matrix.biv, echo=F, message = F}
 key.vars <- screened %>%
   select(DDDI_Total, DDDI_AD_Total, DDDI_RD_Total, DDDI_NE_Total, 
          k6_total, 
