@@ -24,7 +24,7 @@
 <meta name="author" content="Aaron Mackay" />
 
 
-<meta name="date" content="2021-09-27" />
+<meta name="date" content="2021-09-28" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -982,14 +982,101 @@ NA
 <h3><span class="header-section-number">4.5.5</span> Normality of Residuals</h3>
 <div id="all-variables-3" class="section level4 unnumbered">
 <h4>All Variables</h4>
-<p><img src="_main_files/figure-html/ass.norm-1.png" width="672" />
-#### Removed Variables {-}
-<img src="_main_files/figure-html/ass.norm.rm-1.png" width="672" /></p>
+<p><img src="_main_files/figure-html/ass.norm-1.png" width="672" /></p>
+</div>
+<div id="removed-variables-3" class="section level4 unnumbered">
+<h4>Removed Variables</h4>
+<p><img src="_main_files/figure-html/ass.norm.rm-1.png" width="672" /></p>
 </div>
 </div>
 <div id="outliers" class="section level3" number="4.5.6">
 <h3><span class="header-section-number">4.5.6</span> Outliers</h3>
-<p><img src="_main_files/figure-html/ass.out-1.png" width="672" /><img src="_main_files/figure-html/ass.out-2.png" width="672" /></p>
+<div id="residual-standard-deviation" class="section level4 unnumbered">
+<h4>Residual Standard Deviation</h4>
+<p><img src="_main_files/figure-html/ass.res.std.dev-1.png" width="672" /></p>
+</div>
+<div id="cooks-d" class="section level4 unnumbered">
+<h4>Cooks D</h4>
+<p><img src="_main_files/figure-html/cooks.d-1.png" width="672" /></p>
+</div>
+<div id="mahalinobis-distance" class="section level4 unnumbered">
+<h4>Mahalinobis Distance</h4>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:mahalinobis">Table 4.1: </span>Mahalanobis &lt; .01
+</caption>
+<thead>
+<tr>
+<th style="text-align:center;">
+index
+</th>
+<th style="text-align:center;">
+mahal
+</th>
+<th style="text-align:center;">
+p
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+10.148058
+</td>
+<td style="text-align:center;">
+0.0380062
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+13
+</td>
+<td style="text-align:center;">
+13.439610
+</td>
+<td style="text-align:center;">
+0.0093161
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+40
+</td>
+<td style="text-align:center;">
+11.997836
+</td>
+<td style="text-align:center;">
+0.0173674
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+42
+</td>
+<td style="text-align:center;">
+9.862643
+</td>
+<td style="text-align:center;">
+0.0428061
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+46
+</td>
+<td style="text-align:center;">
+10.344494
+</td>
+<td style="text-align:center;">
+0.0350078
+</td>
+</tr>
+</tbody>
+</table>
+<p><img src="_main_files/figure-html/mahalinobis-1.png" width="672" /></p>
 <p>There are 3 points that have been identified as being potentially influential to the regression model. One of these is a clear outlier with a Cooks D of 0.69. The index numbers and their respective id numbers are as follows:</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="analyses.html#cb19-1" aria-hidden="true" tabindex="-1"></a>outliers <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">Index =</span> <span class="fu">c</span>(<span class="dv">13</span>, <span class="dv">46</span>, <span class="dv">50</span>),</span>
 <span id="cb19-2"><a href="analyses.html#cb19-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">ID =</span> <span class="fu">c</span>(<span class="dv">146</span>, <span class="dv">233</span>, <span class="dv">237</span>), </span>
@@ -1048,68 +1135,16 @@ CooksD
 </tbody>
 </table>
 <p>The most influential outlier comes from participant ID 146 who reported a DDDI score of 130 (the next highest score being 86). This participant also demonstrated the highest Trait Anger score (a score of 40/40 - within 4 SDs of the mean) and demonstrated the highest score (with one other participant) in State anger with a score of 56/56 (within 3 SDs of the mean) . They demonstrated high Psychological distress with a k6 score of 27/30, had a reasonably high (though not abnormal) AUDIT-C score of 9/12 and scored an SDS of 11/15.</p>
-<div id="visualising-responses" class="section level4 unnumbered">
-<h4>Visualising Responses</h4>
+</div>
+<div id="digging-deeper" class="section level4 unnumbered">
+<h4>Digging Deeper</h4>
 <div id="id-146" class="section level5 unnumbered">
-<h5>ID = 146</h5>
-<img src="_main_files/figure-html/unnamed-chunk-5-1.png" width="672" /><img src="_main_files/figure-html/unnamed-chunk-5-2.png" width="672" />
-<table class="table" style="margin-left: auto; margin-right: auto;">
-<caption>
-<span id="tab:unnamed-chunk-5">Table 4.1: </span>Quickest 5 responses (in seconds)
-</caption>
-<thead>
-<tr>
-<th style="text-align:center;">
-id
-</th>
-<th style="text-align:center;">
-Duration
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">
-163
-</td>
-<td style="text-align:center;">
-888
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-223
-</td>
-<td style="text-align:center;">
-909
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-234
-</td>
-<td style="text-align:center;">
-913
-</td>
-</tr>
-<tr>
-<td style="text-align:center;background-color: yellow !important;">
-146
-</td>
-<td style="text-align:center;background-color: yellow !important;">
-943
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-175
-</td>
-<td style="text-align:center;">
-1047
-</td>
-</tr>
-</tbody>
-</table>
+<h5>ID: 146</h5>
+<p><img src="_main_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="id-237" class="section level5 unnumbered">
+<h5>ID: 237</h5>
+<p><img src="_main_files/figure-html/237-1.png" width="672" /></p>
 
 </div>
 </div>
