@@ -342,8 +342,8 @@ The HLR will be conducted with 3 models (aka blocks):
 
 ***
 
-## Statistical Analysis
-### Building each linear model
+## Forced Entry (all variables)
+### Model Building
 ```{r buil.models}
 m0 <- lm(DDDI_Total~1, data = ma) # Total SS
 m1 <- lm(DDDI_Total~age + sex, data = ma) # Model 1 (demographics)
@@ -382,18 +382,7 @@ summary(m2)
 summary(m3)
 ```
 
-### Removing non-significant variables
-#### Model 2
-```{r test}
-m2.rm <- lm(DDDI_Total ~ age + AUDIT_Total + meth_SDS, data = ma)
-summary(m2.rm)
-```
 
-#### Model 3
-```{r, echo = F}
-m3.rm <- lm(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
-summary(m3.rm)
-```
 
 ## Assumptions
 ### Plot of Residuals
@@ -429,22 +418,10 @@ tibble(Variable = c("Age", "Sex", "AUDIT-C", "SDS", "STAXI-T"),
        VIF = vif(m3))
 ```
 
-#### Removed Variables {-}
-```{r}
-tibble(Variable = c("AUDIT-C", "SDS", "STAXI-T"),
-       VIF = vif(m3.rm))
-apa.reg.table(m3)
-```
-
 ### Homogeneity
 #### All Variables {-}
 ```{r ass.homo, echo = F}
 plot(m3, 1)
-```
-
-#### Removed Variables {-}
-```{r ass.homo.rm, echo=F}
-plot(m3.rm,1)
 ```
 
 ### Linearity
@@ -454,24 +431,14 @@ m3.diag <- broom::augment(m3) # Not sure what this is for
 plot(m3, 5)
 ```
 
-#### Removed Variables {-}
-```{r ass.lin.rm, echo=F}
-plot(m3.rm, 5)
-```
-
 ### Normality of Residuals
 #### All Variables {-}
 ```{r ass.norm, echo=F}
 plot(m3, 2)
 ```
 
-#### Removed Variables {-}
-```{r ass.norm.rm, echo=F}
-plot(m3.rm, 2)
-```
-
 ### Outliers
-#### Residual Standard Deviation {-}
+#### Residuals {-}
 ```{r ass.res.std.dev, echo=F}
 # Standardised Residuals
 # std.res.df <- tibble(id = ma$id,
@@ -518,8 +485,31 @@ ma %>%
 
 #### Mahalinobis Distance {-}
 ```{r mahalinobis, echo=F}
+ma.key <- ma %>% 
+  select(age, sex, AUDIT_Total, meth_SDS, T_Ang_Total)
 
+ma.key <- ma.key %>% mutate(sex = ifelse(ma.key$sex == "Male", 1, 0)) # Converting sex to numeric for calculations
 
+# Calculate mahalanobis distance
+ma.key$mahal <- mahalanobis(ma.key, colMeans(ma.key), cov(ma.key))
+
+# p-value for mahalanobis
+ma.key$p <- pchisq(ma.key$mahal, df = 4, lower.tail = FALSE)
+
+tibble(
+  index = which(ma.key$p < .05),
+  mahal = ma.key$mahal[which(ma.key$p < .05)],
+  p = ma.key$p[which(ma.key$p < .05)]
+) %>% kable(caption = "Mahalanobis < .05", align = "c") %>% kable_styling()
+ 
+# Create a plotty plot
+ma.key %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.key)), y = mahal, col = p < .05)) +
+  geom_point() +
+  scale_color_manual(values = c("black", "red")) +
+  theme_light() +
+  labs(x = "Index", y = "Mahalanobis Distance") +
+  ggtitle("Mahalanobis Distance Plot")
 ```
 
 There are 3 points that have been identified as being potentially influential to the regression model.  One of these is a clear outlier with a Cooks D of 0.69.  The index numbers and their respective id numbers are as follows:

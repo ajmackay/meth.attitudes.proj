@@ -41,9 +41,156 @@ ma <- screened %>% filter(meth_ingest == "Yes")
 # Converting non-drinkers to 0 on AUDIT-C
 ma <- ma %>% 
   mutate(AUDIT_Total = ifelse(is.na(AUDIT_Total), 0, AUDIT_Total))
+
+options(scipen = 999) # Removing scientific notation
 ```
 
-## Analysis without Outlier
+## Not Forced Entry
+### Model Building
+```{r not-forced}
+m0 <- lm(DDDI_Total~1, data = ma) # Total SS
+m1 <- lm(DDDI_Total ~ age + sex, data = ma)
+m2.rm <- lm(DDDI_Total ~ age + AUDIT_Total + meth_SDS, data = ma)
+m3.rm <- lm(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
+```
+
+### Sums of Suares
+#### Total SS {-}
+```{r total.ss.step, echo=F}
+anova(m0) %>% kable(align = "c") %>% kable_styling()
+```
+
+#### Model SS {-}
+```{r model.ss.step, echo=F}
+anova(m1, m2.rm, m3.rm) %>% kable(align = "c") %>% kable_styling()
+```
+### Model Summaries
+#### Model 1 {-}
+```{r, echo = F}
+summary(m1)
+```
+
+#### Model 2 {-}
+```{r, echo=F}
+summary(m2.rm)
+```
+
+#### Model 3 {-}
+```{r, echo=F}
+summary(m3.rm)
+```
+
+### Assumptions
+#### Plot of Residuals {-}
+```{r, echo=F}
+std.res <- rstandard(m3.rm)
+m3.rm.std.res <- tibble(
+  Std.Res = std.res,
+  Fitted = m3.rm$fitted.values
+)
+
+m3.rm.std.res %>% 
+  ggplot(aes(x = Fitted, y = Std.Res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", alpha = 0.5) +
+  theme_light() +
+  labs(x = "Fitted", y = "Standardised Residuals") +
+  ggtitle("Plot of Residuals")
+```
+
+#### Colinearity {-}
+```{r, echo=F}
+tibble(Variable = c("AUDIT-C", "SDS", "STAXI-T"),
+       VIF = vif(m3.rm))
+```
+
+#### Homogeneity {-]
+```{r ass.homo.rm, echo=F}
+plot(m3.rm,1)
+```
+
+#### Linearity {-}
+```{r ass.lin.rm, echo=F}
+plot(m3.rm, 5)
+```
+
+#### Normality of Residuals {-}
+```{r ass.norm.rm, echo=F}
+plot(m3.rm, 2)
+```
+
+#### Outliers {-}
+##### Residuals {-}
+```{r ass.res.std.dev, echo=F}
+ma %>% 
+  ggplot(aes(x = as.numeric(row.names(ma)), y = std.res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 2), linetype = "dashed", alpha = 0.5) +
+  geom_hline(aes(yintercept = -2), linetype = "dashed", alpha = 0.5) +
+  geom_text(size = 3,
+            label = as.numeric(row.names(ma)),
+            nudge_x = 0.25,
+            nudge_y = 0.25,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Std Residuals") +
+  ggtitle("Std. Residual by Index")
+```
+
+##### Cooks D {-}
+```{r cooks.doodle, echo=F}
+# Calculate Cook's D for each observation
+cooksD <- cooks.distance(m3.rm)
+
+# Plot Cook's D
+n <- nrow(ma)
+
+ma %>% 
+  ggplot(aes(x = as.numeric(row.names(ma)), y = cooksD)) +
+  geom_point() +
+  geom_hline(yintercept = 4/n, linetype = "dashed") +
+  geom_text(size = 2.5,
+            label = as.numeric(row.names(ma)),
+            nudge_y = 0.025,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Cooks Distance") +
+  ggtitle("Cooks Distance")
+```
+
+##### Mahalanobis Distance {-}
+```{r mahalinobis.rm, echo=F}
+ma.key <- ma %>% 
+  select(AUDIT_Total, meth_SDS, T_Ang_Total)
+
+# Calculate mahalanobis distance
+ma.key$mahal <- mahalanobis(ma.key, colMeans(ma.key), cov(ma.key))
+
+# p-value for mahalanobis
+ma.key$p <- pchisq(ma.key$mahal, df = 2, lower.tail = FALSE)
+
+# tibble(
+#   index = which(ma.key$p < .05),
+#   mahal = ma.key$mahal[which(ma.key$p < .05)],
+#   p = ma.key$p[which(ma.key$p < .05)]
+# ) %>% kable(caption = "Mahalanobis < .05", align = "c") %>% kable_styling()
+ 
+# Create a plotty plot
+ma.key %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.key)), y = mahal, col = p < .05)) +
+  geom_point() +
+  geom_text(size = 2.5,
+            label = as.numeric(row.names(ma)),
+            nudge_y = 0.3,
+            check_overlap = T) +
+  scale_color_manual(values = c("black", "red")) +
+  theme_light() +
+  labs(x = "Index", y = "Mahalanobis Distance") +
+  ggtitle("Mahalanobis Distance Plot")
+```
+
+
+## Removed Outlier (Forced Entry)
 **Omitting response 146**
 
 ```{r outlier.prep, include=F}
@@ -52,7 +199,7 @@ ma <- ma %>%
   mutate(include = TRUE)
 ```
 
-### Building Models
+### Model Building
 ```{r buil.models.2}
 ma.nout <- ma %>% mutate(include = ifelse(id == 146, FALSE, TRUE)) # Not including id 146
 
@@ -179,8 +326,162 @@ ma.nout[ma.nout$include == TRUE,] %>%
 
 ##### Mahalanobis Distance {-}
 ```{r mahalanobis.2, echo=F}
+ma.key.nout <- ma.nout[ma.nout$include == TRUE, ] %>% 
+  select(age, sex, AUDIT_Total, meth_SDS, T_Ang_Total)
 
+ma.key.nout <- ma.key.nout %>% 
+  mutate(sex = ifelse(ma.key.nout$sex == "Male", 1, 0)) # Converting sex to numeric for calculations
+
+# Calculate mahalanobis distance
+ma.key.nout$mahal <- mahalanobis(ma.key.nout, colMeans(ma.key.nout), cov(ma.key.nout))
+
+
+# p-value for mahalanobis
+ma.key.nout$p <- pchisq(ma.key.nout$mahal, df = 4, lower.tail = FALSE)
+
+tibble(
+  index = which(ma.key.nout$p < .05),
+  # id = which(ma.nout$id[which(ma.key.nout$p < .05),])
+  mahal = ma.key.nout$mahal[which(ma.key.nout$p < .05)],
+  p = ma.key.nout$p[which(ma.key.nout$p < .05)]
+) %>% kable(caption = "Mahalanobis < .01", align = "c") %>% kable_styling()
+ 
+# Create a plotty plot
+ma.key.nout %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.key.nout)), y = mahal, col = p < .05)) +
+  geom_point() +
+  scale_color_manual(values = c("black", "red")) +
+  theme_light() +
+  labs(x = "Index", y = "Mahalanobis Distance") +
+  ggtitle("Mahalanobis Distance Plot")
 
 ```
+
+## Removed Outlier (Not Forced Entry)
+### Model Building
+```{r nout.step}
+ma.nout <- ma %>% filter(id != 146) # Not including id 146
+
+m0.3 <- lm(DDDI_Total~1, data = ma.nout) # Total SS
+m1.3 <- lm(DDDI_Total~age + sex, data = ma.nout) # Model 1 (demographics)
+m2.3 <- lm(DDDI_Total~age + AUDIT_Total + meth_SDS, data = ma.nout) # Alcohol and MA use characteristics
+m3.3 <- lm(DDDI_Total~AUDIT_Total + meth_SDS + T_Ang_Total, data = ma.nout) # STAXI
+```
+
+### Sums of Squares
+#### Total SS {-}
+```{r nout.step.ss, echo=F}
+anova(m0.3) %>% kable(align = "c") %>% kable_styling()
+```
+
+#### Model SS {-}
+```{r nout.step.ssm, echo=F}
+anova(m1.3, m2.3, m3.3) %>% kable(align = "c") %>% kable_styling()
+```
+### Model Summaries
+#### Model 1 {-}
+```{r nout.sum.1, echo=F}
+summary(m1.3)
+```
+
+#### Model 2{-}
+```{r nout.sum.2, echo=F}
+summary(m2.3)
+```
+
+#### Model 3 {-}
+```{r nout.sum.3, echo=F}
+summary(m3.3)
+```
+### Assumptions
+#### Plot of Residuals {-}
+```{r nout.resid, echo=F}
+std.res.3 <- rstandard(m3.3)
+
+m3.3.std.res <- tibble(
+  Std.Res = std.res.3,
+  Fitted = m3.3$fitted.values
+)
+
+m3.3.std.res %>% 
+  ggplot(aes(x = Fitted, y = Std.Res)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 0), linetype = "dashed", alpha = 0.5) +
+  theme_light() +
+  labs(x = "Fitted", y = "Standardised Residuals") +
+  ggtitle("Plot of Residuals")
+```
+#### Colinearity {-}
+```{r nout.colin, echo=F}
+tibble(
+  Variable = c("AUDIT-C", "SDS", "STAXI-T"),
+  VIF = vif(m3.3)
+)
+```
+
+#### Homogeneity {-}
+```{r nout.homo, echo=F}
+plot(m3.3, 1)
+```
+
+#### Linearity {-}
+
+```{r ass.lin.3, echo=F}
+plot(m3.3, 5)
+```
+
+
+
+#### Normality of Residuals {-}
+```{r ass.norm.3, echo=F}
+plot(m3.3, 2)
+
+shapiro.test(m3.3$residuals)
+```
+
+#### Outliers {-}
+##### Residuals {-}
+```{r ass.out.3, echo=F}
+# Residuals by index
+ma.nout %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.nout)), y = std.res.3)) +
+  geom_point() +
+  geom_hline(aes(yintercept = 2), linetype = "dashed", alpha = 0.5) +
+  geom_hline(aes(yintercept = -2), linetype = "dashed", alpha = 0.5) +
+  geom_text(size = 3,
+            label = as.numeric(row.names(ma.nout)),
+            nudge_x = 0.25,
+            nudge_y = 0.25,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Std Residuals") +
+  ggtitle("Std. Residual by Index")
+```
+
+##### Cooks D {-}
+```{r cooks.d.3, echo=F}
+# Calculate Cook's D for each observation
+cooksD <- cooks.distance(m3.3)
+
+# Plot Cook's D
+n <- nrow(ma.nout)
+
+ma.nout %>% 
+  ggplot(aes(x = as.numeric(row.names(ma.nout)), y = cooksD)) +
+  geom_point() +
+  geom_hline(yintercept = 4/n, linetype = "dashed") +
+  geom_text(size = 2.5,
+            label = as.numeric(row.names(ma.nout)),
+            nudge_y = 0.01,
+            check_overlap = T) +
+  theme_light() +
+  labs(x = "Index", y = "Cooks Distance") +
+  ggtitle("Cooks Distance")
+```
+
+
+
+
+
 
 
