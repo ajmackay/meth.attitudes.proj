@@ -1,0 +1,46 @@
+# Extra
+```{r load.shit, include=F}
+library(tidyverse)
+library(kableExtra)
+library(parameters) # Model parmeters
+```
+
+```{r data.load.final, include = F}
+load("data/objects/screened.full.Rda")
+load("data/objects/screened.Rda")
+load("objects/m3.rda")
+load("objects/m3.rm.rda")
+```
+
+```{r data.prep.final, include = F}
+# Preparing colours for graphs
+.grey <- "#A6A6A6"
+.ma <- "#DC2D27"
+.nma <- "#39B9FF"
+.lav <- "#D9BBDC"
+.lgreen <- "#BEDCB3"
+
+# Changing NA from meth_ingest and meth_user to "No"
+screened$meth_ingest[is.na(screened$meth_ingest)] <- "No"
+screened$meth_user[is.na(screened$meth_user)] <- "Non-User"
+screened$meth_user <- as.factor(screened$meth_user)
+
+# Rearranging levels for education 
+screened$education <- factor(screened$education, levels = c("Did not finish high school",
+                                                          "High School Diploma",
+                                                          "Vocational/Technical degree or certificate",
+                                                          "Did not finish University",
+                                                          "Bachelor Degree",
+                                                          "Postgraduate Degree"))
+
+# Filtering for MA only
+ma <- screened %>% filter(meth_ingest == "Yes")
+
+# Converting non-drinkers to 0 on AUDIT-C
+ma <- ma %>% 
+  mutate(AUDIT_Total = ifelse(is.na(AUDIT_Total), 0, AUDIT_Total))
+
+options(scipen = 999) # Removing scientific notation
+```
+
+

@@ -7,6 +7,8 @@ library(gridExtra)
 library(table1)
 library(kableExtra)
 library(car) #VIF
+# library(parameters) # Standardised estimates
+library(olsrr)
 ```
 
 ```{r data.load.add, include = F}
@@ -45,13 +47,20 @@ ma <- ma %>%
 options(scipen = 999) # Removing scientific notation
 ```
 
-## Not Forced Entry
+## Subset of models
+```{r best.subset, echo=F}
+load("objects/m3.rda")
+ols_step_best_subset(m3)
+```
+
+## Reduced Model
 ### Model Building
 ```{r not-forced}
 m0 <- lm(DDDI_Total~1, data = ma) # Total SS
 m1 <- lm(DDDI_Total ~ age + sex, data = ma)
 m2.rm <- lm(DDDI_Total ~ age + AUDIT_Total + meth_SDS, data = ma)
 m3.rm <- lm(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
+save(m3.rm, file = "objects/m3.rm.rda")
 ```
 
 ### Sums of Suares
@@ -77,7 +86,7 @@ summary(m2.rm)
 
 #### Model 3 {-}
 ```{r, echo=F}
-summary(m3.rm)
+ols_regress(m3.rm)
 ```
 
 ### Assumptions
@@ -104,7 +113,7 @@ tibble(Variable = c("AUDIT-C", "SDS", "STAXI-T"),
        VIF = vif(m3.rm))
 ```
 
-#### Homogeneity {-]
+#### Homogeneity {-}
 ```{r ass.homo.rm, echo=F}
 plot(m3.rm,1)
 ```
@@ -189,6 +198,11 @@ ma.key %>%
   ggtitle("Mahalanobis Distance Plot")
 ```
 
+##### Residual Leverage Plot {-}
+```{r, echo = F}
+ols_plot_resid_lev(m3.rm) +
+  theme_light()
+```
 
 ## Removed Outlier (Forced Entry)
 **Omitting response 146**
@@ -237,7 +251,7 @@ summary(m2.2)
 
 #### Model 3 {-}
 ```{r model.3.2, echo=F}
-summary(m3.2)
+ols_regress(m3.2)
 ```
 
 ### Assumptions
@@ -354,10 +368,15 @@ ma.key.nout %>%
   theme_light() +
   labs(x = "Index", y = "Mahalanobis Distance") +
   ggtitle("Mahalanobis Distance Plot")
-
 ```
 
-## Removed Outlier (Not Forced Entry)
+##### Residual Leverage Plot {-}
+```{r resid.lev.plot.m3, echo=F}
+ols_plot_resid_lev(m3.2) +
+  theme_light()
+```
+
+## Removed Outlier (Reduced Model)
 ### Model Building
 ```{r nout.step}
 ma.nout <- ma %>% filter(id != 146) # Not including id 146
@@ -391,8 +410,9 @@ summary(m2.3)
 
 #### Model 3 {-}
 ```{r nout.sum.3, echo=F}
-summary(m3.3)
+ols_regress(m3.3)
 ```
+
 ### Assumptions
 #### Plot of Residuals {-}
 ```{r nout.resid, echo=F}
@@ -411,6 +431,7 @@ m3.3.std.res %>%
   labs(x = "Fitted", y = "Standardised Residuals") +
   ggtitle("Plot of Residuals")
 ```
+
 #### Colinearity {-}
 ```{r nout.colin, echo=F}
 tibble(
@@ -429,8 +450,6 @@ plot(m3.3, 1)
 ```{r ass.lin.3, echo=F}
 plot(m3.3, 5)
 ```
-
-
 
 #### Normality of Residuals {-}
 ```{r ass.norm.3, echo=F}
@@ -478,6 +497,145 @@ ma.nout %>%
   labs(x = "Index", y = "Cooks Distance") +
   ggtitle("Cooks Distance")
 ```
+
+## Robust Regression
+Information on robust regression taken from <a href = https://stats.idre.ucla.edu/r/dae/robust-regression/> here. </a> and <a href = https://www.youtube.com/watch?v=qte9ASvgElI> here </a>
+
+### Full model (Bisquare Weights)
+```{r rlm.full, echo=F}
+rbst.full <- robustbase::lmrob(DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma, psi = "bisquare")
+summary(rbst.full)
+```
+
+### Reduced Model 
+```{r rlm.red, echo=F}
+rbst.red <- robustbase::lmrob(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
+summary(rbst.red)
+```
+
+## Effect Sizes
+### Full Model
+Calculations for Cohen's $f^2$ were taken from <a href = https://www.spss-tutorials.com/effect-size/#linear-regression> here </a>.
+```{r partial.cor, echo=F}
+partial.vars <- ma %>% 
+  mutate(sex = ifelse(sex == "Male", 1, 0)) %>% 
+    select(DDDI_Total, age, sex, AUDIT_Total, meth_SDS, T_Ang_Total)
+
+partial.cor.full <- ppcor::pcor(partial.vars)
+part.full <- ppcor::spcor(partial.vars)
+
+tibble(
+  Variable = c("DDDI Total", "Age", "Sex", "AUDIT-C", "SDS", "STAXI-T"),
+  Simple = data.frame(cor(partial.vars)) %>% pull(DDDI_Total),
+  Partial = data.frame(partial.cor.full$estimate) %>% pull(DDDI_Total),
+  Part = data.frame(part.full$estimate) %>% pull(DDDI_Total),
+  f2 = (Part^2)/(1 - Part^2)
+) %>% kable(align = "c") %>% kable_styling()
+```
+
+### Reduced Model
+```{r cors.reduced, echo=F}
+reduced.vars <- ma %>% 
+  select(DDDI_Total, AUDIT_Total, meth_SDS, T_Ang_Total)
+
+partial.reduced <- ppcor::pcor(reduced.vars)
+part.reduced <- ppcor::spcor(reduced.vars)
+
+tibble(
+  Variable = c("DDDI Total", "AUDIT-C", "SDS", "STAXI-T"),
+  Simple = data.frame(cor(reduced.vars)) %>% pull(DDDI_Total),
+  Partial = data.frame(partial.reduced$estimate) %>% pull(DDDI_Total),
+  Part = data.frame(part.reduced$estimate) %>% pull(DDDI_Total),
+  f2 = (Part^2)/(1 - Part^2)
+) %>% kable(align = "c") %>% kable_styling()
+```
+
+### Full Model (Outlier Removed)
+```{r effect.size.nout, echo=F}
+full.nout <- ma.nout %>% 
+  mutate(sex = ifelse(sex == "Male", 1, 0)) %>% 
+  select(DDDI_Total, age, sex, AUDIT_Total, meth_SDS, T_Ang_Total)
+
+partial.full.nout <- ppcor::pcor(full.nout)
+part.full.nout <- ppcor::pcor(full.nout)
+
+tibble(
+  Variable = c("DDDI Total", "Age", "Sex", "AUDIT-C", "SDS", "STAXI-T"),
+  Simple = data.frame(cor(full.nout)) %>% pull(DDDI_Total),
+  Partial = data.frame(partial.full.nout$estimate) %>% pull(DDDI_Total),
+  Part = data.frame(part.full.nout$estimate) %>% pull(DDDI_Total),
+  f2 = (Part^2)/(1 - Part^2)
+) %>% kable(align = "c") %>% kable_styling()
+```
+### Reduced Model (Outlier Removed)
+```{r effect.size.nout.rem, echo=F}
+red.nout <- ma.nout %>% 
+  select(DDDI_Total, AUDIT_Total, meth_SDS, T_Ang_Total)
+
+partial.red.nout <- ppcor::pcor(red.nout)
+part.red.nout <- ppcor::pcor(red.nout)
+
+tibble(
+  Variable = c("DDDI Total", "AUDIT-C", "SDS", "STAXI-T"),
+  Simple = data.frame(cor(red.nout)) %>% pull(DDDI_Total),
+  Partial = data.frame(partial.red.nout$estimate) %>% pull(DDDI_Total),
+  Part = data.frame(part.red.nout$estimate) %>% pull(DDDI_Total),
+  f2 = (Part^2) / (1-Part^2)
+) %>% kable(align = "c") %>% kable_styling()
+```
+
+## Moderation TBC
+```{r modertion, echo=F}
+m0 <- lm(DDDI_Total~1, data = ma) # Total SS
+m1 <- lm(DDDI_Total ~ age + sex, data = ma)
+m2.rm <- lm(DDDI_Total ~ age + AUDIT_Total + meth_SDS, data = ma)
+m3.rm <- lm(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
+
+# Centering Variables
+ma.mod <- ma %>% 
+  mutate(age.cen = age - mean(age),
+         AUDIT.cen = AUDIT_Total - mean(AUDIT_Total),
+         SDS.cen = meth_SDS - mean(meth_SDS),
+         STAXI.cen = T_Ang_Total - mean(T_Ang_Total))
+
+m2.rm.mod <- lm(DDDI_Total ~ AUDIT.cen + SDS.cen, data = ma.mod)
+mint.rm <- lm(DDDI_Total ~ AUDIT.cen*meth_SDS, data = ma.mod)
+
+anova(m2.rm.mod, mint.rm)
+
+m3.rm.mod <- lm(DDDI_Total ~ AUDIT.cen + SDS.cen + STAXI.cen, data = ma.mod)
+m4.rm.mod <- lm(DDDI_Total ~ AUDIT.cen + SDS.cen*STAXI.cen, data = ma.mod)
+m5.rm.mod <- lm(DDDI_Total ~ SDS.cen + AUDIT.cen*STAXI.cen, data = ma.mod)
+m6.rm.mod <- lm(DDDI_Total ~ STAXI.cen + AUDIT.cen*SDS.cen, data = ma.mod)
+
+anova(m3.rm.mod, m4.rm.mod)
+anova(m3.rm.mod, m5.rm.mod)
+anova(m3.rm.mod, m6.rm.mod)
+
+m3.mod <- lm(DDDI_Total ~ age.cen + sex + AUDIT.cen + SDS.cen + STAXI.cen, data = ma.mod)
+m4.mod <- lm(DDDI_Total ~ sex + SDS.cen + STAXI.cen + age.cen*AUDIT.cen, data = ma.mod)
+m5.mod <- lm(DDDI_Total ~ sex + AUDIT.cen + STAXI.cen + age.cen*SDS.cen, data = ma.mod)
+m6.mod <- lm(DDDI_Total ~ sex + AUDIT.cen + SDS.cen + age.cen*STAXI.cen, data = ma.mod)
+m7.mod <- lm(DDDI_Total ~ sex + AUDIT_Total + meth_SDS + age*T_Ang_Total, data = ma.mod)
+m8.mod <- lm(DDDI_Total ~ age + meth_SDS + T_Ang_Total + sex*AUDIT_Total, data = ma)
+m9.mod <- lm(DDDI_Total ~ age + T_Ang_Total + AUDIT_Total + sex*meth_SDS, data = ma)
+m10.mod <- lm(DDDI_Total ~ age + meth_SDS + AUDIT_Total + sex*T_Ang_Total, data = ma)
+m11.mod <- lm(DDDI_Total ~ age*sex + meth_SDS + AUDIT_Total + T_Ang_Total, data = ma)
+
+anova(m3, m11.mod)
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

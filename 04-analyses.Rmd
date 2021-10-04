@@ -7,6 +7,8 @@ library(gridExtra)
 library(table1)
 library(kableExtra)
 library(car)
+library(parameters)
+library(olsrr) # Regression output
 ```
 
 ```{r data.load.anal, include = F}
@@ -349,6 +351,7 @@ m0 <- lm(DDDI_Total~1, data = ma) # Total SS
 m1 <- lm(DDDI_Total~age + sex, data = ma) # Model 1 (demographics)
 m2 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS, data = ma) # Alcohol and MA use characteristics
 m3 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma) # STAXI
+save(m3, file = "objects/m3.Rda")
 ```
 
 ### Sums of Squares
@@ -379,7 +382,7 @@ summary(m2)
 
 #### Model 3 {-}
 ```{r model.3, echo=F}
-summary(m3)
+ols_regress(DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
 ```
 
 
@@ -435,17 +438,12 @@ plot(m3, 5)
 #### All Variables {-}
 ```{r ass.norm, echo=F}
 plot(m3, 2)
+shapiro.test(m3$residuals)
 ```
 
 ### Outliers
 #### Residuals {-}
 ```{r ass.res.std.dev, echo=F}
-# Standardised Residuals
-# std.res.df <- tibble(id = ma$id,
-#        resid = std.res)
-
-# std.res.df %>% arrange(desc(resid)) %>% head(5) %>% kable(caption = "Test", align = "c") %>% kable_styling()
-
 # Residuals by index
 ma %>% 
   ggplot(aes(x = as.numeric(row.names(ma)), y = std.res)) +
@@ -510,6 +508,12 @@ ma.key %>%
   theme_light() +
   labs(x = "Index", y = "Mahalanobis Distance") +
   ggtitle("Mahalanobis Distance Plot")
+```
+
+#### Residual Leverage Plot {-}
+```{r resid.lev.plot, echo=F}
+ols_plot_resid_lev(m3) +
+  theme_light()
 ```
 
 There are 3 points that have been identified as being potentially influential to the regression model.  One of these is a clear outlier with a Cooks D of 0.69.  The index numbers and their respective id numbers are as follows:
