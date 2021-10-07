@@ -12,7 +12,6 @@ library(kableExtra)
 load("data/objects/data.full.Rda")
 load("data/objects/screened.full.Rda")
 load("data/objects/screened.Rda")
-
 ```
 
 ```{r data.preparation, include = F}

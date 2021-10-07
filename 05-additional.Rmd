@@ -47,12 +47,6 @@ ma <- ma %>%
 options(scipen = 999) # Removing scientific notation
 ```
 
-## Subset of models
-```{r best.subset, echo=F}
-load("objects/m3.rda")
-ols_step_best_subset(m3)
-```
-
 ## Reduced Model
 ### Model Building
 ```{r not-forced}
@@ -88,7 +82,6 @@ summary(m2.rm)
 ```{r, echo=F}
 ols_regress(m3.rm)
 ```
-
 ### Assumptions
 #### Plot of Residuals {-}
 ```{r, echo=F}
@@ -507,10 +500,35 @@ rbst.full <- robustbase::lmrob(DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS +
 summary(rbst.full)
 ```
 
+#### Standardised
+```{r std.rbst, echo=F}
+ma.std <- ma %>% 
+  mutate(sex = ifelse(sex == "Male", 1, 0)) %>% 
+  mutate(age_Std = scale(age),
+         sex_Std = scale(sex),
+         DDDI_Std = scale(DDDI_Total),
+         AUDIT_Std = scale(AUDIT_Total),
+         SDS_Std = scale(meth_SDS),
+         STAXI_Std = scale(T_Ang_Total)
+         )
+
+rbst.std <- robustbase::lmrob(DDDI_Std ~ age_Std + sex_Std + AUDIT_Std + SDS_Std + STAXI_Std, data = ma.std)
+summary(rbst.std)
+rbst.std$coefficients
+```
+
+
 ### Reduced Model 
 ```{r rlm.red, echo=F}
 rbst.red <- robustbase::lmrob(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
 summary(rbst.red)
+```
+
+#### Standardised {-}
+```{r std.robust.red, echo=F}
+rbst.red.std <- robustbase::lmrob(DDDI_Std ~ AUDIT_Std + SDS_Std + STAXI_Std, data = ma.std)
+summary(rbst.red.std)
+rbst.red.std$coefficients
 ```
 
 ## Effect Sizes
@@ -534,6 +552,43 @@ tibble(
 ```
 
 ### Reduced Model
+#### Model 1{-}
+```{r m1.es, echo=F}
+m1.rm.es <- ma %>%
+  mutate(sex = ifelse(sex == "Male", 1, 0)) %>% 
+  select(DDDI_Total, age, sex)
+
+m1.rm.partial <- ppcor::pcor(m1.rm.es)
+m1.rm.part <- ppcor::spcor(m1.rm.es)
+
+tibble(
+  Variable = c("DDDI Total", "Age", "Sex"),
+  Simple = data.frame(cor(m1.rm.es)) %>% pull(DDDI_Total),
+  Partial = data.frame(m1.rm.partial$estimate) %>% pull(DDDI_Total),
+  Part = data.frame(m1.rm.part$estimate) %>% pull(DDDI_Total),
+  f2 = (Part^2)/(1 - Part^2)
+)
+```
+
+#### Model 2 {-}
+```{r m2.es, echo=F}
+m2.rm.es <- ma %>%
+  select(DDDI_Total, age, AUDIT_Total, meth_SDS)
+
+m2.rm.partial <- ppcor::pcor(m2.rm.es)
+m2.rm.part <- ppcor::spcor(m2.rm.es)
+
+tibble(
+  Variable = c("DDDI Total", "Age", "AUDIT-C", "SDS"),
+  Simple = data.frame(cor(m2.rm.es)) %>% pull(DDDI_Total),
+  Partial = data.frame(m2.rm.partial$estimate) %>% pull(DDDI_Total),
+  Part = data.frame(m2.rm.part$estimate) %>% pull(DDDI_Total),
+  f2 = (Part^2)/(1 - Part^2)
+)
+
+```
+
+#### Final Model {-}
 ```{r cors.reduced, echo=F}
 reduced.vars <- ma %>% 
   select(DDDI_Total, AUDIT_Total, meth_SDS, T_Ang_Total)
@@ -567,6 +622,7 @@ tibble(
   f2 = (Part^2)/(1 - Part^2)
 ) %>% kable(align = "c") %>% kable_styling()
 ```
+
 ### Reduced Model (Outlier Removed)
 ```{r effect.size.nout.rem, echo=F}
 red.nout <- ma.nout %>% 
@@ -582,6 +638,25 @@ tibble(
   Part = data.frame(part.red.nout$estimate) %>% pull(DDDI_Total),
   f2 = (Part^2) / (1-Part^2)
 ) %>% kable(align = "c") %>% kable_styling()
+```
+
+## Comparing Model Fit (AIC)
+```{r aic, echo=F}
+rlm.full <- MASS::rlm(DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma, method = "MM", psi = psi.bisquare)
+rlm.red <- MASS::rlm(DDDI_Total ~ AUDIT_Total + meth_SDS + T_Ang_Total, data = ma, method = "MM", psi = psi.bisquare)
+
+m3 <- lm(DDDI_Total~age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
+
+tibble(
+  Model = c("Full", "Reduced", "Full (Outlier Removed)", "Reduced (Outlier Removed)", "Robust (Full)", "Robust (Reduced)"),
+  AIC = c(AIC(m3), AIC(m3.rm), AIC(m3.2), AIC(m3.3), AIC(rlm.full), AIC(rlm.red))
+) %>% kable(align = "c") %>% kable_styling()
+```
+
+## Best Subset of models
+```{r best.subset, echo=F}
+load("objects/m3.rda")
+ols_step_best_subset(m3)
 ```
 
 ## Moderation TBC

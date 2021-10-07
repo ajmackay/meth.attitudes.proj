@@ -382,7 +382,7 @@ summary(m2)
 
 #### Model 3 {-}
 ```{r model.3, echo=F}
-ols_regress(DDDI_Total ~ age + sex + AUDIT_Total + meth_SDS + T_Ang_Total, data = ma)
+ols_regress(m3)
 ```
 
 
